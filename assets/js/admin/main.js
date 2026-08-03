@@ -618,7 +618,7 @@ function renderCategorias(){
 function openFormCat(id=null){
   const c=id?catPor(id):null;
   openModal(c?'Editar categoría':'Nueva categoría','',`
-    <div class="field" style="margin-bottom:14px"><label>Nombre <span class="req">*</span></label><input id="fcat-nombre" value="${c?esc(c.nombre):''}" placeholder="Maquillaje"><span class="ferr"></span></div>
+    <div class="field" style="margin-bottom:14px"><label>Nombre <span class="req">*</span></label><input id="fcat-nombre" value="${c?esc(c.nombre):''}" placeholder="Nombre de la categoría"><span class="ferr"></span></div>
     <div class="field" style="margin-bottom:14px"><label>Descripción</label><textarea id="fcat-desc" rows="2">${c?esc(c.descripcion||''):''}</textarea></div>
     <div class="field" style="margin-bottom:20px"><label>Estado</label><select id="fcat-estado"><option value="activo" ${!c||c.estado==='activo'?'selected':''}>Activo</option><option value="inactivo" ${c&&c.estado==='inactivo'?'selected':''}>Inactivo</option></select></div>
     <div class="modal-footer">
