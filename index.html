@@ -218,9 +218,25 @@ button{font-family:inherit;cursor:pointer;}
 .wz-logo-row{display:flex;align-items:center;gap:14px;}
 .wz-logo-prev{width:56px;height:56px;border-radius:14px;background:var(--cream-dark);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text-soft);font-family:'Fraunces',serif;font-size:22px;font-weight:600;flex-shrink:0;}
 .wz-logo-prev img{width:100%;height:100%;object-fit:cover;}
+/* contraseña con UX */
+.pw-wrap{position:relative;display:flex;align-items:center;}
+.pw-wrap input{width:100%;padding-right:44px;}
+.pw-eye{position:absolute;right:11px;background:none;border:none;color:var(--text-soft);cursor:pointer;display:flex;padding:4px;border-radius:6px;}
+.pw-eye:hover{color:var(--text-mid);}
+.pw-bar{height:6px;border-radius:999px;background:var(--border);margin-top:10px;overflow:hidden;}
+.pw-bar span{display:block;height:100%;width:0;border-radius:999px;transition:width .25s ease,background .25s ease;}
+.pw-strength{font-size:12px;font-weight:600;margin-top:6px;color:var(--text-soft);}
+.pw-reqs{list-style:none;margin:11px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;}
+.pw-reqs li{font-size:12.5px;color:var(--text-soft);display:flex;align-items:center;gap:8px;transition:color .2s;}
+.pw-reqs li::before{content:'';width:16px;height:16px;border-radius:50%;border:1.6px solid var(--border);flex-shrink:0;background-position:center;background-repeat:no-repeat;transition:all .2s;}
+.pw-reqs li.ok{color:var(--text-dark);}
+.pw-reqs li.ok::before{background-color:#3F9D6A;border-color:#3F9D6A;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4.5 12.5 5 5L19.5 7'/%3E%3C/svg%3E");}
+.pw-match{font-size:12.5px;margin-top:8px;font-weight:600;min-height:15px;}
+.pw-match.ok{color:#3F9D6A;}
+.pw-match.no{color:#D46A6A;}
 </style>
 <div class="modal-ov" id="crear-ov">
-  <div class="modal" style="max-width:500px">
+  <div class="modal" style="max-width:600px">
     <div class="modal-head">
       <h3>Crea tu empresa</h3>
       <p>Registra tu negocio en SIWEPE</p>
@@ -262,13 +278,35 @@ button{font-family:inherit;cursor:pointer;}
       <!-- PASO 2 -->
       <div class="wz-page" data-step="2">
         <div class="wz-title">Tu cuenta de administrador</div>
-        <div class="wz-sub">Con esto vas a manejar tu tienda</div>
+        <div class="wz-sub">Con esta cuenta vas a manejar tu tienda</div>
         <div class="modal-body" style="padding-top:6px">
-          <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre"></div>
-          <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com"></div>
           <div class="fld-row">
-            <div class="fld"><label>Contraseña *</label><input id="e-pass" type="password" placeholder="Mín. 6 caracteres"></div>
-            <div class="fld"><label>Confirmar *</label><input id="e-pass2" type="password" placeholder="Repite la clave"></div>
+            <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre"></div>
+            <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com"></div>
+          </div>
+          <div class="fld">
+            <label>Contraseña *</label>
+            <div class="pw-wrap">
+              <input id="e-pass" type="password" placeholder="Crea una contraseña segura">
+              <button type="button" class="pw-eye" onclick="pwToggle('e-pass',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-bar"><span id="pw-bar-fill"></span></div>
+            <div class="pw-strength" id="pw-strength">Seguridad de la contraseña</div>
+            <ul class="pw-reqs" id="pw-reqs">
+              <li data-k="len">Mínimo 8 caracteres</li>
+              <li data-k="up">Una letra mayúscula</li>
+              <li data-k="low">Una letra minúscula</li>
+              <li data-k="num">Un número</li>
+              <li data-k="sym">Un símbolo (!@#$%)</li>
+            </ul>
+          </div>
+          <div class="fld">
+            <label>Confirmar contraseña *</label>
+            <div class="pw-wrap">
+              <input id="e-pass2" type="password" placeholder="Repite la contraseña">
+              <button type="button" class="pw-eye" onclick="pwToggle('e-pass2',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-match" id="pw-match"></div>
           </div>
         </div>
       </div>
@@ -309,9 +347,12 @@ document.getElementById('anio').textContent = new Date().getFullYear();
 
 function abrirCrear(){
   wzPaso=1; wzLogo='';
+  ['e-nombre','e-rubro','e-desc','e-tel','e-ciudad','e-dueno','e-correo','e-pass','e-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  const t=document.getElementById('e-terminos'); if(t) t.checked=false;
   document.getElementById('wz-form').style.display='';
   document.getElementById('wz-ok').style.display='none';
   const prev=document.getElementById('e-logo-prev'); if(prev) prev.innerHTML='S';
+  if(typeof pwEval==='function') pwEval();
   wzRender();
   document.getElementById('crear-ov').classList.add('open');
 }
@@ -384,7 +425,7 @@ function wzValidar(){
   if(wzPaso===2){
     if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('e-correo'))){ err.textContent='Correo inválido.'; return false; }
-    if(val('e-pass').length<6){ err.textContent='La contraseña debe tener al menos 6 caracteres.'; return false; }
+    if(!pwEval()){ err.textContent='La contraseña debe cumplir todos los requisitos.'; return false; }
     if(val('e-pass')!==val('e-pass2')){ err.textContent='Las contraseñas no coinciden.'; return false; }
   }
   return true;
@@ -402,6 +443,33 @@ document.getElementById('e-logo').addEventListener('change', e=>{
   rd.onload=()=>{ wzLogo=rd.result; document.getElementById('e-logo-prev').innerHTML=`<img src="${wzLogo}" alt="">`; };
   rd.readAsDataURL(f);
 });
+
+/* ── Contraseña: requisitos + medidor en vivo ── */
+const PW_REGLAS = { len:p=>p.length>=8, up:p=>/[A-Z]/.test(p), low:p=>/[a-z]/.test(p), num:p=>/[0-9]/.test(p), sym:p=>/[^A-Za-z0-9]/.test(p) };
+function pwEval(){
+  const p = document.getElementById('e-pass').value;
+  let met = 0;
+  document.querySelectorAll('#pw-reqs li').forEach(li=>{ const ok=PW_REGLAS[li.dataset.k](p); li.classList.toggle('ok',ok); if(ok) met++; });
+  const fill=document.getElementById('pw-bar-fill'), lbl=document.getElementById('pw-strength');
+  if(fill) fill.style.width = (met/5*100) + '%';
+  let color='#D46A6A', txt='Débil';
+  if(met>=5){ color='#3F9D6A'; txt='Fuerte'; }
+  else if(met>=3){ color='#E8A13C'; txt='Media'; }
+  if(fill) fill.style.background = p ? color : 'var(--border)';
+  if(lbl){ lbl.textContent = p ? ('Seguridad: '+txt) : 'Seguridad de la contraseña'; lbl.style.color = p ? color : 'var(--text-soft)'; }
+  pwMatch();
+  return met===5;
+}
+function pwMatch(){
+  const p=document.getElementById('e-pass').value, c=document.getElementById('e-pass2').value;
+  const el=document.getElementById('pw-match'); if(!el) return;
+  if(!c){ el.textContent=''; el.className='pw-match'; return; }
+  if(p===c){ el.textContent='Las contraseñas coinciden'; el.className='pw-match ok'; }
+  else { el.textContent='Las contraseñas no coinciden'; el.className='pw-match no'; }
+}
+function pwToggle(id,btn){ const i=document.getElementById(id); i.type = i.type==='password' ? 'text' : 'password'; }
+document.getElementById('e-pass').addEventListener('input', pwEval);
+document.getElementById('e-pass2').addEventListener('input', pwMatch);
 
 async function crearEmpresa(){
   const err=document.getElementById('e-err');
