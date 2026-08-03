@@ -234,9 +234,17 @@ button{font-family:inherit;cursor:pointer;}
 .pw-match{font-size:12.5px;margin-top:8px;font-weight:600;min-height:15px;}
 .pw-match.ok{color:#3F9D6A;}
 .pw-match.no{color:#D46A6A;}
+/* teléfono con código de país */
+.tel-wrap{display:flex;align-items:stretch;}
+.tel-code{display:flex;align-items:center;padding:0 15px;background:var(--cream-dark);border:1.5px solid var(--border);border-right:none;border-radius:12px 0 0 12px;font-size:14.5px;font-weight:700;color:var(--text-mid);white-space:nowrap;min-width:56px;justify-content:center;}
+.tel-wrap input{border-radius:0 12px 12px 0 !important;flex:1;}
+.fld select:disabled{opacity:.6;cursor:not-allowed;}
+/* ocultar la barra de scroll del modal (el desplazamiento sigue funcionando) */
+.modal{scrollbar-width:none;-ms-overflow-style:none;}
+.modal::-webkit-scrollbar{display:none;width:0;height:0;}
 </style>
 <div class="modal-ov" id="crear-ov">
-  <div class="modal" style="max-width:720px">
+  <div class="modal" style="max-width:1000px">
     <div class="modal-head">
       <h3>Crea tu empresa</h3>
       <p>Registra tu negocio en SIWEPE</p>
@@ -263,8 +271,18 @@ button{font-family:inherit;cursor:pointer;}
           </div>
           <div class="fld"><label>Descripción corta</label><textarea id="e-desc" placeholder="¿Qué vende tu empresa?"></textarea></div>
           <div class="fld-row">
-            <div class="fld"><label>Teléfono / WhatsApp</label><input id="e-tel" placeholder="9999-9999"></div>
-            <div class="fld"><label>Ciudad</label><input id="e-ciudad" placeholder="Tu ciudad"></div>
+            <div class="fld"><label>País *</label>
+              <select id="e-pais" onchange="paisCambio()"><option value="">Selecciona…</option></select>
+            </div>
+            <div class="fld"><label>Ciudad</label>
+              <select id="e-ciudad" disabled><option value="">Elegí el país primero</option></select>
+            </div>
+          </div>
+          <div class="fld"><label>Teléfono / WhatsApp</label>
+            <div class="tel-wrap">
+              <span class="tel-code" id="e-code">+—</span>
+              <input id="e-tel" placeholder="9999-9999" inputmode="tel">
+            </div>
           </div>
           <div class="fld"><label>Logo (opcional)</label>
             <div class="wz-logo-row">
@@ -347,7 +365,9 @@ document.getElementById('anio').textContent = new Date().getFullYear();
 
 function abrirCrear(){
   wzPaso=1; wzLogo='';
-  ['e-nombre','e-rubro','e-desc','e-tel','e-ciudad','e-dueno','e-correo','e-pass','e-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  initPaises();
+  ['e-nombre','e-rubro','e-desc','e-tel','e-pais','e-dueno','e-correo','e-pass','e-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  paisCambio();
   const t=document.getElementById('e-terminos'); if(t) t.checked=false;
   document.getElementById('wz-form').style.display='';
   document.getElementById('wz-ok').style.display='none';
@@ -395,6 +415,35 @@ function vacio(grid){
   </div>`;
 }
 
+/* ── Países: código de teléfono + ciudades ── */
+const PAISES = {
+  'Honduras':      { code:'+504', ciudades:['Tegucigalpa','San Pedro Sula','La Ceiba','El Progreso','Choloma','Comayagua','Choluteca','Danlí','Juticalpa','Puerto Cortés'] },
+  'Guatemala':     { code:'+502', ciudades:['Ciudad de Guatemala','Mixco','Villa Nueva','Quetzaltenango','Escuintla'] },
+  'El Salvador':   { code:'+503', ciudades:['San Salvador','Santa Ana','San Miguel','Soyapango','Mejicanos'] },
+  'Nicaragua':     { code:'+505', ciudades:['Managua','León','Masaya','Chinandega','Granada'] },
+  'Costa Rica':    { code:'+506', ciudades:['San José','Alajuela','Cartago','Heredia','Liberia'] },
+  'Panamá':        { code:'+507', ciudades:['Ciudad de Panamá','San Miguelito','Colón','David','La Chorrera'] },
+  'México':        { code:'+52',  ciudades:['Ciudad de México','Guadalajara','Monterrey','Puebla','Tijuana','Cancún'] },
+  'Colombia':      { code:'+57',  ciudades:['Bogotá','Medellín','Cali','Barranquilla','Cartagena'] },
+  'Estados Unidos':{ code:'+1',   ciudades:['Miami','Houston','Los Ángeles','Nueva York','Chicago'] },
+  'España':        { code:'+34',  ciudades:['Madrid','Barcelona','Valencia','Sevilla','Málaga'] }
+};
+function initPaises(){
+  const sel=document.getElementById('e-pais');
+  if(sel && sel.options.length<=1){
+    sel.insertAdjacentHTML('beforeend', Object.keys(PAISES).map(p=>`<option>${p}</option>`).join(''));
+  }
+}
+function paisCambio(){
+  const p=document.getElementById('e-pais').value;
+  const cs=document.getElementById('e-ciudad');
+  const code=document.getElementById('e-code');
+  if(!p || !PAISES[p]){ cs.innerHTML='<option value="">Elegí el país primero</option>'; cs.disabled=true; code.textContent='+—'; return; }
+  code.textContent = PAISES[p].code;
+  cs.disabled=false;
+  cs.innerHTML = '<option value="">Selecciona…</option>' + PAISES[p].ciudades.map(c=>`<option>${c}</option>`).join('') + '<option>Otra</option>';
+}
+
 /* ── Wizard crear empresa ── */
 let wzPaso = 1;
 let wzLogo = '';
@@ -413,6 +462,7 @@ function wzResumen(){
   document.getElementById('wz-resumen').innerHTML = `
     <div class="rr"><span>Empresa</span><b>${esc(val('e-nombre'))}</b></div>
     <div class="rr"><span>Rubro</span><b>${esc(val('e-rubro'))}</b></div>
+    <div class="rr"><span>Ubicación</span><b>${esc([val('e-ciudad'),val('e-pais')].filter(Boolean).join(', ')||'—')}</b></div>
     <div class="rr"><span>Responsable</span><b>${esc(val('e-dueno'))}</b></div>
     <div class="rr"><span>Correo</span><b>${esc(val('e-correo'))}</b></div>`;
 }
@@ -421,6 +471,7 @@ function wzValidar(){
   if(wzPaso===1){
     if(!val('e-nombre')){ err.textContent='Escribí el nombre de la empresa.'; return false; }
     if(!val('e-rubro')){ err.textContent='Elegí un rubro.'; return false; }
+    if(!val('e-pais')){ err.textContent='Elegí tu país.'; return false; }
   }
   if(wzPaso===2){
     if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
@@ -474,9 +525,11 @@ document.getElementById('e-pass2').addEventListener('input', pwMatch);
 async function crearEmpresa(){
   const err=document.getElementById('e-err');
   const btn=document.getElementById('wz-next'); btn.disabled=true; btn.textContent='Creando…';
+  const code=document.getElementById('e-code').textContent.trim();
   const datos={
     nombre:val('e-nombre'), rubro:val('e-rubro'), descripcion:val('e-desc'),
-    telefono:val('e-tel'), ciudad:val('e-ciudad'), logo:wzLogo,
+    pais:val('e-pais'), ciudad:val('e-ciudad'),
+    telefono: val('e-tel') ? (code+' '+val('e-tel')) : '', logo:wzLogo,
     dueno:val('e-dueno'), correo:val('e-correo'), password:val('e-pass')
   };
   try{
@@ -492,7 +545,20 @@ async function crearEmpresa(){
   }
 }
 
+initPaises();
 cargarEmpresas();
+
+/* Aviso al volver del enlace de verificación del correo */
+(function(){
+  const v = new URLSearchParams(location.search).get('verify');
+  if(!v) return;
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);';
+  if(v==='ok'){ b.style.background='#EAF6EE'; b.style.color='#2C7A4E'; b.textContent='¡Empresa verificada! Ya podés iniciar sesión en tu panel.'; }
+  else { b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.'; }
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(), 7000);
+})();
 </script>
 </body>
 </html>
