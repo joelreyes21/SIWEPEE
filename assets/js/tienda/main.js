@@ -180,7 +180,7 @@ async function submitRegistro(){
   if(pin!==pin2){ errEl.textContent='Los PINs no coinciden.'; return; }
   if(!/^\d+$/.test(pin)){ errEl.textContent='El PIN solo puede tener números.'; return; }
   try{
-    const {token,cliente}=await apiPost('/api/auth/register',{nombre,pin,telefono:tel,correo,direccion:dir});
+    const {token,cliente}=await apiPost('/api/auth/register',{nombre,pin,telefono:tel,correo,direccion:dir,empresa:bsEmpresa()});
     guardarSesionToken(token,'cliente',cliente.nombre);
     errEl.textContent='';
     await bootstrapDB();               // recargar estado con el cliente nuevo
@@ -195,7 +195,7 @@ async function submitLoginT(){
   const pin=(document.getElementById('t-login-pin')?.value||'').trim();
   const errEl=document.getElementById('t-login-error');
   try{
-    const {token,cliente}=await apiPost('/api/auth/cliente-login',{nombre,pin});
+    const {token,cliente}=await apiPost('/api/auth/cliente-login',{nombre,pin,empresa:bsEmpresa()});
     guardarSesionToken(token,'cliente',cliente.nombre);
     await bootstrapDB();               // recargar estado completo con sesión
     entrarComoCliente(cliente);

@@ -14,6 +14,16 @@ const API_BASE = (typeof location !== 'undefined'
 
 function bsToken(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
 
+/* Empresa/tienda activa: viene en la URL como ?e=slug (o id). Se recuerda en
+   localStorage para que sobreviva a la navegación dentro de la misma tienda. */
+function bsEmpresa(){
+  try{
+    const u = new URLSearchParams(location.search).get('e');
+    if(u){ localStorage.setItem('bs_empresa', u); return u; }
+    return localStorage.getItem('bs_empresa') || '';
+  }catch(e){ return ''; }
+}
+
 /* Cache local (respaldo si el backend no está disponible) */
 const almacen = {
   leer:  ()=>{ try{ return localStorage.getItem(BS_CLAVE); }catch(e){ return null; } },
@@ -35,7 +45,9 @@ function _esqueletoDB(){
 async function bootstrapDB(){
   const tok = bsToken();
   try{
-    const ruta = tok ? '/api/state' : '/api/catalog';
+    // Con sesión: estado completo (el token ya sabe de qué empresa es).
+    // Invitado: catálogo público de la tienda indicada en la URL (?e=slug).
+    const ruta = tok ? '/api/state' : ('/api/catalog?empresa=' + encodeURIComponent(bsEmpresa()));
     const r = await fetch(API_BASE + ruta, tok ? { headers:{ 'Authorization':'Bearer '+tok } } : undefined);
     if(!r.ok) throw new Error('estado ' + r.status);
     const data = await r.json();
