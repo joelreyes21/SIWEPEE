@@ -2,7 +2,10 @@
    SIWEPE — TIENDA CLIENTE CSS
    Estilo: Moderno suave · Blanco + rosadito · Aireado y elegante
    ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+/* Tipografía global: TODO en Manrope Light */
+*,*::before,*::after{font-family:'Manrope',sans-serif !important;font-weight:300 !important;}
 
 :root{
   --cream:#F7F8F9;
