@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIWEPE · Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234B5563'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Georgia,serif' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#4B5563">
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+<!-- ===== SVG ICONS ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+  <symbol id="icon-caja" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.5 12 13 3 8.5 12 4l9 4.5Z"/><path d="M3 8.5V16l9 4.5V13"/><path d="M21 8.5V16l-9 4.5"/></symbol>
+  <symbol id="icon-etiqueta" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.3"/></symbol>
+  <symbol id="icon-camion" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h14v12H1z"/><path d="M15 9h4l4 4v3h-8"/><circle cx="6" cy="18.5" r="2"/><circle cx="18" cy="18.5" r="2"/></symbol>
+  <symbol id="icon-corazon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.5 2.8C20.5 15 12 20.5 12 20.5Z"/></symbol>
+  <symbol id="icon-entrada" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m6 11 6 6 6-6"/><path d="M4 20h16"/></symbol>
+  <symbol id="icon-salida" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V8"/><path d="m6 13 6-6 6 6"/><path d="M4 4h16"/></symbol>
+  <symbol id="icon-historial" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="icon-reporte" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/></symbol>
+  <symbol id="icon-ajustes" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2Z"/></symbol>
+  <symbol id="icon-buscar" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.2-4.2"/></symbol>
+  <symbol id="icon-mas" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="icon-lapiz" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3.5 20.5 7 8 19.5 3.5 20.5 4.5 16 17 3.5Z"/></symbol>
+  <symbol id="icon-basura" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5L19.5 7"/></symbol>
+  <symbol id="icon-alerta" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4"/><path d="M12 17.2v.1"/></symbol>
+  <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.8v.1"/></symbol>
+  <symbol id="icon-billete" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></symbol>
+  <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="icon-descarga" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></symbol>
+  <symbol id="icon-bolsa" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="icon-tienda" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-6h16l1 6"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 21V9.5"/><path d="M19 21V9.5"/><rect x="9" y="13" width="6" height="8"/></symbol>
+</defs></svg>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-page" class="login-page">
+  <div class="login-card">
+    <div class="login-logo" id="login-logo">S</div>
+    <h1>Panel Administrador</h1>
+    <p>Ingresa tu PIN para acceder al sistema</p>
+    <div class="lf-campo"><label>PIN de acceso</label><input type="password" id="login-pin" placeholder="••••" maxlength="8" inputmode="numeric" autocomplete="current-password"></div>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;padding:12px">Ingresar →</button>
+    <p class="login-hint">PIN por defecto: <strong>1234</strong> · Cámbialo en Configuración</p>
+  </div>
+</div>
+
+<!-- ===== APP ADMIN ===== -->
+<div id="admin-app" class="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo" id="sb-logo">S</div>
+      <div class="sb-brand-text"><h2 id="sb-nombre">SIWEPE</h2><span>Administrador</span></div>
+    </div>
+    <nav class="sb-nav">
+      <span class="sb-section">Principal</span>
+      <button class="sb-item active" data-page="dashboard"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-home"/></svg></span><span class="sb-label">Menu</span></button>
+      <button class="sb-item" data-page="productos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></span><span class="sb-label">Productos</span></button>
+      <button class="sb-item" data-page="categorias"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-etiqueta"/></svg></span><span class="sb-label">Categorías</span></button>
+      <span class="sb-section">Operaciones</span>
+      <button class="sb-item" data-page="compras"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-entrada"/></svg></span><span class="sb-label">Compras</span></button>
+      <button class="sb-item" data-page="ventas"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-salida"/></svg></span><span class="sb-label">Ventas</span></button>
+      <button class="sb-item" data-page="movimientos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-historial"/></svg></span><span class="sb-label">Movimientos</span></button>
+      <button class="sb-item" data-page="pedidos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg></span><span class="sb-label">Pedidos</span><span class="sb-badge" id="pedidos-badge"></span></button>
+      <span class="sb-section">Personas</span>
+      <button class="sb-item" data-page="proveedores"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-camion"/></svg></span><span class="sb-label">Proveedores</span></button>
+      <button class="sb-item" data-page="clientes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-corazon"/></svg></span><span class="sb-label">Clientes</span></button>
+      <span class="sb-section">Sistema</span>
+      <button class="sb-item" data-page="reportes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-reporte"/></svg></span><span class="sb-label">Reportes</span></button>
+      <button class="sb-item" data-page="configuracion"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-ajustes"/></svg></span><span class="sb-label">Configuración</span></button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user"><div class="sb-user-av">A</div><div class="sb-user-info"><strong>Administrador</strong><span>Panel de control</span></div></div>
+      <button class="sb-tienda-btn" onclick="window.open('tienda.html','_blank')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-tienda"/></svg> Abrir portal cliente
+      </button>
+      <button class="sb-logout-btn" onclick="cerrarSesionAdmin()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="topbar-menu-btn" id="topbar-menu-btn"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-menu"/></svg></button>
+      <span class="topbar-title" id="topbar-title">Menu</span>
+      <div class="topbar-search">
+        <svg><use href="#icon-buscar"/></svg>
+        <input type="search" id="topbar-search-inp" placeholder="Buscar producto…" autocomplete="off">
+        <div class="topbar-search-results" id="topbar-search-res"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar">A</div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+
+        <!-- HEADER ROW -->
+        <div class="dash-top-bar">
+          <div><h2 class="page-title" id="dash-saludo">Panel principal</h2><p class="page-subtitle" id="dash-fecha"></p></div>
+          <div class="dash-top-actions">
+            <span id="dash-periodo-label" class="dash-periodo-label"></span>
+            <select id="dash-periodo" class="filter-select" onchange="renderDashboard()">
+              <option value="1">Este mes</option>
+              <option value="3">Últimos 3 meses</option>
+              <option value="6" selected>Últimos 6 meses</option>
+              <option value="12">Último año</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-icon ki-blue"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-salida"/></svg></div>
+            <div class="kpi-data"><h3 id="kpi-ventas-hoy">—</h3><p>Ventas del día</p><span class="kpi-trend" id="kpi-ventas-hoy-trend"></span></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon ki-green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-billete"/></svg></div>
+            <div class="kpi-data"><h3 id="kpi-ingresos-mes">—</h3><p>Ingresos del mes</p><span class="kpi-trend" id="kpi-ingresos-trend"></span></div>
+          </div>
+          <div class="kpi" style="cursor:pointer" onclick="goTo('pedidos')">
+            <div class="kpi-icon ki-amber"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg></div>
+            <div class="kpi-data"><h3 id="kpi-pedidos-pend">—</h3><p>Pedidos pendientes</p><span class="kpi-trend" id="kpi-pedidos-trend"></span></div>
+          </div>
+          <div class="kpi" style="cursor:pointer" onclick="goTo('productos')">
+            <div class="kpi-icon ki-red"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-alerta"/></svg></div>
+            <div class="kpi-data"><h3 id="kpi-bajo-stock">—</h3><p>Bajo stock</p><span style="font-size:11.5px;color:var(--text-muted)" id="kpi-stock-sub"></span></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-icon ki-purple"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></div>
+            <div class="kpi-data"><h3 id="kpi-productos">—</h3><p>Productos activos</p><span class="kpi-trend" id="kpi-valor-trend"></span></div>
+          </div>
+        </div>
+
+        <!-- FILA 2: Barras agrupadas + Dona -->
+        <div class="dash-row-2">
+          <div class="card dash-card-main">
+            <div class="card-header">
+              <div><h3>Ventas vs Compras por mes</h3><p id="dash-barras-sub">Comparación mensual de operaciones</p></div>
+              <div class="chart-legend-inline">
+                <span class="cli-item"><span class="cli-dot" style="background:var(--accent)"></span>Ventas</span>
+                <span class="cli-item"><span class="cli-dot" style="background:var(--ok)"></span>Compras</span>
+              </div>
+            </div>
+            <div class="card-body dash-chart-body">
+              <div id="dash-chart-barras" class="dash-chart-barras"></div>
+            </div>
+          </div>
+          <div class="card dash-card-side">
+            <div class="card-header"><div><h3>Ventas por categoría</h3><p>Distribución del período</p></div></div>
+            <div class="card-body">
+              <div id="dash-donut-wrap" class="dash-donut-wrap">
+                <svg id="dash-donut-svg" viewBox="0 0 200 200" style="width:160px;height:160px;flex-shrink:0"></svg>
+                <div id="dash-donut-legend" class="donut-legend"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILA 3: Top productos + Pedidos + Stock -->
+        <div class="dash-row-3">
+          <div class="card">
+            <div class="card-header"><div><h3>Top productos vendidos</h3><p>Por unidades en el período</p></div></div>
+            <div class="card-body" id="dash-top-prods"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div><h3>Pedidos recientes</h3><p>Del portal cliente</p></div><button class="btn btn-outline btn-sm" onclick="goTo('pedidos')">Ver todos</button></div>
+            <div class="card-body" id="dash-pedidos"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div><h3>Alerta de stock</h3><p>Requieren reposición</p></div></div>
+            <div class="card-body" id="dash-bajo-stock"></div>
+          </div>
+        </div>
+
+        <!-- FILA 4: Últimos movimientos + Línea ingresos -->
+        <div class="dash-row-4">
+          <div class="card dash-card-movs">
+            <div class="card-header"><div><h3>Últimos movimientos</h3></div></div>
+            <div class="card-body"><div class="mov-list" id="dash-movs"></div></div>
+          </div>
+          <div class="card" style="flex:1.6">
+            <div class="card-header"><div><h3>Ingresos acumulados</h3><p>Curva del período seleccionado</p></div></div>
+            <div class="card-body dash-chart-body" id="dash-linea-wrap">
+              <svg id="dash-linea-svg" style="width:100%;height:160px"></svg>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PRODUCTOS -->
+      <div class="page" id="page-productos">
+        <div class="page-header"><div><h2 class="page-title">Productos</h2><p class="page-subtitle">Gestiona el catálogo de la tienda</p></div><button class="btn btn-primary" onclick="openFormProducto()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nuevo producto</button></div>
+        <div class="filters-bar">
+          <div class="filter-field"><svg><use href="#icon-buscar"/></svg><input type="search" id="filtro-prod-q" placeholder="Buscar por nombre o código…"></div>
+          <select class="filter-select cat-filter-sel" id="filtro-prod-cat"><option value="">Todas las categorías</option></select>
+          <select class="filter-select" id="filtro-prod-est"><option value="">Todos los estados</option><option value="activo">Activos</option><option value="inactivo">Inactivos</option></select>
+        </div>
+        <div class="prod-grid-admin" id="prod-grid"></div>
+      </div>
+
+      <!-- CATEGORÍAS -->
+      <div class="page" id="page-categorias">
+        <div class="page-header"><div><h2 class="page-title">Categorías</h2><p class="page-subtitle">Organiza los productos por colección</p></div><button class="btn btn-primary" onclick="openFormCat()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nueva categoría</button></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Descripción</th><th>Productos</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-categorias"></tbody></table></div></div>
+      </div>
+
+      <!-- PROVEEDORES -->
+      <div class="page" id="page-proveedores">
+        <div class="page-header"><div><h2 class="page-title">Proveedores</h2><p class="page-subtitle">Tus aliados comerciales</p></div><button class="btn btn-primary" onclick="openFormProv()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nuevo proveedor</button></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Empresa</th><th>Teléfono</th><th>Correo</th><th>WhatsApp</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-proveedores"></tbody></table></div></div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div class="page-header"><div><h2 class="page-title">Clientes</h2><p class="page-subtitle">Gestiona tus clientes y sus accesos</p></div><button class="btn btn-primary" onclick="openFormCliente()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nueva clienta</button></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>WhatsApp</th><th>Pedidos</th><th>Total comprado</th><th>Dirección</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-clientes"></tbody></table></div></div>
+      </div>
+
+      <!-- COMPRAS -->
+      <div class="page" id="page-compras">
+        <div class="page-header"><div><h2 class="page-title">Compras · Entradas</h2><p class="page-subtitle">Registra el ingreso de mercancía</p></div><button class="btn btn-primary" onclick="openFormCompra()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Registrar compra</button></div>
+        <div class="filters-bar">
+          <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Desde <input type="date" class="filter-date" id="filtro-com-desde"></label>
+          <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Hasta <input type="date" class="filter-date" id="filtro-com-hasta"></label>
+          <button class="btn btn-ghost btn-sm" id="filtro-com-limpiar">Limpiar</button>
+        </div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Proveedor</th><th>Cantidad</th><th>P. compra</th><th>Total</th><th>Observaciones</th></tr></thead><tbody id="tabla-compras"></tbody></table></div></div>
+      </div>
+
+      <!-- VENTAS -->
+      <div class="page" id="page-ventas">
+        <div class="page-header"><div><h2 class="page-title">Ventas directas</h2><p class="page-subtitle">Registra ventas en mostrador (pedidos aprobados también se registran aquí)</p></div><button class="btn btn-primary" onclick="openFormVenta()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Registrar venta</button></div>
+        <div class="filters-bar">
+          <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Desde <input type="date" class="filter-date" id="filtro-ven-desde"></label>
+          <label style="font-size:12.5px;font-weight:600;color:var(--text-secondary)">Hasta <input type="date" class="filter-date" id="filtro-ven-hasta"></label>
+          <button class="btn btn-ghost btn-sm" id="filtro-ven-limpiar">Limpiar</button>
+        </div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cliente</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr></thead><tbody id="tabla-ventas"></tbody></table></div></div>
+      </div>
+
+      <!-- MOVIMIENTOS -->
+      <div class="page" id="page-movimientos">
+        <div class="page-header"><div><h2 class="page-title">Movimientos</h2><p class="page-subtitle">Análisis visual del inventario</p></div><button class="btn btn-primary" onclick="openFormAjuste()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-mas"/></svg> Registrar ajuste</button></div>
+        <div class="mov-kpi-grid">
+          <div class="mov-kpi"><div class="mov-kpi-ic ki-green"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-entrada"/></svg></div><div class="mov-kpi-data"><span id="mov-kpi-ent">0</span><small>Uds ingresadas</small></div></div>
+          <div class="mov-kpi"><div class="mov-kpi-ic ki-red"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-salida"/></svg></div><div class="mov-kpi-data"><span id="mov-kpi-sal">0</span><small>Uds vendidas</small></div></div>
+          <div class="mov-kpi"><div class="mov-kpi-ic ki-blue"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></div><div class="mov-kpi-data"><span id="mov-kpi-top" style="font-size:13px">—</span><small>Producto más activo</small></div></div>
+          <div class="mov-kpi"><div class="mov-kpi-ic ki-purple"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-historial"/></svg></div><div class="mov-kpi-data"><span id="mov-kpi-ops">0</span><small>Total operaciones</small></div></div>
+        </div>
+        <div class="filters-bar">
+          <div class="filter-field"><svg><use href="#icon-buscar"/></svg><input type="search" id="filtro-mov-q" placeholder="Buscar por producto…"></div>
+          <select class="filter-select" id="filtro-mov-tipo"><option value="">Todos los tipos</option><option value="entrada">Solo entradas</option><option value="salida">Solo salidas</option><option value="ajuste">Solo ajustes</option></select>
+          <input type="date" class="filter-date" id="filtro-mov-desde" title="Desde">
+          <input type="date" class="filter-date" id="filtro-mov-hasta" title="Hasta">
+          <button class="btn btn-ghost btn-sm" id="filtro-mov-limpiar">Limpiar</button>
+        </div>
+        <div class="chart-2col">
+          <div class="card"><div class="card-header"><div><h3>Actividad por fecha</h3><p>Últimos 14 días con movimientos</p></div></div><div class="card-body" id="mov-chart"></div></div>
+          <div class="card"><div class="card-header"><div><h3>Más vendidos</h3><p>Ranking por unidades de salida</p></div></div><div class="card-body" id="mov-rank"></div></div>
+        </div>
+        <div class="card"><div class="card-header"><h3>Historial detallado</h3><p>Últimos 60 movimientos del período</p></div><div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Fecha</th><th>Usuario</th><th>Observación</th></tr></thead><tbody id="tabla-movimientos"></tbody></table></div></div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div class="page" id="page-pedidos">
+        <div class="page-header"><div><h2 class="page-title">Pedidos del portal</h2><p class="page-subtitle">Gestiona los pedidos realizados por los clientes</p></div>
+          <select class="filter-select" id="filtro-ped-estado"><option value="">Todos los estados</option><option value="pendiente">Pendientes</option><option value="aprobado">Aprobados</option><option value="entregado">Entregados</option><option value="cancelado">Cancelados</option></select>
+        </div>
+        <div id="ped-contenedor"></div>
+      </div>
+
+      <!-- REPORTES -->
+      <div class="page" id="page-reportes">
+        <div class="page-header"><div><h2 class="page-title">Reportes</h2><p class="page-subtitle">Analiza y exporta datos de tu negocio</p></div></div>
+        <div class="report-tabs">
+          <div class="report-tab active" onclick="elegirReporte('bajo',this)"><div class="rt-icon ki-red"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-alerta"/></svg></div><div class="rt-info"><h4>Bajo stock</h4><p>Productos a reponer</p></div></div>
+          <div class="report-tab" onclick="elegirReporte('ventas',this)"><div class="rt-icon ki-blue"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-salida"/></svg></div><div class="rt-info"><h4>Ventas</h4><p>Historial de ventas</p></div></div>
+          <div class="report-tab" onclick="elegirReporte('compras',this)"><div class="rt-icon ki-green"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-entrada"/></svg></div><div class="rt-info"><h4>Compras</h4><p>Entradas de mercancía</p></div></div>
+          <div class="report-tab" onclick="elegirReporte('pedidos',this)"><div class="rt-icon ki-amber"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg></div><div class="rt-info"><h4>Pedidos</h4><p>Portal cliente</p></div></div>
+          <div class="report-tab" onclick="elegirReporte('inventario',this)"><div class="rt-icon ki-purple"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></div><div class="rt-info"><h4>Inventario</h4><p>Estado completo</p></div></div>
+        </div>
+        <div class="card">
+          <div class="report-actions" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--surface-2);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:12.5px;color:var(--text-muted);font-weight:600">Filtrar por fechas:</span>
+            <input type="date" class="filter-date" id="rpt-desde" placeholder="Desde">
+            <input type="date" class="filter-date" id="rpt-hasta" placeholder="Hasta">
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="exportarPDF()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-descarga"/></svg> PDF</button>
+              <button class="btn btn-primary btn-sm" onclick="exportarCSV()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-descarga"/></svg> Excel/CSV</button>
+            </div>
+          </div>
+          <div class="report-title" id="reporte-titulo"></div>
+          <div class="report-meta" id="reporte-meta"></div>
+          <div class="table-wrap" id="reporte-tabla"></div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div class="page" id="page-configuracion">
+        <div class="page-header"><div><h2 class="page-title">Configuración</h2><p class="page-subtitle">Personaliza el sistema</p></div></div>
+        <div class="config-grid">
+          <div class="card"><div class="card-header"><h3>Datos del negocio</h3></div><div class="card-body">
+            <div class="field" style="margin-bottom:16px"><label>Nombre del negocio</label><input id="cfg-nombre" type="text" maxlength="40"></div>
+            <div class="field" style="margin-bottom:16px"><label>Logo</label>
+              <div style="display:flex;align-items:center;gap:14px">
+                <div id="cfg-logo-prev" style="width:52px;height:52px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--accent);border:1.5px solid var(--border);overflow:hidden"></div>
+                <div style="display:flex;gap:8px"><label class="btn btn-outline btn-sm" style="cursor:pointer">Subir imagen<input type="file" id="cfg-logo-inp" accept="image/*" hidden></label><button class="btn btn-ghost btn-sm" onclick="DB.config.logo='';dbGuardar();renderConfig();aplicarLogo()">Quitar logo</button></div>
+              </div>
+            </div>
+            <div class="field"><label>Moneda</label><select id="cfg-moneda"><option value="L">L · Lempira</option><option value="$">$ · Dólar</option><option value="€">€ · Euro</option><option value="Q">Q · Quetzal</option><option value="C$">C$ · Córdoba</option></select></div>
+          </div></div>
+          <div class="card"><div class="card-header"><h3>Seguridad</h3></div><div class="card-body">
+            <div class="field" style="margin-bottom:20px"><label>PIN de administrador</label><input id="cfg-pin" type="password" maxlength="8" placeholder="Mínimo 4 dígitos"><small style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">Este PIN protege el acceso al panel admin</small></div>
+            <button class="btn btn-primary" onclick="guardarConfig()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg> Guardar cambios</button>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:14px;line-height:1.5">Los datos se guardan en el navegador. Borrar el caché o historial restablecerá el sistema con datos de ejemplo.</p>
+          </div></div>
+          <div class="card config-full"><div class="card-header"><div><h3>Pago por transferencia</h3><p>Estos datos se muestran al cliente en el carrito para que haga su transferencia</p></div></div><div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="field"><label>Banco</label><input id="cfg-pago-banco" type="text" maxlength="40" placeholder="Ej: Banco Atlántida"></div>
+              <div class="field"><label>Número de cuenta</label><input id="cfg-pago-cuenta" type="text" maxlength="40" placeholder="Ej: 1234-5678-90"></div>
+              <div class="field"><label>Titular de la cuenta</label><input id="cfg-pago-titular" type="text" maxlength="40" placeholder="Ej: María López"></div>
+              <div class="field"><label>Tipo de cuenta (opcional)</label><input id="cfg-pago-tipo" type="text" maxlength="30" placeholder="Ej: Ahorro / Cheques"></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Instrucciones adicionales (opcional)</label><textarea id="cfg-pago-nota" rows="2" maxlength="200" placeholder="Ej: Enviar el comprobante por aquí. Pedidos se confirman al verificar el pago."></textarea></div>
+            <button class="btn btn-primary" style="margin-top:14px" onclick="guardarPago()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg> Guardar datos de transferencia</button>
+          </div></div>
+          <div class="card config-full"><div class="card-header"><div><h3>Carrusel de inicio (tienda)</h3><p>Imágenes que rotan en la portada que ven tus clientes</p></div></div><div class="card-body">
+            <div class="banners-grid" id="banners-grid"></div>
+            <label class="btn btn-outline btn-sm" style="cursor:pointer;margin-top:14px">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Agregar imagen
+              <input type="file" id="cfg-banner-inp" accept="image/*" hidden>
+            </label>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:12px;line-height:1.5">Recomendado: imágenes horizontales (ej. 1600×600 px). Rotan automáticamente cada 5 segundos. Si no agregas ninguna, se muestra la portada de texto por defecto.</p>
+          </div></div>
+          <div class="card config-full"><div class="card-header"><div><h3>Tema visual</h3><p>Cambia los colores de toda la app · afecta la tienda y el panel admin</p></div></div><div class="card-body">
+            <div class="paletas-grid">
+              <button class="paleta-btn" data-tema="rosado"><div class="pal-prev"><div class="pal-sb" style="background:#FCEFF3"></div><div class="pal-body"><div class="pal-acc" style="background:#4B5563"></div><div class="pal-dots"><span style="background:#FCEFF3"></span><span style="background:#F0B5C4"></span></div></div></div><div class="pal-info"><strong>Rosado</strong><span>Suave · Boutique</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="coral"><div class="pal-prev"><div class="pal-sb" style="background:#FCEEEC"></div><div class="pal-body"><div class="pal-acc" style="background:#E8736A"></div><div class="pal-dots"><span style="background:#FCEEEC"></span><span style="background:#F3ABA4"></span></div></div></div><div class="pal-info"><strong>Coral</strong><span>Cálido · Vivo</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="durazno"><div class="pal-prev"><div class="pal-sb" style="background:#FBF1E6"></div><div class="pal-body"><div class="pal-acc" style="background:#DD9558"></div><div class="pal-dots"><span style="background:#FBF1E6"></span><span style="background:#F0C9A1"></span></div></div></div><div class="pal-info"><strong>Durazno</strong><span>Cálido · Suave</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="salvia"><div class="pal-prev"><div class="pal-sb" style="background:#EAF5EF"></div><div class="pal-body"><div class="pal-acc" style="background:#5FA37E"></div><div class="pal-dots"><span style="background:#EAF5EF"></span><span style="background:#ABD6C0"></span></div></div></div><div class="pal-info"><strong>Salvia</strong><span>Verde · Natural</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="turquesa"><div class="pal-prev"><div class="pal-sb" style="background:#E6F5F5"></div><div class="pal-body"><div class="pal-acc" style="background:#2FA3A3"></div><div class="pal-dots"><span style="background:#E6F5F5"></span><span style="background:#9DD8D8"></span></div></div></div><div class="pal-info"><strong>Turquesa</strong><span>Fresco · Marino</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="cielo"><div class="pal-prev"><div class="pal-sb" style="background:#EAF2FB"></div><div class="pal-body"><div class="pal-acc" style="background:#4F86C6"></div><div class="pal-dots"><span style="background:#EAF2FB"></span><span style="background:#A9CBEC"></span></div></div></div><div class="pal-info"><strong>Cielo</strong><span>Azul · Fresco</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="indigo"><div class="pal-prev"><div class="pal-sb" style="background:#EEEFFC"></div><div class="pal-body"><div class="pal-acc" style="background:#5B61D6"></div><div class="pal-dots"><span style="background:#EEEFFC"></span><span style="background:#B3B6EE"></span></div></div></div><div class="pal-info"><strong>Índigo</strong><span>Moderno · Tech</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="lavanda"><div class="pal-prev"><div class="pal-sb" style="background:#F2ECFB"></div><div class="pal-body"><div class="pal-acc" style="background:#8E6FC4"></div><div class="pal-dots"><span style="background:#F2ECFB"></span><span style="background:#CBB6EC"></span></div></div></div><div class="pal-info"><strong>Lavanda</strong><span>Suave · Elegante</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="gris"><div class="pal-prev"><div class="pal-sb" style="background:#F1F3F5"></div><div class="pal-body"><div class="pal-acc" style="background:#6B7280"></div><div class="pal-dots"><span style="background:#F1F3F5"></span><span style="background:#C3C9D0"></span></div></div></div><div class="pal-info"><strong>Gris</strong><span>Neutro · Minimal</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+              <button class="paleta-btn" data-tema="byn"><div class="pal-prev"><div class="pal-sb" style="background:#F2F2F2"></div><div class="pal-body"><div class="pal-acc" style="background:#1A1A1A"></div><div class="pal-dots"><span style="background:#E6E6E6"></span><span style="background:#C9C9C9"></span></div></div></div><div class="pal-info"><strong>Blanco y negro</strong><span>Monocromo · Elegante</span></div><div class="pal-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg></div></button>
+            </div>
+          </div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div><!-- fin admin-app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-header"><div><h3 id="modal-title"></h3><p id="modal-sub"></p></div><button class="modal-close" id="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="modal-overlay" id="confirm-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-body confirm-body">
+      <div class="confirm-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-basura"/></svg></div>
+      <h4>¿Eliminar registro?</h4>
+      <p id="confirm-text"></p>
+      <div class="confirm-actions"><button class="btn btn-outline" id="confirm-no">Cancelar</button><button class="btn btn-danger" id="confirm-si">Sí, eliminar</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE VEIL -->
+<div class="mobile-veil" id="mobile-veil"></div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
+
+<!-- Conversión automática de fotos HEIC (iPhone) a JPG -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="assets/js/shared/data.js"></script>
+<script src="assets/js/admin/main.js"></script>
+<script>
+  /* Inicializar dashboard fecha y saludo */
+  document.addEventListener('DOMContentLoaded',()=>{
+    const fn=$('#dash-fecha'); if(fn) fn.textContent=new Date().toLocaleDateString('es-HN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  });
+</script>
+</body>
+</html>

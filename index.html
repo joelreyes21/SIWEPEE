@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIWEPE · Crea y descubre tiendas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233A6DA8'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Georgia,serif' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#4F86C6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6F9FC; --cream-dark:#F0F5FB;
+  --rose:#4F86C6; --rose-light:#EAF2FB; --rose-mid:#A9CBEC; --rose-dark:#3A6DA8;
+  --text-dark:#21303D; --text-mid:#5A6B78; --text-soft:#9AAAB6;
+  --surface:#FFFFFF; --border:#E2EBF3;
+  --shadow-sm:0 2px 10px rgba(40,80,140,.07);
+  --shadow-md:0 8px 28px rgba(40,80,140,.10);
+  --shadow-lg:0 20px 56px rgba(40,80,140,.14);
+  --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:30px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+/* fondo con orbes suaves */
+.bg-orbs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;}
+.orb.a{width:420px;height:420px;background:var(--rose-light);top:-120px;left:-100px;}
+.orb.b{width:360px;height:360px;background:var(--rose-mid);bottom:-120px;right:-80px;opacity:.35;}
+.orb.c{width:300px;height:300px;background:#E6EEF8;top:40%;right:20%;opacity:.4;}
+
+/* header */
+.nav{position:sticky;top:0;z-index:50;background:rgba(246,249,252,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{max-width:1180px;margin:0 auto;height:70px;display:flex;align-items:center;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,var(--rose),var(--rose-mid));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#fff;box-shadow:0 8px 20px rgba(79,134,198,.35);}
+.brand-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.01em;}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid transparent;transition:all .18s;}
+.nav-btn.ghost{color:var(--text-mid);}
+.nav-btn.ghost:hover{color:var(--rose-dark);background:var(--rose-light);}
+.nav-btn.solid{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.32);}
+.nav-btn.solid:hover{background:var(--rose-dark);transform:translateY(-1px);}
+
+/* hero */
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 28px;}
+.hero{text-align:center;padding:72px 0 26px;}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rose);background:var(--rose-light);padding:7px 16px;border-radius:999px;margin-bottom:22px;}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(38px,6vw,64px);font-weight:600;line-height:1.05;letter-spacing:-.02em;margin-bottom:18px;}
+.hero h1 em{font-style:italic;color:var(--rose-dark);}
+.hero p{font-size:clamp(16px,2.2vw,19px);color:var(--text-mid);max-width:560px;margin:0 auto;line-height:1.65;}
+
+/* dos caminos */
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:48px 0 20px;}
+.path{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:40px 34px;box-shadow:var(--shadow-sm);transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s;overflow:hidden;text-align:left;display:flex;flex-direction:column;}
+.path::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:var(--rose-light);opacity:.6;transition:transform .4s;}
+.path:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:var(--rose-mid);}
+.path:hover::before{transform:scale(1.25);}
+.path-ic{position:relative;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:#fff;}
+.path.crear .path-ic{background:linear-gradient(145deg,var(--rose),var(--rose-dark));}
+.path.descubrir .path-ic{background:linear-gradient(145deg,#3A6DA8,#2C5488);}
+.path h3{position:relative;font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:10px;letter-spacing:-.01em;}
+.path p{position:relative;font-size:15px;color:var(--text-mid);line-height:1.6;margin-bottom:26px;flex:1;}
+.path-cta{position:relative;display:inline-flex;align-items:center;gap:9px;align-self:flex-start;padding:13px 26px;border-radius:999px;font-size:15px;font-weight:700;border:none;transition:all .2s;}
+.path.crear .path-cta{background:var(--rose);color:#fff;box-shadow:0 8px 20px rgba(79,134,198,.34);}
+.path.crear .path-cta:hover{background:var(--rose-dark);transform:translateX(3px);}
+.path.descubrir .path-cta{background:#EAF2FB;color:#2C5488;}
+.path.descubrir .path-cta:hover{background:#E2EBF3;transform:translateX(3px);}
+
+/* seccion empresas */
+.section{padding:64px 0 40px;}
+.section-head{text-align:center;margin-bottom:34px;}
+.section-head h2{font-family:'Fraunces',serif;font-size:34px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px;}
+.section-head p{color:var(--text-soft);font-size:15px;}
+.empresas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s;cursor:pointer;}
+.emp-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.emp-cover{height:96px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));position:relative;}
+.emp-logo{position:absolute;left:20px;bottom:-24px;width:54px;height:54px;border-radius:15px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--rose);box-shadow:var(--shadow-sm);overflow:hidden;}
+.emp-logo img{width:100%;height:100%;object-fit:cover;}
+.emp-body{padding:34px 20px 20px;}
+.emp-body h4{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:4px;}
+.emp-body span{font-size:13px;color:var(--text-soft);}
+.emp-go{margin-top:14px;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--rose-dark);}
+.empty-state{grid-column:1/-1;text-align:center;padding:56px 24px;color:var(--text-soft);}
+.empty-state .es-ic{font-size:44px;margin-bottom:12px;}
+.empty-state h3{font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:var(--text-mid);margin-bottom:8px;}
+.empty-state .es-btn{margin-top:18px;display:inline-block;padding:12px 24px;border-radius:999px;background:var(--rose);color:#fff;font-weight:700;font-size:14px;}
+
+/* footer */
+.footer{position:relative;z-index:1;text-align:center;padding:40px 20px 48px;color:var(--text-soft);font-size:13px;border-top:1px solid var(--border);margin-top:40px;}
+
+/* modal crear empresa */
+.modal-ov{position:fixed;inset:0;z-index:100;background:rgba(33,48,61,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r-xl);width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop .25s ease;}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{padding:26px 28px 4px;position:relative;}
+.modal-head h3{font-family:'Fraunces',serif;font-size:25px;font-weight:600;letter-spacing:-.01em;}
+.modal-head p{font-size:14px;color:var(--text-soft);margin-top:3px;}
+.modal-x{position:absolute;top:20px;right:22px;width:34px;height:34px;border-radius:50%;border:none;background:var(--cream-dark);color:var(--text-mid);font-size:18px;display:flex;align-items:center;justify-content:center;}
+.modal-x:hover{background:var(--rose-light);color:var(--rose-dark);}
+.modal-body{padding:16px 28px 26px;}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:15px;}
+.fld label{font-size:11.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text-mid);}
+.fld input{padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:14.5px;outline:none;background:var(--cream);transition:all .2s;font-family:'Inter',sans-serif;}
+.fld input:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.modal-err{font-size:13px;color:#D46A6A;min-height:16px;margin-bottom:6px;}
+.modal-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--rose);color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(79,134,198,.34);transition:all .2s;}
+.modal-btn:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.modal-note{font-size:12px;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.5;}
+
+@media(max-width:760px){
+  .paths{grid-template-columns:1fr;}
+  .nav-in{padding:0 18px;}
+  .hero{padding:48px 0 18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">S</div>
+      <span class="brand-name">SIWEPE</span>
+    </a>
+    <div class="nav-links">
+      <button class="nav-btn ghost" onclick="document.getElementById('empresas').scrollIntoView()">Descubrir</button>
+      <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow">La plataforma de tiendas</span>
+    <h1>Crea tu tienda o<br><em>descubre</em> las que ya existen</h1>
+    <p>SIWEPE es donde los emprendedores levantan su tienda en línea y los clientes encuentran todo en un solo lugar. Elige tu camino.</p>
+  </section>
+
+  <!-- DOS CAMINOS -->
+  <section class="paths">
+    <div class="path crear">
+      <div class="path-ic">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M12 13v4M10 15h4"/></svg>
+      </div>
+      <h3>Crear tu empresa</h3>
+      <p>Registra tu negocio, sube tus productos y empieza a vender con tu propia tienda en línea, panel de administración incluido.</p>
+      <button class="path-cta" onclick="abrirCrear()">Empezar ahora →</button>
+    </div>
+    <div class="path descubrir">
+      <div class="path-ic">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
+      </div>
+      <h3>Descubrir empresas</h3>
+      <p>Explora las tiendas de SIWEPE, mira sus productos y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
+      <button class="path-cta" onclick="document.getElementById('empresas').scrollIntoView()">Ver empresas →</button>
+    </div>
+  </section>
+
+  <!-- EMPRESAS -->
+  <section class="section" id="empresas">
+    <div class="section-head">
+      <h2>Empresas en SIWEPE</h2>
+      <p>Tiendas registradas en la plataforma</p>
+    </div>
+    <div class="empresas-grid" id="empresas-grid">
+      <div class="empty-state"><div class="es-ic"></div><h3>Cargando empresas…</h3></div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  © <span id="anio"></span> SIWEPE · Plataforma de tiendas en línea
+</footer>
+
+<!-- MODAL CREAR EMPRESA -->
+<div class="modal-ov" id="crear-ov">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Crea tu empresa</h3>
+      <p>Completa los datos para levantar tu tienda</p>
+      <button class="modal-x" onclick="cerrarCrear()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Miscelánea Aly"></div>
+      <div class="fld"><label>Rubro / categoría</label><input id="e-rubro" placeholder="Belleza, ropa, comida…"></div>
+      <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Joel Reyes"></div>
+      <div class="fld-row">
+        <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com"></div>
+        <div class="fld"><label>Contraseña *</label><input id="e-pass" type="password" placeholder="••••••"></div>
+      </div>
+      <div class="modal-err" id="e-err"></div>
+      <button class="modal-btn" onclick="crearEmpresa()">Crear mi empresa</button>
+      <p class="modal-note">Al crearla entrarás a tu panel de administración para cargar productos.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Base del API: local vs Railway (mismo criterio que la tienda) */
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://backendsiwepe-production.up.railway.app';
+
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+function abrirCrear(){ document.getElementById('crear-ov').classList.add('open'); }
+function cerrarCrear(){ document.getElementById('crear-ov').classList.remove('open'); document.getElementById('e-err').textContent=''; }
+document.getElementById('crear-ov').addEventListener('click', e=>{ if(e.target.id==='crear-ov') cerrarCrear(); });
+
+const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ── Listar empresas ── */
+async function cargarEmpresas(){
+  const grid = document.getElementById('empresas-grid');
+  try{
+    const r = await fetch(API_BASE + '/api/empresas');
+    if(!r.ok) throw new Error('estado ' + r.status);
+    const empresas = await r.json();
+    if(!Array.isArray(empresas) || !empresas.length){ vacio(grid); return; }
+    grid.innerHTML = empresas.map(e=>{
+      const ini = (e.nombre||'S')[0].toUpperCase();
+      const logo = e.logo ? `<img src="${e.logo}" alt="">` : ini;
+      const url = 'tienda.html?e=' + encodeURIComponent(e.slug || e.id);
+      return `<a class="emp-card" href="${url}">
+        <div class="emp-cover"><div class="emp-logo">${logo}</div></div>
+        <div class="emp-body">
+          <h4>${esc(e.nombre||'Empresa')}</h4>
+          <span>${esc(e.rubro || e.descripcion || 'Tienda en SIWEPE')}</span>
+          <div class="emp-go">Entrar a la tienda →</div>
+        </div>
+      </a>`;
+    }).join('');
+  }catch(err){
+    vacio(grid);
+  }
+}
+function vacio(grid){
+  grid.innerHTML = `<div class="empty-state">
+    <div class="es-ic"></div>
+    <h3>Aún no hay empresas</h3>
+    <p>Sé el primero en crear tu tienda en SIWEPE.</p>
+    <button class="es-btn" onclick="abrirCrear()">Crear la primera empresa</button>
+  </div>`;
+}
+
+/* ── Crear empresa ── */
+async function crearEmpresa(){
+  const nombre=(document.getElementById('e-nombre').value||'').trim();
+  const rubro=(document.getElementById('e-rubro').value||'').trim();
+  const dueno=(document.getElementById('e-dueno').value||'').trim();
+  const correo=(document.getElementById('e-correo').value||'').trim();
+  const pass=(document.getElementById('e-pass').value||'').trim();
+  const err=document.getElementById('e-err');
+  if(!nombre||!dueno||!correo||!pass){ err.textContent='Completa los campos obligatorios (*).'; return; }
+  if(pass.length<6){ err.textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
+  err.textContent='Creando…';
+  try{
+    const r = await fetch(API_BASE + '/api/empresas', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nombre, rubro, dueno, correo, password: pass })
+    });
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+    if(j.token){ try{ localStorage.setItem('bs_token', j.token); localStorage.setItem('bs_role','admin'); }catch(e){} }
+    window.location.href = 'admin.html';
+  }catch(e){
+    err.textContent = e.message || 'No se pudo crear la empresa.';
+  }
+}
+
+cargarEmpresas();
+</script>
+</body>
+</html>
