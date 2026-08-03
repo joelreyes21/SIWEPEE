@@ -183,25 +183,118 @@ button{font-family:inherit;cursor:pointer;}
   © <span id="anio"></span> SIWEPE · Plataforma de tiendas en línea
 </footer>
 
-<!-- MODAL CREAR EMPRESA -->
+<!-- MODAL CREAR EMPRESA (asistente por pasos) -->
+<style>
+.wz-steps{display:flex;gap:8px;padding:16px 28px 4px;}
+.wz-step-ind{flex:1;height:5px;border-radius:999px;background:var(--border);transition:background .3s;}
+.wz-step-ind.done,.wz-step-ind.active{background:var(--rose);}
+.wz-count{padding:10px 28px 0;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--rose);}
+.wz-page{display:none;}
+.wz-page.active{display:block;animation:wzIn .25s ease;}
+@keyframes wzIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.wz-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;padding:2px 28px 0;}
+.wz-sub{font-size:13.5px;color:var(--text-soft);padding:2px 28px 8px;}
+.fld select,.fld textarea{padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:14.5px;outline:none;background:var(--cream);font-family:'Inter',sans-serif;transition:all .2s;color:var(--text-dark);}
+.fld select:focus,.fld textarea:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+.fld textarea{resize:none;min-height:62px;}
+.wz-nav{display:flex;gap:10px;padding:6px 28px 24px;}
+.wz-btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.wz-btn.prim{background:var(--rose);color:#fff;box-shadow:0 6px 18px rgba(79,134,198,.34);}
+.wz-btn.prim:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.wz-btn.prim:disabled{opacity:.6;cursor:default;transform:none;}
+.wz-btn.sec{flex:0 0 auto;padding:14px 22px;background:var(--cream-dark);color:var(--text-mid);}
+.wz-btn.sec:hover{background:var(--border);}
+.wz-resumen{background:var(--cream-dark);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin:0 28px 14px;}
+.wz-resumen .rr{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:5px 0;}
+.wz-resumen .rr span{color:var(--text-soft);}
+.wz-resumen .rr b{color:var(--text-dark);text-align:right;word-break:break-word;}
+.wz-terms{display:flex;align-items:flex-start;gap:10px;padding:0 28px 6px;font-size:13px;color:var(--text-mid);cursor:pointer;line-height:1.5;}
+.wz-terms input{width:17px;height:17px;margin-top:1px;accent-color:var(--rose);flex-shrink:0;}
+.wz-ok{text-align:center;padding:34px 30px 40px;}
+.wz-ok-ic{width:72px;height:72px;border-radius:50%;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.wz-ok h3{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:10px;}
+.wz-ok p{font-size:14.5px;color:var(--text-mid);line-height:1.6;max-width:340px;margin:0 auto 8px;}
+.wz-ok b{color:var(--text-dark);}
+.wz-logo-row{display:flex;align-items:center;gap:14px;}
+.wz-logo-prev{width:56px;height:56px;border-radius:14px;background:var(--cream-dark);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text-soft);font-family:'Fraunces',serif;font-size:22px;font-weight:600;flex-shrink:0;}
+.wz-logo-prev img{width:100%;height:100%;object-fit:cover;}
+</style>
 <div class="modal-ov" id="crear-ov">
-  <div class="modal">
+  <div class="modal" style="max-width:500px">
     <div class="modal-head">
       <h3>Crea tu empresa</h3>
-      <p>Completa los datos para levantar tu tienda</p>
+      <p>Registra tu negocio en SIWEPE</p>
       <button class="modal-x" onclick="cerrarCrear()">×</button>
     </div>
-    <div class="modal-body">
-      <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Nombre de tu empresa"></div>
-      <div class="fld"><label>Rubro / categoría</label><input id="e-rubro" placeholder="Ej: ropa, comida, tecnología…"></div>
-      <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre"></div>
-      <div class="fld-row">
-        <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com"></div>
-        <div class="fld"><label>Contraseña *</label><input id="e-pass" type="password" placeholder="••••••"></div>
+
+    <div id="wz-form">
+      <div class="wz-steps"><span class="wz-step-ind" data-i="1"></span><span class="wz-step-ind" data-i="2"></span><span class="wz-step-ind" data-i="3"></span></div>
+      <div class="wz-count" id="wz-count">Paso 1 de 3</div>
+
+      <!-- PASO 1 -->
+      <div class="wz-page" data-step="1">
+        <div class="wz-title">Datos de la empresa</div>
+        <div class="wz-sub">Contanos de tu negocio</div>
+        <div class="modal-body" style="padding-top:6px">
+          <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Nombre de tu empresa"></div>
+          <div class="fld"><label>Rubro / categoría *</label>
+            <select id="e-rubro">
+              <option value="">Selecciona…</option>
+              <option>Ropa y moda</option><option>Comida y bebidas</option><option>Belleza y cuidado</option>
+              <option>Tecnología</option><option>Hogar</option><option>Salud</option>
+              <option>Servicios</option><option>Otro</option>
+            </select>
+          </div>
+          <div class="fld"><label>Descripción corta</label><textarea id="e-desc" placeholder="¿Qué vende tu empresa?"></textarea></div>
+          <div class="fld-row">
+            <div class="fld"><label>Teléfono / WhatsApp</label><input id="e-tel" placeholder="9999-9999"></div>
+            <div class="fld"><label>Ciudad</label><input id="e-ciudad" placeholder="Tu ciudad"></div>
+          </div>
+          <div class="fld"><label>Logo (opcional)</label>
+            <div class="wz-logo-row">
+              <div class="wz-logo-prev" id="e-logo-prev">S</div>
+              <label class="wz-btn sec" style="cursor:pointer;flex:0 0 auto">Subir logo<input type="file" id="e-logo" accept="image/*" hidden></label>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="modal-err" id="e-err"></div>
-      <button class="modal-btn" onclick="crearEmpresa()">Crear mi empresa</button>
-      <p class="modal-note">Al crearla entrarás a tu panel de administración para cargar productos.</p>
+
+      <!-- PASO 2 -->
+      <div class="wz-page" data-step="2">
+        <div class="wz-title">Tu cuenta de administrador</div>
+        <div class="wz-sub">Con esto vas a manejar tu tienda</div>
+        <div class="modal-body" style="padding-top:6px">
+          <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre"></div>
+          <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com"></div>
+          <div class="fld-row">
+            <div class="fld"><label>Contraseña *</label><input id="e-pass" type="password" placeholder="Mín. 6 caracteres"></div>
+            <div class="fld"><label>Confirmar *</label><input id="e-pass2" type="password" placeholder="Repite la clave"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="wz-page" data-step="3">
+        <div class="wz-title">Revisá y confirmá</div>
+        <div class="wz-sub">Verificá que todo esté bien</div>
+        <div class="wz-resumen" id="wz-resumen"></div>
+        <label class="wz-terms"><input type="checkbox" id="e-terminos"> Acepto los términos y condiciones y confirmo que la información es verdadera.</label>
+      </div>
+
+      <div class="modal-err" id="e-err" style="padding:0 28px"></div>
+      <div class="wz-nav">
+        <button class="wz-btn sec" id="wz-prev" onclick="wzAtras()" style="display:none">Atrás</button>
+        <button class="wz-btn prim" id="wz-next" onclick="wzSiguiente()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ÉXITO: verificación por correo -->
+    <div class="wz-ok" id="wz-ok" style="display:none">
+      <div class="wz-ok-ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
+      <h3>¡Casi listo!</h3>
+      <p>Te enviamos un correo a <b id="wz-ok-mail"></b> para <b>verificar tu empresa</b>.</p>
+      <p>Confirmá el correo y tu tienda queda activa. Revisá también la carpeta de spam.</p>
+      <button class="wz-btn prim" style="max-width:220px;margin:18px auto 0" onclick="cerrarCrear()">Entendido</button>
     </div>
   </div>
 </div>
@@ -214,7 +307,14 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
 
 document.getElementById('anio').textContent = new Date().getFullYear();
 
-function abrirCrear(){ document.getElementById('crear-ov').classList.add('open'); }
+function abrirCrear(){
+  wzPaso=1; wzLogo='';
+  document.getElementById('wz-form').style.display='';
+  document.getElementById('wz-ok').style.display='none';
+  const prev=document.getElementById('e-logo-prev'); if(prev) prev.innerHTML='S';
+  wzRender();
+  document.getElementById('crear-ov').classList.add('open');
+}
 function cerrarCrear(){ document.getElementById('crear-ov').classList.remove('open'); document.getElementById('e-err').textContent=''; }
 document.getElementById('crear-ov').addEventListener('click', e=>{ if(e.target.id==='crear-ov') cerrarCrear(); });
 
@@ -254,28 +354,73 @@ function vacio(grid){
   </div>`;
 }
 
-/* ── Crear empresa ── */
-async function crearEmpresa(){
-  const nombre=(document.getElementById('e-nombre').value||'').trim();
-  const rubro=(document.getElementById('e-rubro').value||'').trim();
-  const dueno=(document.getElementById('e-dueno').value||'').trim();
-  const correo=(document.getElementById('e-correo').value||'').trim();
-  const pass=(document.getElementById('e-pass').value||'').trim();
+/* ── Wizard crear empresa ── */
+let wzPaso = 1;
+let wzLogo = '';
+const val = id => (document.getElementById(id).value||'').trim();
+
+function wzRender(){
+  document.querySelectorAll('.wz-page').forEach(p=>p.classList.toggle('active', +p.dataset.step===wzPaso));
+  document.querySelectorAll('.wz-step-ind').forEach(s=>{ const i=+s.dataset.i; s.classList.toggle('active', i===wzPaso); s.classList.toggle('done', i<wzPaso); });
+  document.getElementById('wz-count').textContent = `Paso ${wzPaso} de 3`;
+  document.getElementById('wz-prev').style.display = wzPaso>1 ? 'block' : 'none';
+  document.getElementById('wz-next').textContent = wzPaso<3 ? 'Siguiente →' : 'Crear empresa';
+  document.getElementById('e-err').textContent = '';
+  if(wzPaso===3) wzResumen();
+}
+function wzResumen(){
+  document.getElementById('wz-resumen').innerHTML = `
+    <div class="rr"><span>Empresa</span><b>${esc(val('e-nombre'))}</b></div>
+    <div class="rr"><span>Rubro</span><b>${esc(val('e-rubro'))}</b></div>
+    <div class="rr"><span>Responsable</span><b>${esc(val('e-dueno'))}</b></div>
+    <div class="rr"><span>Correo</span><b>${esc(val('e-correo'))}</b></div>`;
+}
+function wzValidar(){
   const err=document.getElementById('e-err');
-  if(!nombre||!dueno||!correo||!pass){ err.textContent='Completa los campos obligatorios (*).'; return; }
-  if(pass.length<6){ err.textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
-  err.textContent='Creando…';
+  if(wzPaso===1){
+    if(!val('e-nombre')){ err.textContent='Escribí el nombre de la empresa.'; return false; }
+    if(!val('e-rubro')){ err.textContent='Elegí un rubro.'; return false; }
+  }
+  if(wzPaso===2){
+    if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('e-correo'))){ err.textContent='Correo inválido.'; return false; }
+    if(val('e-pass').length<6){ err.textContent='La contraseña debe tener al menos 6 caracteres.'; return false; }
+    if(val('e-pass')!==val('e-pass2')){ err.textContent='Las contraseñas no coinciden.'; return false; }
+  }
+  return true;
+}
+function wzAtras(){ if(wzPaso>1){ wzPaso--; wzRender(); } }
+function wzSiguiente(){
+  if(!wzValidar()) return;
+  if(wzPaso<3){ wzPaso++; wzRender(); return; }
+  if(!document.getElementById('e-terminos').checked){ document.getElementById('e-err').textContent='Tenés que aceptar los términos.'; return; }
+  crearEmpresa();
+}
+document.getElementById('e-logo').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ wzLogo=rd.result; document.getElementById('e-logo-prev').innerHTML=`<img src="${wzLogo}" alt="">`; };
+  rd.readAsDataURL(f);
+});
+
+async function crearEmpresa(){
+  const err=document.getElementById('e-err');
+  const btn=document.getElementById('wz-next'); btn.disabled=true; btn.textContent='Creando…';
+  const datos={
+    nombre:val('e-nombre'), rubro:val('e-rubro'), descripcion:val('e-desc'),
+    telefono:val('e-tel'), ciudad:val('e-ciudad'), logo:wzLogo,
+    dueno:val('e-dueno'), correo:val('e-correo'), password:val('e-pass')
+  };
   try{
-    const r = await fetch(API_BASE + '/api/empresas', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ nombre, rubro, dueno, correo, password: pass })
-    });
-    const j = await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
-    if(j.token){ try{ localStorage.setItem('bs_token', j.token); localStorage.setItem('bs_role','admin'); }catch(e){} }
-    window.location.href = 'admin.html';
+    const r=await fetch(API_BASE+'/api/empresas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||('Error '+r.status));
+    document.getElementById('wz-form').style.display='none';
+    document.getElementById('wz-ok-mail').textContent=datos.correo;
+    document.getElementById('wz-ok').style.display='block';
   }catch(e){
     err.textContent = e.message || 'No se pudo crear la empresa.';
+    btn.disabled=false; btn.textContent='Crear empresa';
   }
 }
 
