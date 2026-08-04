@@ -1,3 +1,4 @@
+/*! SIWEPE · © 2026 Joel Reyes. Todos los derechos reservados. · Prohibida su reproduccion o distribucion sin autorizacion. */
 /*
   shared/data.js — Base de datos compartida en localStorage.
   Etapa 2: reemplazar almacen.leer/escribir por fetch() a la API.

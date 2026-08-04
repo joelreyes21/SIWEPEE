@@ -1,3 +1,4 @@
+/*! SIWEPE · © 2026 Joel Reyes. Todos los derechos reservados. · Prohibida su reproduccion o distribucion sin autorizacion. */
 /*
   tienda/main.js — Portal cliente v3: bienvenida, registro, chat por pedido
 */
