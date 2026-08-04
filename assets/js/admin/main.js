@@ -528,13 +528,35 @@ function renderProductos(){
 
 const TIPOS_PIEL=['Grasa','Seca','Mixta','Sensible','Normal'];
 
+/* Código de producto AUTOMÁTICO: PROD-0001, PROD-0002, … (por empresa). */
+function siguienteCodigoProducto(){
+  let max=0;
+  (DB.productos||[]).forEach(p=>{ const m=/^PROD-(\d+)$/i.exec(p.codigo||''); if(m){ const n=+m[1]; if(n>max) max=n; } });
+  return 'PROD-'+String(max+1).padStart(4,'0');
+}
+
+/* Borrador del formulario de producto: guarda lo escrito en el navegador para
+   que NO se pierda si el form se cierra por accidente. Se limpia al guardar. */
+function _draftKeyProd(){ return 'bs_draft_prod_'+((DB.config&&DB.config.nombre)||''); }
+function guardarBorradorProd(){
+  const g=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+  const d={nombre:g('fp-nombre'),cat:g('fp-cat'),estado:g('fp-estado'),desc:g('fp-desc'),
+    pcompra:g('fp-pcompra'),pventa:g('fp-pventa'),stock:g('fp-stock'),stockmin:g('fp-stockmin'),
+    destacado:g('fp-destacado'),marca:g('fp-marca')};
+  const hayAlgo=d.nombre||d.desc||d.pcompra||d.pventa||d.marca||d.cat;
+  try{ if(hayAlgo) localStorage.setItem(_draftKeyProd(),JSON.stringify(d)); else localStorage.removeItem(_draftKeyProd()); }catch(e){}
+}
+function leerBorradorProd(){ try{ return JSON.parse(localStorage.getItem(_draftKeyProd())||'null'); }catch(e){ return null; } }
+function limpiarBorradorProd(){ try{ localStorage.removeItem(_draftKeyProd()); }catch(e){} }
+
 function openFormProducto(id=null){
   const p=id?prodPor(id):null;
+  const codigoVal=p?p.codigo:siguienteCodigoProducto();
   const cats=DB.categorias.filter(c=>c.estado==='activo').map(c=>`<option value="${c.id}" ${p&&p.categoria_id===c.id?'selected':''}>${esc(c.nombre)}</option>`).join('');
   openModal(p?'Editar producto':'Nuevo producto',p?`Código: ${p.codigo}`:'Completa los datos del producto',`
     <div class="form-grid">
-      <div class="field"><label>Código <span class="req">*</span></label><input id="fp-codigo" value="${p?esc(p.codigo):''}" placeholder="MAQ-010"><span class="ferr"></span></div>
-      <div class="field"><label>Nombre <span class="req">*</span></label><input id="fp-nombre" value="${p?esc(p.nombre):''}" placeholder="Labial mate…"><span class="ferr"></span></div>
+      <div class="field"><label>Código <span style="font-weight:400;color:var(--text-muted)">(automático)</span></label><input id="fp-codigo" value="${esc(codigoVal)}" readonly style="background:var(--surface-2);color:var(--text-secondary);cursor:not-allowed"></div>
+      <div class="field"><label>Nombre <span class="req">*</span></label><input id="fp-nombre" value="${p?esc(p.nombre):''}" placeholder="Ej: nombre del producto"><span class="ferr"></span></div>
       <div class="field"><label>Categoría <span class="req">*</span></label><select id="fp-cat"><option value="">Selecciona…</option>${cats}</select><span class="ferr"></span></div>
       <div class="field"><label>Estado</label><select id="fp-estado"><option value="activo" ${!p||p.estado==='activo'?'selected':''}>Activo</option><option value="inactivo" ${p&&p.estado==='inactivo'?'selected':''}>Inactivo</option></select></div>
       <div class="field span2"><label>Descripción</label><textarea id="fp-desc" placeholder="Describe el producto…" rows="2">${p?esc(p.descripcion||''):''}</textarea></div>
@@ -549,12 +571,7 @@ function openFormProducto(id=null){
         </div>
       </div>
       <div class="field"><label>¿Destacado en tienda?</label><select id="fp-destacado"><option value="1" ${p&&p.destacado?'selected':''}>Sí</option><option value="0" ${!p||!p.destacado?'selected':''}>No</option></select></div>
-      <div class="field"><label>Marca</label><input id="fp-marca" value="${p?esc(p.marca||''):''}" placeholder="The Ordinary, CeraVe…"></div>
-      <div class="field span2"><label>Tipo de piel <span style="font-weight:400;color:var(--text-muted)">(para los filtros de la tienda)</span></label>
-        <div style="display:flex;flex-wrap:wrap;gap:16px;padding-top:6px">
-          ${TIPOS_PIEL.map(t=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer"><input type="checkbox" id="fp-tp-${t}" ${p&&Array.isArray(p.tipoPiel)&&p.tipoPiel.includes(t)?'checked':''} style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer"> ${t}</label>`).join('')}
-        </div>
-      </div>
+      <div class="field"><label>Marca <span style="font-weight:400;color:var(--text-muted)">(opcional)</span></label><input id="fp-marca" value="${p?esc(p.marca||''):''}" placeholder="Ej: marca del producto"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
@@ -571,16 +588,31 @@ function openFormProducto(id=null){
     }).catch(err=>toast(errImagen(err),'error'));
   });
   window.__fpImg=()=>imgActual;
+
+  // ── Borrador (sólo para producto NUEVO): restaurar y auto-guardar ──
+  if(!p){
+    const b=leerBorradorProd();
+    if(b){
+      const set=(fid,v)=>{ const el=document.getElementById(fid); if(el&&v!=null&&v!=='') el.value=v; };
+      set('fp-nombre',b.nombre); set('fp-cat',b.cat); set('fp-estado',b.estado); set('fp-desc',b.desc);
+      set('fp-pcompra',b.pcompra); set('fp-pventa',b.pventa); set('fp-stock',b.stock); set('fp-stockmin',b.stockmin);
+      set('fp-destacado',b.destacado); set('fp-marca',b.marca);
+      toast('Recuperé lo que habías escrito');
+    }
+    ['fp-nombre','fp-cat','fp-estado','fp-desc','fp-pcompra','fp-pventa','fp-stock','fp-stockmin','fp-destacado','fp-marca'].forEach(fid=>{
+      const el=document.getElementById(fid);
+      if(el){ el.addEventListener('input',guardarBorradorProd); el.addEventListener('change',guardarBorradorProd); }
+    });
+  }
 }
 
 function saveProducto(id){
-  const ok=validar([['fp-codigo',noVacio,'Escribe un código'],['fp-nombre',noVacio,'Escribe el nombre'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numPos,'Precio inválido'],['fp-pventa',numPos,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v),'Cantidad inválida'],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
+  const ok=validar([['fp-nombre',noVacio,'Escribe el nombre'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numPos,'Precio inválido'],['fp-pventa',numPos,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v),'Cantidad inválida'],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
   if(!ok) return;
-  const cod=$('#fp-codigo').value.trim().toUpperCase();
-  if(DB.productos.some(p=>p.codigo.toUpperCase()===cod&&p.id!==id)){ validar([['fp-codigo',()=>false,'Ese código ya existe']]); return; }
-  const datos={codigo:cod,nombre:$('#fp-nombre').value.trim(),categoria_id:+$('#fp-cat').value,descripcion:$('#fp-desc').value.trim(),precio_compra:+$('#fp-pcompra').value,precio_venta:+$('#fp-pventa').value,stock:+$('#fp-stock').value,stock_min:+$('#fp-stockmin').value,imagen:window.__fpImg(),estado:$('#fp-estado').value,destacado:$('#fp-destacado').value==='1',marca:$('#fp-marca').value.trim(),tipoPiel:TIPOS_PIEL.filter(t=>$('#fp-tp-'+t)?.checked)};
+  const cod=($('#fp-codigo').value||'').trim().toUpperCase();  // generado automáticamente
+  const datos={codigo:cod,nombre:$('#fp-nombre').value.trim(),categoria_id:+$('#fp-cat').value,descripcion:$('#fp-desc').value.trim(),precio_compra:+$('#fp-pcompra').value,precio_venta:+$('#fp-pventa').value,stock:+$('#fp-stock').value,stock_min:+$('#fp-stockmin').value,imagen:window.__fpImg(),estado:$('#fp-estado').value,destacado:$('#fp-destacado').value==='1',marca:$('#fp-marca').value.trim(),tipoPiel:[]};
   if(id){ Object.assign(prodPor(id),datos); toast('Producto actualizado'); }
-  else{ DB.productos.push({id:nuevoId('producto'),...datos}); toast('Producto creado'); }
+  else{ DB.productos.push({id:nuevoId('producto'),...datos}); limpiarBorradorProd(); toast('Producto creado'); }
   dbGuardar(); closeModal(); renderProductos(); renderDashboard();
 }
 
