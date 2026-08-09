@@ -596,11 +596,15 @@ cargarProductos();
   const v = new URLSearchParams(location.search).get('verify');
   if(!v) return;
   const b=document.createElement('div');
-  b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);';
-  if(v==='ok'){ b.style.background='#EAF6EE'; b.style.color='#2C7A4E'; b.textContent='¡Empresa verificada! Ya podés iniciar sesión en tu panel.'; }
-  else { b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.'; }
+  b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);display:flex;align-items:center;gap:14px;';
+  if(v==='ok'){
+    b.style.background='#EAF6EE'; b.style.color='#2C7A4E';
+    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="admin.html" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
+  } else {
+    b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.';
+  }
   document.body.appendChild(b);
-  setTimeout(()=>b.remove(), 7000);
+  if(v!=='ok') setTimeout(()=>b.remove(), 7000);
 })();
 </script>
 </body>
