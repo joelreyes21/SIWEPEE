@@ -1263,13 +1263,19 @@ async function renderPerfilEmpresa(){
 }
 
 /* Abre el portal de cliente de MI tienda (no la tienda.html pelada, que no
-   sabe de qué negocio es y termina mandando al marketplace). */
-async function abrirPortalCliente(){
-  let slug=_miEmpresaSlug;
-  if(!slug){
-    try{ const perfil=await apiGet('/api/empresas/mi'); slug=perfil.slug||''; _miEmpresaSlug=slug; }catch(e){}
-  }
-  window.open('tienda.html'+(slug?('?e='+encodeURIComponent(slug)):''), '_blank');
+   sabe de qué negocio es y termina mandando al marketplace).
+   La pestaña se abre YA, de forma sincrónica dentro del click (si no, el
+   navegador la bloquea como popup por abrirse después de un await) y recién
+   después se le pone la URL final una vez que se sabe el slug. */
+function abrirPortalCliente(){
+  const w = window.open('', '_blank');
+  (async ()=>{
+    let slug=_miEmpresaSlug;
+    if(!slug){
+      try{ const perfil=await apiGet('/api/empresas/mi'); slug=perfil.slug||''; _miEmpresaSlug=slug; }catch(e){}
+    }
+    if(w) w.location.href = 'tienda.html'+(slug?('?e='+encodeURIComponent(slug)):'');
+  })();
 }
 window.abrirPortalCliente=abrirPortalCliente;
 
