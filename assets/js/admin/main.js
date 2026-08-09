@@ -751,12 +751,12 @@ function renderClientes(){
 
 function openFormCliente(id=null){
   const c=id?cliPor(id):null;
-  openModal(c?'Editar cliente':'Nueva clienta','El PIN permite acceder al portal de la tienda',`
+  openModal(c?'Editar cliente':'Nueva clienta', c?'Dejá la contraseña en blanco para no cambiarla':'La contraseña permite acceder al portal de la tienda',`
     <div class="form-grid">
       <div class="field"><label>Nombre <span class="req">*</span></label><input id="fcli-nombre" value="${c?esc(c.nombre):''}"><span class="ferr"></span></div>
       <div class="field"><label>Teléfono</label><input id="fcli-tel" value="${c?esc(c.telefono||''):''}"></div>
       <div class="field"><label>Correo</label><input id="fcli-correo" value="${c?esc(c.correo||''):''}"><span class="ferr"></span></div>
-      <div class="field"><label>PIN Portal <span class="req">*</span></label><input id="fcli-pin" type="text" inputmode="numeric" maxlength="8" value="${c?esc(c.pin||'0000'):'0000'}" placeholder="4 dígitos"><span class="ferr"></span></div>
+      <div class="field"><label>Contraseña ${c?'':'<span class="req">*</span>'}</label><input id="fcli-pin" type="text" placeholder="${c?'Dejar en blanco para no cambiar':'Mínimo 6 caracteres'}" autocomplete="new-password"><span class="ferr"></span></div>
       <div class="field"><label>WhatsApp</label><input id="fcli-wa" type="tel" value="${c?esc(c.whatsapp||''):''}" placeholder="50499881122"><small style="color:var(--text-muted);font-size:11.5px;margin-top:3px;display:block">Con código de país, sin + ni espacios</small></div>
       <div class="field span2"><label>Dirección</label><input id="fcli-dir" value="${c?esc(c.direccion||''):''}"></div>
     </div>
@@ -767,10 +767,20 @@ function openFormCliente(id=null){
 }
 
 function saveCliente(id){
-  if(!validar([['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-correo',correoOk,'Correo inválido'],['fcli-pin',v=>/^\d{4,8}$/.test(v.trim()),'PIN: 4-8 dígitos']])) return;
-  const datos={nombre:$('#fcli-nombre').value.trim(),telefono:$('#fcli-tel').value.trim(),correo:$('#fcli-correo').value.trim(),pin:$('#fcli-pin').value.trim(),whatsapp:$('#fcli-wa').value.trim().replace(/[^0-9]/g,''),direccion:$('#fcli-dir').value.trim()};
-  if(id){ Object.assign(cliPor(id),datos); toast('Cliente actualizado'); }
-  else{ DB.clientes.push({id:nuevoId('cliente'),...datos}); toast('Clienta registrada'); }
+  const pinVal=($('#fcli-pin').value||'').trim();
+  const reglas=[['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-correo',correoOk,'Correo inválido']];
+  if(!id || pinVal) reglas.push(['fcli-pin',v=>v.trim().length>=6,'Contraseña: mínimo 6 caracteres']);
+  if(!validar(reglas)) return;
+  const datos={nombre:$('#fcli-nombre').value.trim(),telefono:$('#fcli-tel').value.trim(),correo:$('#fcli-correo').value.trim(),whatsapp:$('#fcli-wa').value.trim().replace(/[^0-9]/g,''),direccion:$('#fcli-dir').value.trim()};
+  if(id){
+    const actual=cliPor(id);
+    Object.assign(actual,datos);
+    if(pinVal) actual.pin=pinVal;
+    toast('Cliente actualizado');
+  } else {
+    DB.clientes.push({id:nuevoId('cliente'),...datos,pin:pinVal});
+    toast('Clienta registrada');
+  }
   dbGuardar(); closeModal(); renderClientes();
 }
 
@@ -1121,7 +1131,6 @@ function exportarCSV(){
 function renderConfig(){
   $('#cfg-nombre').value=DB.config.nombre;
   $('#cfg-moneda').value=DB.config.moneda;
-  $('#cfg-pin').value=DB.config.pinAdmin||'1234';
   const logoEl=$('#cfg-logo-prev');
   if(logoEl) logoEl.innerHTML=DB.config.logo?`<img src="${DB.config.logo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:(DB.config.nombre||'B')[0].toUpperCase();
   $$('.paleta-btn').forEach(b=>b.classList.toggle('active',b.dataset.tema===(DB.config.tema||'rosado')));
@@ -1219,11 +1228,8 @@ window.guardarPerfilEmpresa=guardarPerfilEmpresa;
 
 function guardarConfig(){
   const nombre=$('#cfg-nombre').value.trim();
-  const pin=$('#cfg-pin').value.trim();
   if(!nombre){ toast('El nombre es obligatorio','error'); return; }
-  if(pin&&(pin.length<4||!/^\d+$/.test(pin))){ toast('PIN: mínimo 4 dígitos','error'); return; }
   DB.config.nombre=nombre; DB.config.moneda=$('#cfg-moneda').value;
-  if(pin) DB.config.pinAdmin=pin;
   dbGuardar(); renderDashboard();
   const sbN=$('#sb-nombre'); if(sbN) sbN.textContent=nombre;
   document.title=`${nombre} · Admin`;

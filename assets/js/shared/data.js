@@ -25,10 +25,12 @@ function bsEmpresa(){
   }catch(e){ return ''; }
 }
 
-/* Cache local (respaldo si el backend no está disponible) */
+/* Cache local (respaldo si el backend no está disponible).
+   Se guarda por empresa (bs_empresa) para que el respaldo de una tienda
+   nunca se muestre encima de otra si el fetch de la tienda actual falla. */
 const almacen = {
-  leer:  ()=>{ try{ return localStorage.getItem(BS_CLAVE); }catch(e){ return null; } },
-  escribir: v=>{ try{ localStorage.setItem(BS_CLAVE, v); }catch(e){} }
+  leer:  ()=>{ try{ return localStorage.getItem(BS_CLAVE + ':' + (bsEmpresa()||'_')); }catch(e){ return null; } },
+  escribir: v=>{ try{ localStorage.setItem(BS_CLAVE + ':' + (bsEmpresa()||'_'), v); }catch(e){} }
 };
 
 let DB = null;
@@ -43,8 +45,23 @@ function _esqueletoDB(){
    - Con sesión (token): estado completo (/api/state).
    - Invitado (sin token): solo catálogo público (/api/catalog).
    - Sin backend: respaldo local/semilla. */
-async function bootstrapDB(){
-  const tok = bsToken();
+async function bootstrapDB(opts){
+  let tok = bsToken();
+  /* Un token de cliente pertenece a UNA tienda (empresa_id va adentro del JWT).
+     Si estás logueado como cliente de la Tienda A y navegás a la URL de la
+     Tienda B, seguir usando ese token mezclaría los datos de A dentro de la
+     página de B. bsEmpresa() ya cambia con la URL; acá comparamos contra la
+     empresa con la que se guardó la sesión y, si no coincide, se descarta
+     (la página actual entra como invitada, no como sesión de otra tienda). */
+  if(opts && opts.checkEmpresa && tok){
+    const empresaActual = bsEmpresa();
+    let empresaToken=''; try{ empresaToken = localStorage.getItem('bs_token_empresa')||''; }catch(e){}
+    if(empresaActual && empresaToken && empresaActual!==empresaToken){
+      limpiarSesionToken();
+      try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
+      tok='';
+    }
+  }
   try{
     // Con sesión: estado completo (el token ya sabe de qué empresa es).
     // Invitado: catálogo público de la tienda indicada en la URL (?e=slug).
@@ -103,10 +120,17 @@ function guardarSesionToken(token, role, nombre){
     localStorage.setItem('bs_token', token || '');
     localStorage.setItem('bs_role', role || '');
     if(nombre) localStorage.setItem('bs_user', nombre);
+    // Solo el rol cliente está atado a una tienda puntual (?e=); admin/proveedor
+    // no dependen de la URL, así que no hace sentido guardarles una "empresa".
+    if(role==='cliente') localStorage.setItem('bs_token_empresa', bsEmpresa());
+    else localStorage.removeItem('bs_token_empresa');
   }catch(e){}
 }
 function limpiarSesionToken(){
-  try{ localStorage.removeItem('bs_token'); localStorage.removeItem('bs_role'); localStorage.removeItem('bs_user'); }catch(e){}
+  try{
+    localStorage.removeItem('bs_token'); localStorage.removeItem('bs_role');
+    localStorage.removeItem('bs_user'); localStorage.removeItem('bs_token_empresa');
+  }catch(e){}
 }
 
 const hoy = (d=0) => { const x=new Date(); x.setDate(x.getDate()+d); return x.toISOString().slice(0,10); };

@@ -161,9 +161,8 @@ async function submitRegistro(){
   const pin2=(document.getElementById('t-reg-pin2')?.value||'').trim();
   const errEl=document.getElementById('t-reg-error');
   if(!nombre){ errEl.textContent='El nombre es obligatorio.'; return; }
-  if(!pin||pin.length<4){ errEl.textContent='El PIN debe tener al menos 4 dígitos.'; return; }
-  if(pin!==pin2){ errEl.textContent='Los PINs no coinciden.'; return; }
-  if(!/^\d+$/.test(pin)){ errEl.textContent='El PIN solo puede tener números.'; return; }
+  if(!pin||pin.length<6){ errEl.textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
+  if(pin!==pin2){ errEl.textContent='Las contraseñas no coinciden.'; return; }
   try{
     const {token,cliente}=await apiPost('/api/auth/register',{nombre,pin,telefono:tel,correo,direccion:dir,empresa:bsEmpresa()});
     guardarSesionToken(token,'cliente',cliente.nombre);
@@ -184,7 +183,7 @@ async function submitLoginT(){
     guardarSesionToken(token,'cliente',cliente.nombre);
     await bootstrapDB();               // recargar estado completo con sesión
     entrarComoCliente(cliente);
-  }catch(e){ if(errEl) errEl.textContent=e.message||'Nombre o PIN incorrecto.'; }
+  }catch(e){ if(errEl) errEl.textContent=e.message||'Nombre o contraseña incorrectos.'; }
 }
 
 function entrarComoCliente(cli){
@@ -713,7 +712,7 @@ function renderMisPedidos(){
   const el=$t('#t-mis-pedidos');
   if(!el) return;
   if(!clienteActivo){
-    el.innerHTML=`<div class="t-empty"><h3>Inicia sesión para ver tus pedidos</h3><p>Entra con tu nombre y PIN, o crea tu cuenta, para ver el seguimiento de tus compras.</p><button class="t-btn t-btn-primary" onclick="abrirLogin('cliente')">Iniciar sesión</button></div>`;
+    el.innerHTML=`<div class="t-empty"><h3>Inicia sesión para ver tus pedidos</h3><p>Entra con tu nombre y contraseña, o crea tu cuenta, para ver el seguimiento de tus compras.</p><button class="t-btn t-btn-primary" onclick="abrirLogin('cliente')">Iniciar sesión</button></div>`;
     return;
   }
   dbCargar();
@@ -871,7 +870,7 @@ function enviarMensajeCliente(){
 
 /* ── INICIALIZAR ── */
 document.addEventListener('DOMContentLoaded', async ()=>{
-  await bootstrapDB();
+  await bootstrapDB({checkEmpresa:true});
   /* Configurar marca */
   const nombre=DB.config.nombre||'Siwepe';
   const logo=DB.config.logo;
