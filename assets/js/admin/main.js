@@ -1245,10 +1245,12 @@ $('#cfg-banner-inp')?.addEventListener('change',e=>{
 });
 
 /* ── PERFIL PÚBLICO DE LA EMPRESA (tabla empresas, separada de DB.config) ── */
+let _miEmpresaSlug='';
 async function renderPerfilEmpresa(){
   const msg=$('#perfil-msg');
   try{
     const perfil = await apiGet('/api/empresas/mi');
+    _miEmpresaSlug = perfil.slug || _miEmpresaSlug;
     if($('#perfil-rubro'))        $('#perfil-rubro').value=perfil.rubro||'';
     if($('#perfil-telefono'))     $('#perfil-telefono').value=perfil.telefono||'';
     if($('#perfil-pais'))         $('#perfil-pais').value=perfil.pais||'';
@@ -1259,6 +1261,17 @@ async function renderPerfilEmpresa(){
     if(msg) msg.textContent='No se pudo cargar el perfil público (' + (e.message||'sin conexión') + ').';
   }
 }
+
+/* Abre el portal de cliente de MI tienda (no la tienda.html pelada, que no
+   sabe de qué negocio es y termina mandando al marketplace). */
+async function abrirPortalCliente(){
+  let slug=_miEmpresaSlug;
+  if(!slug){
+    try{ const perfil=await apiGet('/api/empresas/mi'); slug=perfil.slug||''; _miEmpresaSlug=slug; }catch(e){}
+  }
+  window.open('tienda.html'+(slug?('?e='+encodeURIComponent(slug)):''), '_blank');
+}
+window.abrirPortalCliente=abrirPortalCliente;
 
 async function guardarPerfilEmpresa(){
   const msg=$('#perfil-msg');
