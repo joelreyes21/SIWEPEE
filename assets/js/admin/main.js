@@ -1383,7 +1383,18 @@ function iniciarPollAdmin(){
 
 /* Carga el estado y muestra el dashboard (llamado con sesión ya válida) */
 async function iniciarPanelAdmin(){
-  await bootstrapDB();
+  try{
+    await bootstrapDB();
+  }catch(e){
+    // El token no sirve para ningún negocio (vencido, revocado, o es una
+    // cuenta sin empresa asociada como el admin de plataforma). No hay un
+    // "panel general" al que entrar con esa cuenta — se vuelve al login.
+    mostrarPanelLogin();
+    const lp=$('#login-page'); if(lp) lp.style.display='flex';
+    const ap=$('#admin-app'); if(ap) ap.style.display='none';
+    const errEl=$('#login-error'); if(errEl) errEl.textContent='Tu sesión ya no es válida para ningún negocio. Iniciá sesión de nuevo.';
+    return;
+  }
   try{ localStorage.setItem('bs_sesion_admin','1'); }catch(e){}
   const lp=$('#login-page'); if(lp) lp.style.display='none';
   const ap=$('#admin-app'); if(ap) ap.style.display='grid';

@@ -870,7 +870,13 @@ function enviarMensajeCliente(){
 
 /* ── INICIALIZAR ── */
 document.addEventListener('DOMContentLoaded', async ()=>{
-  await bootstrapDB({checkEmpresa:true});
+  try{
+    await bootstrapDB({checkEmpresa:true});
+  }catch(e){
+    // El token guardado ya no sirve (vencido/revocado): bootstrapDB ya cerró
+    // la sesión localmente; se reintenta como invitada para esta tienda.
+    await bootstrapDB({checkEmpresa:true});
+  }
   /* Configurar marca */
   const nombre=DB.config.nombre||'Siwepe';
   const logo=DB.config.logo;

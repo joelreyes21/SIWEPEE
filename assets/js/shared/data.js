@@ -79,6 +79,18 @@ async function bootstrapDB(opts){
     }
     almacen.escribir(JSON.stringify(DB));
   }catch(e){
+    if(tok){
+      /* Con sesión, un fallo del backend (token inválido/vencido, cuenta sin
+         empresa asociada como el admin de plataforma, etc.) NO debe tapar el
+         error mostrando el respaldo local como si fuera el estado actual:
+         ese respaldo puede pertenecer a OTRA cuenta/tienda probada antes en
+         este mismo navegador. Se corta la sesión y se avisa a quien llamó. */
+      limpiarSesionToken();
+      try{ localStorage.removeItem('bs_sesion_cli'); localStorage.removeItem('bs_sesion_admin'); }catch(e2){}
+      DB = _esqueletoDB();
+      _migrar();
+      throw e;
+    }
     console.warn('Sin conexión al backend, usando datos locales:', e.message);
     const raw = almacen.leer();
     DB = raw ? JSON.parse(raw) : _esqueletoDB();
