@@ -73,21 +73,21 @@ button{font-family:inherit;cursor:pointer;}
 .path.descubrir .path-cta{background:#EAF2FB;color:#2C5488;}
 .path.descubrir .path-cta:hover{background:#E2EBF3;transform:translateX(3px);}
 
-/* seccion empresas */
+/* seccion productos */
 .section{padding:64px 0 40px;}
 .section-head{text-align:center;margin-bottom:34px;}
 .section-head h2{font-family:'Fraunces',serif;font-size:34px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px;}
 .section-head p{color:var(--text-soft);font-size:15px;}
-.empresas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
-.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s;cursor:pointer;}
-.emp-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
-.emp-cover{height:96px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));position:relative;}
-.emp-logo{position:absolute;left:20px;bottom:-24px;width:54px;height:54px;border-radius:15px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--rose);box-shadow:var(--shadow-sm);overflow:hidden;}
-.emp-logo img{width:100%;height:100%;object-fit:cover;}
-.emp-body{padding:34px 20px 20px;}
-.emp-body h4{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:4px;}
-.emp-body span{font-size:13px;color:var(--text-soft);}
-.emp-go{margin-top:14px;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--rose-dark);}
+.productos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s;cursor:pointer;display:flex;flex-direction:column;}
+.prod-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.prod-cover{height:150px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.prod-cover img{width:100%;height:100%;object-fit:cover;}
+.prod-cover span{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--rose);}
+.prod-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.prod-tienda{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--rose-dark);}
+.prod-body h4{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.3;}
+.prod-precio{margin-top:auto;font-size:15.5px;font-weight:700;color:var(--text-dark);}
 .empty-state{grid-column:1/-1;text-align:center;padding:56px 24px;color:var(--text-soft);}
 .empty-state .es-ic{font-size:44px;margin-bottom:12px;}
 .empty-state h3{font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:var(--text-mid);margin-bottom:8px;}
@@ -136,7 +136,7 @@ button{font-family:inherit;cursor:pointer;}
       <span class="brand-name">SIWEPE</span>
     </a>
     <div class="nav-links">
-      <button class="nav-btn ghost" onclick="document.getElementById('empresas').scrollIntoView()">Descubrir</button>
+      <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
   </div>
@@ -164,20 +164,20 @@ button{font-family:inherit;cursor:pointer;}
       <div class="path-ic">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
       </div>
-      <h3>Descubrir empresas</h3>
-      <p>Explora las tiendas de SIWEPE, mira sus productos y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
-      <button class="path-cta" onclick="document.getElementById('empresas').scrollIntoView()">Ver empresas →</button>
+      <h3>Descubrir productos</h3>
+      <p>Explora lo que venden las tiendas de SIWEPE y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
+      <button class="path-cta" onclick="document.getElementById('productos').scrollIntoView()">Ver productos →</button>
     </div>
   </section>
 
-  <!-- EMPRESAS -->
-  <section class="section" id="empresas">
+  <!-- PRODUCTOS -->
+  <section class="section" id="productos">
     <div class="section-head">
-      <h2>Empresas en SIWEPE</h2>
-      <p>Tiendas registradas en la plataforma</p>
+      <h2>Productos en SIWEPE</h2>
+      <p>Lo que están vendiendo las tiendas de la plataforma</p>
     </div>
-    <div class="empresas-grid" id="empresas-grid">
-      <div class="empty-state"><div class="es-ic"></div><h3>Cargando empresas…</h3></div>
+    <div class="productos-grid" id="productos-grid">
+      <div class="empty-state"><div class="es-ic"></div><h3>Cargando productos…</h3></div>
     </div>
   </section>
 </div>
@@ -385,37 +385,73 @@ document.getElementById('crear-ov').addEventListener('click', e=>{ if(e.target.i
 
 const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* ── Listar empresas ── */
-async function cargarEmpresas(){
-  const grid = document.getElementById('empresas-grid');
+/* ── Listar productos de todas las tiendas activas ── */
+function fmtPrecio(moneda, val){
+  return `${moneda||'L'} ${Number(val||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+}
+
+async function cargarProductos(){
+  const grid = document.getElementById('productos-grid');
+  let empresas = [];
   try{
     const r = await fetch(API_BASE + '/api/empresas');
     if(!r.ok) throw new Error('estado ' + r.status);
-    const empresas = await r.json();
-    if(!Array.isArray(empresas) || !empresas.length){ vacio(grid); return; }
-    grid.innerHTML = empresas.map(e=>{
-      const ini = (e.nombre||'S')[0].toUpperCase();
-      const logo = e.logo ? `<img src="${e.logo}" alt="">` : ini;
-      const url = 'tienda.html?e=' + encodeURIComponent(e.slug || e.id);
-      return `<a class="emp-card" href="${url}">
-        <div class="emp-cover"><div class="emp-logo">${logo}</div></div>
-        <div class="emp-body">
-          <h4>${esc(e.nombre||'Empresa')}</h4>
-          <span>${esc(e.rubro || e.descripcion || 'Tienda en SIWEPE')}</span>
-          <div class="emp-go">Entrar a la tienda →</div>
-        </div>
-      </a>`;
-    }).join('');
-  }catch(err){
-    vacio(grid);
-  }
+    empresas = await r.json();
+  }catch(err){ empresas = []; }
+
+  if(!Array.isArray(empresas) || !empresas.length){ vacioEmpresas(grid); return; }
+
+  const resultados = await Promise.allSettled(
+    empresas.slice(0, 40).map(async e=>{
+      const slug = e.slug || e.id;
+      const r = await fetch(API_BASE + '/api/catalog?empresa=' + encodeURIComponent(slug));
+      if(!r.ok) throw new Error('catalogo ' + r.status);
+      const cat = await r.json();
+      const moneda = (cat.config && cat.config.moneda) || 'L';
+      const nombreTienda = (cat.config && cat.config.nombre) || e.nombre || 'Tienda';
+      return (cat.productos||[])
+        .filter(p=>p.estado==='activo')
+        .sort((a,b)=>(b.destacado?1:0)-(a.destacado?1:0))
+        .slice(0,6)
+        .map(p=>({ ...p, moneda, nombreTienda, slug }));
+    })
+  );
+
+  const productos = resultados
+    .filter(r=>r.status==='fulfilled')
+    .flatMap(r=>r.value)
+    .sort((a,b)=>(b.destacado?1:0)-(a.destacado?1:0));
+
+  if(!productos.length){ vacioProductos(grid); return; }
+
+  grid.innerHTML = productos.slice(0,24).map(p=>{
+    const ini = (p.nombre||'P')[0].toUpperCase();
+    const img = p.imagen ? `<img src="${p.imagen}" alt="">` : `<span>${ini}</span>`;
+    const url = 'tienda.html?e=' + encodeURIComponent(p.slug);
+    return `<a class="prod-card" href="${url}">
+      <div class="prod-cover">${img}</div>
+      <div class="prod-body">
+        <span class="prod-tienda">${esc(p.nombreTienda)}</span>
+        <h4>${esc(p.nombre||'Producto')}</h4>
+        <span class="prod-precio">${fmtPrecio(p.moneda, p.precio_venta)}</span>
+      </div>
+    </a>`;
+  }).join('');
 }
-function vacio(grid){
+
+function vacioEmpresas(grid){
   grid.innerHTML = `<div class="empty-state">
     <div class="es-ic"></div>
     <h3>Aún no hay empresas</h3>
     <p>Sé el primero en crear tu tienda en SIWEPE.</p>
     <button class="es-btn" onclick="abrirCrear()">Crear la primera empresa</button>
+  </div>`;
+}
+function vacioProductos(grid){
+  grid.innerHTML = `<div class="empty-state">
+    <div class="es-ic"></div>
+    <h3>Aún no hay productos publicados</h3>
+    <p>Las tiendas de SIWEPE todavía no cargan su catálogo.</p>
   </div>`;
 }
 
@@ -550,7 +586,7 @@ async function crearEmpresa(){
 }
 
 initPaises();
-cargarEmpresas();
+cargarProductos();
 
 /* Aviso al volver del enlace de verificación del correo */
 (function(){

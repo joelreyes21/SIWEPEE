@@ -41,15 +41,16 @@
 </defs></svg>
 
 <!-- ===== LOGIN ===== -->
-<div id="login-page" class="login-page">
+<div id="login-page" class="login-page" style="display:none">
   <div class="login-card">
     <div class="login-logo" id="login-logo">S</div>
     <h1>Panel Administrador</h1>
-    <p>Ingresa tu PIN para acceder al sistema</p>
-    <div class="lf-campo"><label>PIN de acceso</label><input type="password" id="login-pin" placeholder="••••" maxlength="8" inputmode="numeric" autocomplete="current-password"></div>
+    <p>Inicia sesión para acceder a tu tienda</p>
+    <div class="lf-campo"><label>Correo electrónico</label><input type="email" id="login-email" placeholder="admin@tuempresa.com" autocomplete="email"></div>
+    <div class="lf-campo"><label>Contraseña</label><input type="password" id="login-pass" placeholder="Ingresa tu contraseña" autocomplete="current-password"></div>
     <div class="login-error" id="login-error"></div>
     <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;padding:12px">Ingresar →</button>
-    <p class="login-hint">PIN por defecto: <strong>1234</strong> · Cámbialo en Configuración</p>
+    <p class="login-hint">¿No tenés cuenta? Registrá tu empresa desde <a href="index.html">SIWEPE</a>.</p>
   </div>
 </div>
 
@@ -331,6 +332,24 @@
             <div class="field" style="margin-bottom:20px"><label>PIN de administrador</label><input id="cfg-pin" type="password" maxlength="8" placeholder="Mínimo 4 dígitos"><small style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">Este PIN protege el acceso al panel admin</small></div>
             <button class="btn btn-primary" onclick="guardarConfig()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg> Guardar cambios</button>
             <p style="font-size:12px;color:var(--text-muted);margin-top:14px;line-height:1.5">Los datos se guardan en el navegador. Borrar el caché o historial restablecerá el sistema con datos de ejemplo.</p>
+          </div></div>
+          <div class="card config-full"><div class="card-header"><div><h3>Perfil de la empresa</h3><p>Así te ven en el listado público de SIWEPE (siwepe.shop). El nombre y el logo se editan arriba, en "Datos del negocio".</p></div></div><div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div class="field"><label>Rubro / categoría</label>
+                <select id="perfil-rubro">
+                  <option value="">Selecciona…</option>
+                  <option>Ropa y moda</option><option>Comida y bebidas</option><option>Belleza y cuidado</option>
+                  <option>Tecnología</option><option>Hogar</option><option>Salud</option>
+                  <option>Servicios</option><option>Otro</option>
+                </select>
+              </div>
+              <div class="field"><label>Teléfono / WhatsApp</label><input id="perfil-telefono" type="text" placeholder="+504 9999-9999"></div>
+              <div class="field"><label>País</label><input id="perfil-pais" type="text" placeholder="Honduras"></div>
+              <div class="field"><label>Ciudad</label><input id="perfil-ciudad" type="text" placeholder="Tegucigalpa"></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Descripción corta</label><textarea id="perfil-descripcion" maxlength="200" placeholder="¿Qué vende tu empresa?"></textarea></div>
+            <button class="btn btn-primary" style="margin-top:14px" onclick="guardarPerfilEmpresa()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg> Guardar perfil</button>
+            <p class="field-hint" id="perfil-msg" style="font-size:12px;color:var(--text-muted);margin-top:10px"></p>
           </div></div>
           <div class="card config-full"><div class="card-header"><div><h3>Pago por transferencia</h3><p>Estos datos se muestran al cliente en el carrito para que haga su transferencia</p></div></div><div class="card-body">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">

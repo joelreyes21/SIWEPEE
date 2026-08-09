@@ -146,23 +146,29 @@ function openSidebar(){ $('#sidebar').classList.add('open'); $('#mobile-veil').c
 function closeSidebar(){ $('#sidebar').classList.remove('open'); $('#mobile-veil').classList.remove('show'); }
 
 /* ── LOGIN ── */
-function submitLogin(){
-  const pin = $('#login-pin').value.trim();
-  if(pin !== String(DB.config.pinAdmin)){
-    $('#login-error').textContent = 'PIN incorrecto.';
-    $('#login-pin').value=''; return;
+async function submitLoginAdmin(){
+  const email=($('#login-email')?.value||'').trim().toLowerCase();
+  const pass=($('#login-pass')?.value||'').trim();
+  const errEl=$('#login-error');
+  if(!email||!pass){ if(errEl) errEl.textContent='Completa correo y contraseña.'; return; }
+  const btn=$('#btn-login'); if(btn){ btn.disabled=true; btn.textContent='Ingresando…'; }
+  try{
+    const {token,user}=await apiPost('/api/auth/login',{email,password:pass});
+    if(user.role!=='admin' && user.role!=='proveedor'){ throw new Error('Esta cuenta no tiene acceso al panel.'); }
+    guardarSesionToken(token, user.role, user.nombre);
+    if(errEl) errEl.textContent='';
+    await iniciarPanelAdmin();
+  }catch(e){
+    if(errEl) errEl.textContent=e.message||'Correo o contraseña incorrectos.';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Ingresar →'; }
   }
-  try{ localStorage.setItem('bs_sesion_admin','1'); }catch(e){}
-  $('#login-page').style.display = 'none';
-  $('#admin-app').style.display  = 'grid';
-  renderAll();
-  goTo('dashboard');
 }
 
 function cerrarSesionAdmin(){
   try{ localStorage.removeItem('bs_sesion_admin'); }catch(e){}
   limpiarSesionToken();
-  window.location.href='tienda.html';
+  window.location.reload();
 }
 window.cerrarSesionAdmin=cerrarSesionAdmin;
 
@@ -1126,6 +1132,7 @@ function renderConfig(){
   if($('#cfg-pago-tipo'))    $('#cfg-pago-tipo').value=pago.tipo||'';
   if($('#cfg-pago-nota'))    $('#cfg-pago-nota').value=pago.nota||'';
   renderBanners();
+  renderPerfilEmpresa();
 }
 
 function guardarPago(){
@@ -1171,6 +1178,44 @@ $('#cfg-banner-inp')?.addEventListener('change',e=>{
     else { DB.config.banners.pop(); }
   }).catch(err=>toast(errImagen(err),'error'));
 });
+
+/* ── PERFIL PÚBLICO DE LA EMPRESA (tabla empresas, separada de DB.config) ── */
+async function renderPerfilEmpresa(){
+  const msg=$('#perfil-msg');
+  try{
+    const perfil = await apiGet('/api/empresas/mi');
+    if($('#perfil-rubro'))        $('#perfil-rubro').value=perfil.rubro||'';
+    if($('#perfil-telefono'))     $('#perfil-telefono').value=perfil.telefono||'';
+    if($('#perfil-pais'))         $('#perfil-pais').value=perfil.pais||'';
+    if($('#perfil-ciudad'))       $('#perfil-ciudad').value=perfil.ciudad||'';
+    if($('#perfil-descripcion'))  $('#perfil-descripcion').value=perfil.descripcion||'';
+    if(msg) msg.textContent='';
+  }catch(e){
+    if(msg) msg.textContent='No se pudo cargar el perfil público (' + (e.message||'sin conexión') + ').';
+  }
+}
+
+async function guardarPerfilEmpresa(){
+  const msg=$('#perfil-msg');
+  const datos={
+    nombre: DB.config.nombre,
+    logo: DB.config.logo||'',
+    rubro: ($('#perfil-rubro')?.value||'').trim(),
+    telefono: ($('#perfil-telefono')?.value||'').trim(),
+    pais: ($('#perfil-pais')?.value||'').trim(),
+    ciudad: ($('#perfil-ciudad')?.value||'').trim(),
+    descripcion: ($('#perfil-descripcion')?.value||'').trim()
+  };
+  try{
+    await apiPut('/api/empresas/mi', datos);
+    if(msg) msg.textContent='Perfil actualizado — ya se ve así en siwepe.shop.';
+    toast('Perfil de la empresa actualizado');
+  }catch(e){
+    if(msg) msg.textContent=e.message||'No se pudo guardar el perfil.';
+    toast('No se pudo guardar el perfil','error');
+  }
+}
+window.guardarPerfilEmpresa=guardarPerfilEmpresa;
 
 function guardarConfig(){
   const nombre=$('#cfg-nombre').value.trim();
@@ -1274,28 +1319,32 @@ function iniciarPollAdmin(){
   }, 4000);
 }
 
-/* ── INICIALIZAR ── */
-document.addEventListener('DOMContentLoaded', async ()=>{
-  /* Control de acceso: se requiere sesión (token) de admin o proveedor.
-     El login se hace en la tienda (pestaña Admin). Sin token → a la tienda. */
-  const token=(()=>{ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } })();
-  const role=(()=>{ try{ return localStorage.getItem('bs_role')||''; }catch(e){ return ''; } })();
-  if(!token || (role!=='admin' && role!=='proveedor')){
-    window.location.href='tienda.html';
-    return;
-  }
-
+/* Carga el estado y muestra el dashboard (llamado con sesión ya válida) */
+async function iniciarPanelAdmin(){
   await bootstrapDB();
-  sessionStorage.removeItem('sw_admin_auth');
   try{ localStorage.setItem('bs_sesion_admin','1'); }catch(e){}
   const lp=$('#login-page'); if(lp) lp.style.display='none';
   const ap=$('#admin-app'); if(ap) ap.style.display='grid';
   renderAll(); goTo('dashboard');
   iniciarPollAdmin();
+}
 
+/* ── INICIALIZAR ── */
+document.addEventListener('DOMContentLoaded', async ()=>{
   /* Login */
-  $('#btn-login')?.addEventListener('click',submitLogin);
-  $('#login-pin')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitLogin(); });
+  $('#btn-login')?.addEventListener('click',submitLoginAdmin);
+  $('#login-pass')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitLoginAdmin(); });
+
+  /* Control de acceso: se requiere sesión (token) de admin o proveedor.
+     Sin token válido se muestra el login de este mismo panel. */
+  const token=(()=>{ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } })();
+  const role=(()=>{ try{ return localStorage.getItem('bs_role')||''; }catch(e){ return ''; } })();
+  if(!token || (role!=='admin' && role!=='proveedor')){
+    const lp=$('#login-page'); if(lp) lp.style.display='flex';
+    return;
+  }
+
+  await iniciarPanelAdmin();
 
   /* Modal */
   $('#modal-close')?.addEventListener('click',closeModal);

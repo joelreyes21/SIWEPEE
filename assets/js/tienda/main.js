@@ -89,7 +89,7 @@ function swTab(name){
   if(tab) tab.classList.add('active');
   if(panel) panel.classList.add('active');
   // clear errors
-  ['sw-admin-error','t-reg-error','t-login-error'].forEach(id=>{
+  ['t-reg-error','t-login-error'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.textContent='';
   });
 }
@@ -150,22 +150,6 @@ function cerrarLogin(){
   intentoCheckout=false;
 }
 window.abrirLogin=abrirLogin; window.cerrarLogin=cerrarLogin;
-
-/* ── ADMIN LOGIN ── */
-const ADMIN_CREDENTIALS={ email:'admin@siwepe.com', password:'admin1234' };
-
-async function swLoginAdmin(){
-  const email=(document.getElementById('sw-admin-email')?.value||'').trim().toLowerCase();
-  const pass=(document.getElementById('sw-admin-pass')?.value||'').trim();
-  const errEl=document.getElementById('sw-admin-error');
-  if(!email||!pass){ errEl.textContent='Completa ambos campos.'; return; }
-  try{
-    const {token,user}=await apiPost('/api/auth/login',{email,password:pass});
-    guardarSesionToken(token, user.role, user.nombre);
-    sessionStorage.setItem('sw_admin_auth','1');
-    window.location.href='admin.html';
-  }catch(e){ errEl.textContent=e.message||'Correo o contraseña incorrectos.'; }
-}
 
 /* ── REGISTRO ── */
 async function submitRegistro(){
@@ -864,7 +848,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.title=`${nombre} · Tienda`;
 
   /* Enter en campos de login */
-  document.getElementById('sw-admin-pass')?.addEventListener('keydown',e=>{ if(e.key==='Enter') swLoginAdmin(); });
   document.getElementById('t-login-pin')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitLoginT(); });
   document.getElementById('t-reg-pin2')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitRegistro(); });
 
