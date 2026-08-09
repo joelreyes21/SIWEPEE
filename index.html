@@ -47,6 +47,8 @@ button{font-family:inherit;cursor:pointer;}
 .nav-btn.ghost:hover{color:var(--rose-dark);background:var(--rose-light);}
 .nav-btn.solid{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.32);}
 .nav-btn.solid:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.nav-btn.subtle{padding:8px 6px;font-weight:500;font-size:13px;color:var(--text-soft);}
+.nav-btn.subtle:hover{color:var(--rose-dark);background:none;}
 
 /* hero */
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 28px;}
@@ -137,7 +139,7 @@ button{font-family:inherit;cursor:pointer;}
     </a>
     <div class="nav-links">
       <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
-      <a class="nav-btn ghost" href="admin.html">Iniciar sesión</a>
+      <a class="nav-btn subtle" href="admin.html" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
   </div>

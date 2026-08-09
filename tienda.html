@@ -304,7 +304,7 @@
         </button>
         <button class="t-login-header-btn" id="t-btn-login-header" onclick="abrirLogin()" style="display:none">Iniciar sesión</button>
         <div class="t-sesion-usuario" id="t-sesion-usuario" style="display:none">
-          <div class="t-user-pill">
+          <div class="t-user-pill" onclick="abrirPerfilCliente()" title="Mi perfil">
             <div class="t-user-av" id="t-user-av">S</div>
             <span class="t-user-name" id="t-user-nombre">Sofía</span>
           </div>
@@ -479,6 +479,36 @@
   </div>
 </div>
 
+<!-- MI PERFIL -->
+<div class="t-perfil-overlay" id="t-perfil-overlay">
+  <div class="t-perfil-panel">
+    <div class="t-perfil-head">
+      <h3>Mi perfil</h3>
+      <button class="t-perfil-close" id="t-perfil-close">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sw-field">
+      <label>Nombre completo</label>
+      <div class="sw-input-wrap"><input type="text" id="perfil-cli-nombre"></div>
+    </div>
+    <div class="sw-field">
+      <label>Teléfono</label>
+      <div class="sw-input-wrap"><input type="tel" id="perfil-cli-telefono"></div>
+    </div>
+    <div class="sw-field">
+      <label>Correo</label>
+      <div class="sw-input-wrap"><input type="email" id="perfil-cli-correo"></div>
+    </div>
+    <div class="sw-field">
+      <label>Dirección</label>
+      <div class="sw-input-wrap"><input type="text" id="perfil-cli-direccion"></div>
+    </div>
+    <div class="sw-error" id="perfil-cli-error"></div>
+    <button class="sw-btn-main" id="btn-guardar-perfil-cli">Guardar cambios</button>
+  </div>
+</div>
+
 <!-- TOASTS -->
 <div class="t-toasts" id="t-toasts"></div>
 
@@ -487,6 +517,13 @@
 .inicio-cat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);}
 .inicio-cat-card h4{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:var(--text-dark);margin-bottom:5px;letter-spacing:-.01em;}
 .inicio-cat-card span{font-size:12.5px;color:var(--text-soft);}
+.t-user-pill{cursor:pointer;}
+.t-perfil-overlay{position:fixed;inset:0;z-index:250;background:rgba(33,48,61,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.t-perfil-overlay.open{display:flex;}
+.t-perfil-panel{background:var(--surface);border-radius:20px;width:100%;max-width:380px;padding:26px 24px;box-shadow:0 20px 56px rgba(0,0,0,.18);}
+.t-perfil-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.t-perfil-head h3{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--text-dark);}
+.t-perfil-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--surface-2,#F5F5F7);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-mid);flex-shrink:0;}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>

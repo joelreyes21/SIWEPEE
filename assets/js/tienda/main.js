@@ -208,6 +208,40 @@ function entrarComoCliente(cli){
   }
 }
 
+/* ── MI PERFIL (cliente) ── */
+function abrirPerfilCliente(){
+  if(!clienteActivo) return;
+  const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('perfil-cli-nombre', clienteActivo.nombre);
+  set('perfil-cli-telefono', clienteActivo.telefono);
+  set('perfil-cli-correo', clienteActivo.correo);
+  set('perfil-cli-direccion', clienteActivo.direccion);
+  const errEl=document.getElementById('perfil-cli-error'); if(errEl) errEl.textContent='';
+  document.getElementById('t-perfil-overlay')?.classList.add('open');
+}
+function cerrarPerfilCliente(){
+  document.getElementById('t-perfil-overlay')?.classList.remove('open');
+}
+async function guardarPerfilCliente(){
+  const nombre=(document.getElementById('perfil-cli-nombre')?.value||'').trim();
+  const telefono=(document.getElementById('perfil-cli-telefono')?.value||'').trim();
+  const correo=(document.getElementById('perfil-cli-correo')?.value||'').trim();
+  const direccion=(document.getElementById('perfil-cli-direccion')?.value||'').trim();
+  const errEl=document.getElementById('perfil-cli-error');
+  if(!nombre){ if(errEl) errEl.textContent='El nombre es obligatorio.'; return; }
+  try{
+    await apiPut('/api/clientes/mi',{nombre,telefono,correo,direccion});
+    clienteActivo.nombre=nombre; clienteActivo.telefono=telefono; clienteActivo.correo=correo; clienteActivo.direccion=direccion;
+    actualizarHeaderSesion();
+    if(errEl) errEl.textContent='';
+    toastT('Perfil actualizado');
+    cerrarPerfilCliente();
+  }catch(e){ if(errEl) errEl.textContent=e.message||'No se pudo guardar el perfil.'; }
+}
+window.abrirPerfilCliente=abrirPerfilCliente;
+window.cerrarPerfilCliente=cerrarPerfilCliente;
+window.guardarPerfilCliente=guardarPerfilCliente;
+
 function salirTienda(){
   try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
   limpiarSesionToken();
@@ -857,6 +891,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $t('#t-cart-close')?.addEventListener('click',cerrarCarrito);
   $t('#t-cart-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-cart-overlay') cerrarCarrito(); });
   $t('#t-detail-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-detail-overlay') cerrarDetalle(); });
+  $t('#t-perfil-close')?.addEventListener('click',cerrarPerfilCliente);
+  $t('#t-perfil-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-perfil-overlay') cerrarPerfilCliente(); });
+  $t('#btn-guardar-perfil-cli')?.addEventListener('click',guardarPerfilCliente);
   $t('#btn-confirmar-ped')?.addEventListener('click',confirmarPedidoT);
   $t('#t-comprobante-inp')?.addEventListener('change',onComprobanteSeleccion);
 
@@ -874,7 +911,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $t('#btn-chat-send')?.addEventListener('click',enviarMensajeCliente);
   $t('#t-chat-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarMensajeCliente(); } });
 
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ cerrarCarrito(); cerrarDetalle(); cerrarChat(); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ cerrarCarrito(); cerrarDetalle(); cerrarChat(); cerrarPerfilCliente(); } });
 
   iniciarFondoAnimado();
 
