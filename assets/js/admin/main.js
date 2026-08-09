@@ -165,6 +165,62 @@ async function submitLoginAdmin(){
   }
 }
 
+/* ── OLVIDÉ MI CONTRASEÑA ── */
+function mostrarPanelLogin(){
+  $('#login-panel-login').style.display='';
+  $('#login-panel-olvide').style.display='none';
+  $('#login-panel-reset').style.display='none';
+}
+function mostrarPanelOlvide(){
+  $('#login-panel-login').style.display='none';
+  $('#login-panel-olvide').style.display='';
+  $('#login-panel-reset').style.display='none';
+  const err=$('#olvide-error'); if(err) err.textContent='';
+  const ok=$('#olvide-ok'); if(ok) ok.style.display='none';
+}
+function mostrarPanelReset(){
+  $('#login-panel-login').style.display='none';
+  $('#login-panel-olvide').style.display='none';
+  $('#login-panel-reset').style.display='';
+}
+
+async function submitOlvide(){
+  const correo=($('#olvide-email')?.value||'').trim().toLowerCase();
+  const errEl=$('#olvide-error'); const okEl=$('#olvide-ok');
+  if(errEl) errEl.textContent='';
+  if(okEl) okEl.style.display='none';
+  if(!correo){ if(errEl) errEl.textContent='Escribí tu correo.'; return; }
+  const btn=$('#btn-olvide'); if(btn){ btn.disabled=true; btn.textContent='Enviando…'; }
+  try{
+    await apiPost('/api/auth/olvide',{correo});
+    if(okEl){ okEl.textContent='Si ese correo tiene una cuenta, te llegará un enlace para elegir una nueva contraseña. Revisá también la carpeta de spam.'; okEl.style.display='block'; }
+  }catch(e){
+    if(errEl) errEl.textContent=e.message||'No se pudo enviar el enlace.';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Enviar enlace'; }
+  }
+}
+
+async function submitReset(){
+  const pass=($('#reset-pass')?.value||'').trim();
+  const pass2=($('#reset-pass2')?.value||'').trim();
+  const errEl=$('#reset-error'); if(errEl) errEl.textContent='';
+  if(!pass||pass.length<8){ if(errEl) errEl.textContent='La contraseña debe tener al menos 8 caracteres.'; return; }
+  if(pass!==pass2){ if(errEl) errEl.textContent='Las contraseñas no coinciden.'; return; }
+  const token=new URLSearchParams(location.search).get('reset');
+  const btn=$('#btn-reset'); if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
+  try{
+    await apiPost('/api/auth/reset',{token,password:pass});
+    history.replaceState({}, '', 'admin.html');
+    mostrarPanelLogin();
+    const errLogin=$('#login-error'); if(errLogin) errLogin.textContent='Contraseña actualizada — ya podés iniciar sesión.';
+  }catch(e){
+    if(errEl) errEl.textContent=e.message||'No se pudo actualizar la contraseña. Pedí un enlace nuevo.';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Guardar contraseña'; }
+  }
+}
+
 function cerrarSesionAdmin(){
   try{ localStorage.removeItem('bs_sesion_admin'); }catch(e){}
   limpiarSesionToken();
@@ -1340,6 +1396,19 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   /* Login */
   $('#btn-login')?.addEventListener('click',submitLoginAdmin);
   $('#login-pass')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitLoginAdmin(); });
+  $('#btn-mostrar-olvide')?.addEventListener('click',mostrarPanelOlvide);
+  $('#btn-volver-login')?.addEventListener('click',mostrarPanelLogin);
+  $('#btn-olvide')?.addEventListener('click',submitOlvide);
+  $('#olvide-email')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitOlvide(); });
+  $('#btn-reset')?.addEventListener('click',submitReset);
+  $('#reset-pass2')?.addEventListener('keydown',e=>{ if(e.key==='Enter') submitReset(); });
+
+  /* Enlace de recuperación de contraseña (?reset=token en la URL, del correo) */
+  if(new URLSearchParams(location.search).get('reset')){
+    mostrarPanelReset();
+    const lp=$('#login-page'); if(lp) lp.style.display='flex';
+    return;
+  }
 
   /* Control de acceso: se requiere sesión (token) de admin o proveedor.
      Sin token válido se muestra el login de este mismo panel. */

@@ -41,16 +41,44 @@
 </defs></svg>
 
 <!-- ===== LOGIN ===== -->
+<style>.link-btn{background:none;border:none;padding:0;color:var(--accent);font-weight:600;font-size:inherit;cursor:pointer;font-family:inherit;}.link-btn:hover{text-decoration:underline;}</style>
 <div id="login-page" class="login-page" style="display:none">
   <div class="login-card">
     <div class="login-logo" id="login-logo">S</div>
-    <h1>Panel Administrador</h1>
-    <p>Inicia sesión para acceder a tu tienda</p>
-    <div class="lf-campo"><label>Correo electrónico</label><input type="email" id="login-email" placeholder="admin@tuempresa.com" autocomplete="email"></div>
-    <div class="lf-campo"><label>Contraseña</label><input type="password" id="login-pass" placeholder="Ingresa tu contraseña" autocomplete="current-password"></div>
-    <div class="login-error" id="login-error"></div>
-    <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;padding:12px">Ingresar →</button>
-    <p class="login-hint">¿No tenés cuenta? Registrá tu empresa desde <a href="index.html">SIWEPE</a>.</p>
+
+    <!-- INICIAR SESIÓN -->
+    <div id="login-panel-login">
+      <h1>Panel Administrador</h1>
+      <p>Inicia sesión para acceder a tu tienda</p>
+      <div class="lf-campo"><label>Correo electrónico</label><input type="email" id="login-email" placeholder="admin@tuempresa.com" autocomplete="email"></div>
+      <div class="lf-campo"><label>Contraseña</label><input type="password" id="login-pass" placeholder="Ingresa tu contraseña" autocomplete="current-password"></div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;padding:12px">Ingresar →</button>
+      <p class="login-hint"><button type="button" class="link-btn" id="btn-mostrar-olvide">¿Olvidaste tu contraseña?</button></p>
+      <p class="login-hint">¿No tenés cuenta? Registrá tu empresa desde <a href="index.html">SIWEPE</a>.</p>
+    </div>
+
+    <!-- OLVIDÉ MI CONTRASEÑA -->
+    <div id="login-panel-olvide" style="display:none">
+      <h1>Recuperar contraseña</h1>
+      <p>Te mandamos un enlace a tu correo para elegir una nueva</p>
+      <div class="lf-campo"><label>Correo electrónico</label><input type="email" id="olvide-email" placeholder="admin@tuempresa.com" autocomplete="email"></div>
+      <div class="login-error" id="olvide-error"></div>
+      <div class="login-hint" id="olvide-ok" style="display:none;color:#2C7A4E;margin-bottom:14px"></div>
+      <button class="btn btn-primary" id="btn-olvide" style="width:100%;justify-content:center;padding:12px">Enviar enlace</button>
+      <p class="login-hint"><button type="button" class="link-btn" id="btn-volver-login">Volver a iniciar sesión</button></p>
+    </div>
+
+    <!-- ELEGIR NUEVA CONTRASEÑA (llega desde el correo, ?reset=token) -->
+    <div id="login-panel-reset" style="display:none">
+      <h1>Elegí tu nueva contraseña</h1>
+      <p>Escribila dos veces para confirmar</p>
+      <div class="lf-campo"><label>Nueva contraseña</label><input type="password" id="reset-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
+      <div class="lf-campo"><label>Confirmar contraseña</label><input type="password" id="reset-pass2" placeholder="Repetila" autocomplete="new-password"></div>
+      <div class="login-error" id="reset-error"></div>
+      <button class="btn btn-primary" id="btn-reset" style="width:100%;justify-content:center;padding:12px">Guardar contraseña</button>
+    </div>
+
   </div>
 </div>
 
