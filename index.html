@@ -139,7 +139,7 @@ button{font-family:inherit;cursor:pointer;}
     </a>
     <div class="nav-links">
       <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
-      <a class="nav-btn subtle" href="admin.html" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
+      <a class="nav-btn subtle" href="admin.html?login=1" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
   </div>
@@ -599,7 +599,7 @@ cargarProductos();
   b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);display:flex;align-items:center;gap:14px;';
   if(v==='ok'){
     b.style.background='#EAF6EE'; b.style.color='#2C7A4E';
-    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="admin.html" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
+    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="admin.html?login=1" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
   } else {
     b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.';
   }

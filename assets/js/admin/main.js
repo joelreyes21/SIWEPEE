@@ -1421,6 +1421,19 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return;
   }
 
+  /* "Iniciar sesión" desde index.html (?login=1): siempre debe llevar al
+     formulario de login, aunque quede una sesión vieja guardada en este
+     navegador (de otra tienda que se probó antes) — no continuar con esa
+     sesión en silencio, cerrar y pedir credenciales de nuevo. */
+  if(new URLSearchParams(location.search).get('login')){
+    limpiarSesionToken();
+    try{ localStorage.removeItem('bs_sesion_admin'); }catch(e){}
+    history.replaceState({}, '', 'admin.html');
+    mostrarPanelLogin();
+    const lp=$('#login-page'); if(lp) lp.style.display='flex';
+    return;
+  }
+
   /* Control de acceso: se requiere sesión (token) de admin o proveedor.
      Sin token válido se muestra el login de este mismo panel. */
   const token=(()=>{ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } })();
