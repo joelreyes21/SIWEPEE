@@ -870,6 +870,13 @@ function enviarMensajeCliente(){
 
 /* ── INICIALIZAR ── */
 document.addEventListener('DOMContentLoaded', async ()=>{
+  /* tienda.html siempre necesita saber de qué negocio es (?e=slug). Sin eso
+     no hay catálogo que mostrar ni tienda contra la cual loguearse — en vez
+     de mostrar una tienda vacía y genérica, se manda al marketplace a elegir. */
+  if(!bsEmpresa()){
+    window.location.href = 'index.html';
+    return;
+  }
   try{
     await bootstrapDB({checkEmpresa:true});
   }catch(e){
