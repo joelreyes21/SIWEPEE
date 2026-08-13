@@ -139,6 +139,7 @@ button{font-family:inherit;cursor:pointer;}
     </a>
     <div class="nav-links">
       <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
+      <button class="nav-btn ghost" id="nav-cuenta" onclick="abrirCuenta()">Ingresar</button>
       <a class="nav-btn subtle" href="admin.html?login=1" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
@@ -362,6 +363,11 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 </div>
 
+<!-- ===== MODAL CUENTA (login / registro / perfil global de SIWEPE) ===== -->
+<div class="modal-ov" id="cuenta-ov">
+  <div class="modal" id="cuenta-modal"><div id="cuenta-body"></div></div>
+</div>
+
 <script>
 /* Base del API: local vs Railway (mismo criterio que la tienda) */
 const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
@@ -387,6 +393,146 @@ function cerrarCrear(){ document.getElementById('crear-ov').classList.remove('op
 document.getElementById('crear-ov').addEventListener('click', e=>{ if(e.target.id==='crear-ov') cerrarCrear(); });
 
 const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ══════════════ CUENTA GLOBAL DE SIWEPE (login / registro / perfil) ══════════════
+   La cuenta del cliente es una sola para TODA la plataforma (no una por tienda),
+   así que el acceso y el perfil viven también acá, en la página principal. */
+function _tok(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
+function sesionCliente(){
+  try{ const t=localStorage.getItem('bs_token'), r=localStorage.getItem('bs_role');
+    return (t && r==='cliente') ? { token:t, nombre: localStorage.getItem('bs_user')||'Mi cuenta' } : null; }catch(e){ return null; }
+}
+function refrescarNavCuenta(){
+  const btn=document.getElementById('nav-cuenta'); if(!btn) return;
+  const s=sesionCliente();
+  if(s){
+    const ini=((s.nombre||'?').trim()[0]||'?').toUpperCase();
+    const fn=(s.nombre||'').split(' ')[0]||'Mi cuenta';
+    btn.innerHTML=`<span style="display:inline-flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:var(--rose);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${esc(ini)}</span>${esc(fn)}</span>`;
+    btn.title='Mi cuenta';
+  } else { btn.textContent='Ingresar'; btn.title='Iniciar sesión o crear cuenta'; }
+}
+async function apiCuenta(ruta, method='GET', datos=null, auth=false){
+  const headers={'Content-Type':'application/json'};
+  if(auth){ const t=_tok(); if(t) headers['Authorization']='Bearer '+t; }
+  const r=await fetch(API_BASE+ruta,{method,headers,body:datos?JSON.stringify(datos):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error||('Error '+r.status));
+  return j;
+}
+function _ctaErr(id,msg,ok){ const e=document.getElementById(id); if(e){ e.textContent=msg||''; e.style.color= ok?'#3F9D6A':'#D46A6A'; } }
+function abrirCuenta(){ if(sesionCliente()) renderPerfilCuenta(); else renderLoginCuenta(); document.getElementById('cuenta-ov').classList.add('open'); }
+function cerrarCuenta(){ document.getElementById('cuenta-ov').classList.remove('open'); }
+document.getElementById('cuenta-ov').addEventListener('click', e=>{ if(e.target.id==='cuenta-ov') cerrarCuenta(); });
+
+function renderLoginCuenta(){
+  document.getElementById('cuenta-body').innerHTML=`
+    <div class="modal-head"><h3>Iniciar sesión</h3><p>Tu cuenta de SIWEPE sirve para todas las tiendas</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div style="padding:10px 28px 26px">
+      <div class="fld"><label>Correo</label><input type="email" id="cta-log-correo" placeholder="tucorreo@correo.com" autocomplete="email"></div>
+      <div class="fld"><label>Contraseña</label><input type="password" id="cta-log-pass" placeholder="Tu contraseña" autocomplete="current-password"></div>
+      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
+      <button class="wz-btn prim" style="width:100%" onclick="loginCuenta()">Entrar</button>
+      <p style="text-align:center;font-size:13px;color:var(--text-soft);margin-top:14px">¿No tenés cuenta? <a onclick="renderRegistroCuenta()" style="color:var(--rose-dark);font-weight:700;cursor:pointer">Crear cuenta</a></p>
+    </div>`;
+}
+function renderRegistroCuenta(){
+  document.getElementById('cuenta-body').innerHTML=`
+    <div class="modal-head"><h3>Crear cuenta</h3><p>Una sola cuenta para comprar en cualquier tienda</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div style="padding:10px 28px 26px">
+      <div class="fld"><label>Nombre completo</label><input type="text" id="cta-reg-nombre"></div>
+      <div class="fld"><label>Correo</label><input type="email" id="cta-reg-correo" placeholder="tucorreo@correo.com" autocomplete="email"></div>
+      <div class="fld"><label>Teléfono (opcional)</label><input type="tel" id="cta-reg-tel"></div>
+      <div class="fld"><label>Contraseña</label><input type="password" id="cta-reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
+      <div class="fld"><label>Confirmar contraseña</label><input type="password" id="cta-reg-pass2" autocomplete="new-password"></div>
+      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
+      <button class="wz-btn prim" style="width:100%" onclick="registroCuenta()">Crear cuenta</button>
+      <p style="text-align:center;font-size:13px;color:var(--text-soft);margin-top:14px">¿Ya tenés cuenta? <a onclick="renderLoginCuenta()" style="color:var(--rose-dark);font-weight:700;cursor:pointer">Iniciar sesión</a></p>
+    </div>`;
+}
+async function renderPerfilCuenta(){
+  let u={};
+  try{ u=await apiCuenta('/api/mi-cuenta','GET',null,true); }catch(e){ /* token vencido */ salirCuenta(true); renderLoginCuenta(); return; }
+  document.getElementById('cuenta-body').innerHTML=`
+    <div class="modal-head"><h3>Mi cuenta</h3><p>Tu perfil de SIWEPE</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div style="padding:10px 28px 26px">
+      <div class="fld"><label>Nombre</label><input type="text" id="cta-p-nombre" value="${esc(u.nombre||'')}"></div>
+      <div class="fld"><label>Correo (con este iniciás sesión)</label><input type="email" id="cta-p-correo" value="${esc(u.email||'')}"></div>
+      <div class="fld"><label>Teléfono</label><input type="tel" id="cta-p-tel" value="${esc(u.telefono||'')}"></div>
+      <div class="fld"><label>WhatsApp</label><input type="tel" id="cta-p-wa" value="${esc(u.whatsapp||'')}"></div>
+      <div class="fld"><label>Dirección</label><input type="text" id="cta-p-dir" value="${esc(u.direccion||'')}"></div>
+      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
+      <button class="wz-btn prim" style="width:100%" onclick="guardarCuenta()">Guardar cambios</button>
+      <div style="border-top:1px solid var(--border);margin:22px 0 12px"></div>
+      <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:2px">Cambiar contraseña</div>
+      <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px">Dejá esto en blanco si no querés cambiarla.</p>
+      <div class="fld"><label>Contraseña actual</label><input type="password" id="cta-p-pa" autocomplete="current-password"></div>
+      <div class="fld"><label>Nueva contraseña</label><input type="password" id="cta-p-pn" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
+      <div class="fld"><label>Confirmar nueva</label><input type="password" id="cta-p-pc" autocomplete="new-password"></div>
+      <div id="cta-perr" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
+      <button class="wz-btn sec" style="width:100%" onclick="cambiarPassCuenta()">Cambiar contraseña</button>
+      <p style="text-align:center;margin-top:16px"><a onclick="salirCuenta()" style="color:var(--text-soft);font-size:13px;cursor:pointer;font-weight:600">Cerrar sesión</a></p>
+    </div>`;
+}
+async function loginCuenta(){
+  const email=(document.getElementById('cta-log-correo')?.value||'').trim();
+  const password=document.getElementById('cta-log-pass')?.value||'';
+  if(!email||!password){ _ctaErr('cta-err','Escribí tu correo y contraseña.'); return; }
+  try{
+    const {token,user}=await apiCuenta('/api/auth/login','POST',{email,password});
+    if(user.role!=='cliente'){ _ctaErr('cta-err','Esa cuenta es de un negocio. Ingresá desde "¿Tenés tienda?".'); return; }
+    localStorage.setItem('bs_token',token); localStorage.setItem('bs_role','cliente'); localStorage.setItem('bs_user',user.nombre||'');
+    refrescarNavCuenta(); renderPerfilCuenta();
+  }catch(e){ _ctaErr('cta-err', e.message||'Correo o contraseña incorrectos.'); }
+}
+async function registroCuenta(){
+  const nombre=(document.getElementById('cta-reg-nombre')?.value||'').trim();
+  const correo=(document.getElementById('cta-reg-correo')?.value||'').trim();
+  const telefono=(document.getElementById('cta-reg-tel')?.value||'').trim();
+  const password=document.getElementById('cta-reg-pass')?.value||'';
+  const password2=document.getElementById('cta-reg-pass2')?.value||'';
+  if(!nombre){ _ctaErr('cta-err','El nombre es obligatorio.'); return; }
+  if(!correo){ _ctaErr('cta-err','El correo es obligatorio.'); return; }
+  if(password.length<8){ _ctaErr('cta-err','La contraseña debe tener al menos 8 caracteres.'); return; }
+  if(password!==password2){ _ctaErr('cta-err','Las contraseñas no coinciden.'); return; }
+  try{
+    const {token,user}=await apiCuenta('/api/auth/register','POST',{nombre,correo,password,telefono});
+    localStorage.setItem('bs_token',token); localStorage.setItem('bs_role','cliente'); localStorage.setItem('bs_user',user.nombre||'');
+    refrescarNavCuenta(); renderPerfilCuenta();
+  }catch(e){ _ctaErr('cta-err', e.message||'No se pudo crear la cuenta.'); }
+}
+async function guardarCuenta(){
+  const nombre=(document.getElementById('cta-p-nombre')?.value||'').trim();
+  const correo=(document.getElementById('cta-p-correo')?.value||'').trim();
+  const telefono=(document.getElementById('cta-p-tel')?.value||'').trim();
+  const whatsapp=(document.getElementById('cta-p-wa')?.value||'').trim();
+  const direccion=(document.getElementById('cta-p-dir')?.value||'').trim();
+  if(!nombre){ _ctaErr('cta-err','El nombre es obligatorio.'); return; }
+  try{
+    await apiCuenta('/api/mi-cuenta','PUT',{nombre,correo,telefono,whatsapp,direccion},true);
+    localStorage.setItem('bs_user',nombre); refrescarNavCuenta();
+    _ctaErr('cta-err','Cambios guardados.',true);
+  }catch(e){ _ctaErr('cta-err', e.message||'No se pudo guardar.'); }
+}
+async function cambiarPassCuenta(){
+  const actual=document.getElementById('cta-p-pa')?.value||'';
+  const nueva=document.getElementById('cta-p-pn')?.value||'';
+  const conf=document.getElementById('cta-p-pc')?.value||'';
+  if(!actual||!nueva){ _ctaErr('cta-perr','Completá la contraseña actual y la nueva.'); return; }
+  if(nueva.length<8){ _ctaErr('cta-perr','La nueva debe tener al menos 8 caracteres.'); return; }
+  if(nueva!==conf){ _ctaErr('cta-perr','Las contraseñas nuevas no coinciden.'); return; }
+  try{
+    await apiCuenta('/api/mi-cuenta/password','PUT',{actual,nueva},true);
+    ['cta-p-pa','cta-p-pn','cta-p-pc'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=''; });
+    _ctaErr('cta-perr','Contraseña actualizada.',true);
+  }catch(e){ _ctaErr('cta-perr', e.message||'No se pudo cambiar la contraseña.'); }
+}
+function salirCuenta(silencioso){
+  try{ localStorage.removeItem('bs_token'); localStorage.removeItem('bs_role'); localStorage.removeItem('bs_user'); }catch(e){}
+  refrescarNavCuenta();
+  if(!silencioso) renderLoginCuenta();
+}
+refrescarNavCuenta();
 
 /* ── Listar productos de todas las tiendas activas ── */
 function fmtPrecio(moneda, val){

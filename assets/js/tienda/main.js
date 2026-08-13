@@ -157,33 +157,36 @@ async function submitRegistro(){
   const tel=(document.getElementById('t-reg-tel')?.value||'').trim();
   const correo=(document.getElementById('t-reg-correo')?.value||'').trim();
   const dir=(document.getElementById('t-reg-dir')?.value||'').trim();
-  const pin=(document.getElementById('t-reg-pin')?.value||'').trim();
-  const pin2=(document.getElementById('t-reg-pin2')?.value||'').trim();
+  const password=(document.getElementById('t-reg-pin')?.value||'');
+  const password2=(document.getElementById('t-reg-pin2')?.value||'');
   const errEl=document.getElementById('t-reg-error');
   if(!nombre){ errEl.textContent='El nombre es obligatorio.'; return; }
-  if(!pin||pin.length<6){ errEl.textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
-  if(pin!==pin2){ errEl.textContent='Las contraseñas no coinciden.'; return; }
+  if(!correo){ errEl.textContent='El correo es obligatorio (con él iniciás sesión).'; return; }
+  if(!password||password.length<8){ errEl.textContent='La contraseña debe tener al menos 8 caracteres.'; return; }
+  if(password!==password2){ errEl.textContent='Las contraseñas no coinciden.'; return; }
   try{
-    const {token,cliente}=await apiPost('/api/auth/register',{nombre,pin,telefono:tel,correo,direccion:dir,empresa:bsEmpresa()});
-    guardarSesionToken(token,'cliente',cliente.nombre);
+    const {token,user}=await apiPost('/api/auth/register',{nombre,correo,password,telefono:tel,direccion:dir});
+    guardarSesionToken(token,'cliente',user.nombre);
     errEl.textContent='';
-    await bootstrapDB();               // recargar estado con el cliente nuevo
+    await bootstrapDB();               // recargar estado con la cuenta nueva
     toastT('¡Cuenta creada!');
-    entrarComoCliente(cliente);
+    entrarComoCliente(user);
   }catch(e){ errEl.textContent=e.message||'No se pudo crear la cuenta.'; }
 }
 
-/* ── LOGIN CLIENTE ── */
+/* ── LOGIN CLIENTE (cuenta GLOBAL de SIWEPE: correo + contraseña) ── */
 async function submitLoginT(){
-  const nombre=(document.getElementById('t-login-nombre')?.value||'').trim();
-  const pin=(document.getElementById('t-login-pin')?.value||'').trim();
+  const email=(document.getElementById('t-login-correo')?.value||'').trim();
+  const password=(document.getElementById('t-login-pin')?.value||'');
   const errEl=document.getElementById('t-login-error');
+  if(!email||!password){ if(errEl) errEl.textContent='Escribí tu correo y contraseña.'; return; }
   try{
-    const {token,cliente}=await apiPost('/api/auth/cliente-login',{nombre,pin,empresa:bsEmpresa()});
-    guardarSesionToken(token,'cliente',cliente.nombre);
-    await bootstrapDB();               // recargar estado completo con sesión
-    entrarComoCliente(cliente);
-  }catch(e){ if(errEl) errEl.textContent=e.message||'Nombre o contraseña incorrectos.'; }
+    const {token,user}=await apiPost('/api/auth/login',{email,password});
+    if(user.role!=='cliente'){ if(errEl) errEl.textContent='Esta cuenta es de un negocio. Ingresá desde el panel de administración.'; return; }
+    guardarSesionToken(token,'cliente',user.nombre);
+    await bootstrapDB();               // recargar estado con la sesión
+    entrarComoCliente(user);
+  }catch(e){ if(errEl) errEl.textContent=e.message||'Correo o contraseña incorrectos.'; }
 }
 
 function entrarComoCliente(cli){
