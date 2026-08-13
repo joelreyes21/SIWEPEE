@@ -168,7 +168,7 @@ async function submitRegistro(){
     const {token,user}=await apiPost('/api/auth/register',{nombre,correo,password,telefono:tel,direccion:dir});
     guardarSesionToken(token,'cliente',user.nombre);
     errEl.textContent='';
-    await bootstrapDB();               // recargar estado con la cuenta nueva
+    await bootstrapDB({checkEmpresa:true});   // recargar la vitrina de la tienda elegida
     toastT('¡Cuenta creada!');
     entrarComoCliente(user);
   }catch(e){ errEl.textContent=e.message||'No se pudo crear la cuenta.'; }
@@ -184,7 +184,7 @@ async function submitLoginT(){
     const {token,user}=await apiPost('/api/auth/login',{email,password});
     if(user.role!=='cliente'){ if(errEl) errEl.textContent='Esta cuenta es de un negocio. Ingresá desde el panel de administración.'; return; }
     guardarSesionToken(token,'cliente',user.nombre);
-    await bootstrapDB();               // recargar estado con la sesión
+    await bootstrapDB({checkEmpresa:true});   // recargar la vitrina de la tienda elegida
     entrarComoCliente(user);
   }catch(e){ if(errEl) errEl.textContent=e.message||'Correo o contraseña incorrectos.'; }
 }

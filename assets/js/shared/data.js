@@ -54,13 +54,17 @@ async function bootstrapDB(opts){
      empresa con la que se guardó la sesión y, si no coincide, se descarta
      (la página actual entra como invitada, no como sesión de otra tienda). */
   if(opts && opts.checkEmpresa && tok){
+    // La VITRINA siempre muestra la tienda del ?e=slug (catálogo público). No se
+    // usa /api/state acá (devolvería la empresa del token —la tuya—, no la que
+    // elegiste). Si la sesión guardada es de OTRA tienda, se descarta del todo;
+    // en cualquier caso, esta carga usa el catálogo de la tienda elegida.
     const empresaActual = bsEmpresa();
     let empresaToken=''; try{ empresaToken = localStorage.getItem('bs_token_empresa')||''; }catch(e){}
     if(empresaActual && empresaToken && empresaActual!==empresaToken){
       limpiarSesionToken();
       try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
-      tok='';
     }
+    tok='';
   }
   try{
     // Con sesión: estado completo (el token ya sabe de qué empresa es).

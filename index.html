@@ -161,8 +161,7 @@ button{font-family:inherit;cursor:pointer;}
 <header class="nav">
   <div class="nav-in">
     <a class="brand" href="index.html">
-      <div class="brand-mark">S</div>
-      <span class="brand-name">SIWEPE</span>
+      <img src="assets/img/siwepe-logo.png" alt="SIWEPE" style="height:52px;width:auto;display:block">
     </a>
     <div class="nav-links">
       <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
@@ -463,7 +462,7 @@ function _in(id,ico,type,ph,val){ return `<div class="cta-in"><span class="ic">$
 
 function renderLoginCuenta(){
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="cta-top"><div class="cta-logo">${_icoChat}</div><h3>Iniciar sesión</h3><p>Tu cuenta de SIWEPE sirve para todo</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-top"><img src="assets/img/siwepe-logo.png" alt="SIWEPE" style="height:66px;width:auto;margin:0 auto 8px;display:block"><h3>Iniciar sesión</h3><p>Tu cuenta de SIWEPE sirve para todo</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
     <div class="cta-body">
       <label class="cta-lbl">Correo</label>${_in('cta-log-correo',_icoMail,'email','tucorreo@correo.com')}
       <label class="cta-lbl">Contraseña</label>${_in('cta-log-pass',_icoLock,'password','Tu contraseña')}
@@ -474,7 +473,7 @@ function renderLoginCuenta(){
 }
 function renderRegistroCuenta(){
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="cta-top"><div class="cta-logo">${_icoChat}</div><h3>Crear cuenta</h3><p>Una cuenta para comprar en cualquier tienda</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-top"><img src="assets/img/siwepe-logo.png" alt="SIWEPE" style="height:66px;width:auto;margin:0 auto 8px;display:block"><h3>Crear cuenta</h3><p>Una cuenta para comprar en cualquier tienda</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
     <div class="cta-body">
       <label class="cta-lbl">Nombre completo</label>${_in('cta-reg-nombre',_icoUser,'text','Tu nombre')}
       <label class="cta-lbl">Correo</label>${_in('cta-reg-correo',_icoMail,'email','tucorreo@correo.com')}
