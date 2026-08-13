@@ -164,56 +164,168 @@ button{font-family:inherit;cursor:pointer;}
       <img src="assets/img/siwepe-logo.png" alt="SIWEPE" style="height:52px;width:auto;display:block">
     </a>
     <div class="nav-links">
-      <button class="nav-btn ghost" onclick="document.getElementById('productos').scrollIntoView()">Descubrir</button>
+      <button class="nav-btn ghost" onclick="irTiendas()">Explorar</button>
+      <button class="nav-btn ghost" onclick="document.getElementById('mkt-cats').scrollIntoView({behavior:'smooth'})">Categorías</button>
+      <button class="nav-btn ghost" onclick="irTiendas()">Tiendas</button>
       <button class="nav-btn ghost" id="nav-cuenta" onclick="abrirCuenta()">Ingresar</button>
-      <a class="nav-btn subtle" href="admin.html?login=1" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
-      <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
+      <button class="nav-btn solid" onclick="abrirCrear()">Crear mi tienda</button>
     </div>
   </div>
 </header>
 
+<style>
+/* ===== LANDING MARKETPLACE ===== */
+.mkt-hero{max-width:1180px;margin:0 auto;padding:40px 28px 18px;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;}
+.mkt-eyebrow{display:inline-block;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--rose-dark);background:var(--rose-light);padding:7px 14px;border-radius:999px;margin-bottom:18px;}
+.mkt-hero h1{font-size:clamp(32px,4.5vw,50px);line-height:1.08;letter-spacing:-.02em;color:var(--text-dark);margin-bottom:16px;}
+.mkt-hero h1 .g{color:var(--rose-dark);}
+.mkt-hero .lead{font-size:16.5px;color:var(--text-mid);line-height:1.6;margin-bottom:22px;max-width:470px;}
+.mkt-search{display:flex;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:7px 7px 7px 16px;box-shadow:var(--shadow-sm);max-width:520px;}
+.mkt-search input{flex:1;border:none;outline:none;font-size:15px;background:transparent;}
+.mkt-search button{border:none;background:var(--rose);color:#fff;padding:12px 22px;border-radius:10px;cursor:pointer;font-size:14.5px;box-shadow:0 6px 16px rgba(79,134,198,.3);}
+.mkt-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 26px;align-items:center;}
+.mkt-tags .lbl{font-size:13px;color:var(--text-soft);}
+.mkt-tag{font-size:13px;color:var(--text-mid);background:var(--cream-dark);border:1px solid var(--border);padding:6px 13px;border-radius:999px;cursor:pointer;transition:.18s;}
+.mkt-tag:hover{background:var(--rose-light);color:var(--rose-dark);border-color:var(--rose-mid);}
+.mkt-cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+.mkt-cta{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 22px;border-radius:13px;font-size:15px;cursor:pointer;border:none;transition:.2s;text-align:left;}
+.mkt-cta.prim{background:var(--rose);color:#fff;box-shadow:0 8px 22px rgba(79,134,198,.34);}
+.mkt-cta.prim:hover{background:var(--rose-dark);transform:translateY(-2px);}
+.mkt-cta.ghost{background:#fff;border:1.5px solid var(--border);color:var(--text-dark);}
+.mkt-cta.ghost:hover{border-color:var(--rose-mid);background:var(--rose-light);}
+.mkt-cta small{font-size:11.5px;opacity:.8;}
+.mkt-visual{position:relative;height:420px;}
+.mkt-panel{position:absolute;inset:0;border-radius:28px;background:linear-gradient(150deg,var(--rose-light),#fff 65%);border:1px solid var(--border);box-shadow:var(--shadow-lg);}
+.mkt-fcard{position:absolute;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-md);padding:13px 15px;display:flex;align-items:center;gap:11px;max-width:230px;}
+.mkt-fcard .ic{width:40px;height:40px;border-radius:11px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mkt-fcard b{font-size:13.5px;color:var(--text-dark);display:block;}
+.mkt-fcard span{font-size:11.5px;color:var(--text-soft);}
+.mkt-prodcard{position:absolute;right:26px;bottom:24px;width:172px;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;}
+.mkt-prodcard .ph{height:92px;background:linear-gradient(135deg,var(--rose-mid),var(--rose-light));}
+.mkt-prodcard .bd{padding:12px 14px;}
+.mkt-prodcard .bd b{font-size:14px;color:var(--text-dark);}
+.mkt-prodcard .bd .pr{font-size:13px;color:var(--rose-dark);margin-top:2px;}
+.mkt-prodcard .bd button{margin-top:9px;width:100%;padding:8px;border:none;border-radius:9px;background:var(--rose);color:#fff;font-size:12.5px;cursor:pointer;}
+.mkt-sec{max-width:1180px;margin:0 auto;padding:44px 28px;}
+.mkt-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;}
+.mkt-sec-head h2{font-size:28px;letter-spacing:-.02em;color:var(--text-dark);}
+.mkt-sec-head a{font-size:14px;color:var(--rose-dark);cursor:pointer;}
+.mkt-cats{display:grid;grid-template-columns:repeat(8,1fr);gap:14px;}
+.mkt-cat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 8px;text-align:center;cursor:pointer;transition:.18s;}
+.mkt-cat:hover{border-color:var(--rose-mid);box-shadow:var(--shadow-sm);transform:translateY(-3px);}
+.mkt-cat .ci{width:46px;height:46px;border-radius:13px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin:0 auto 9px;}
+.mkt-cat span{font-size:12.5px;color:var(--text-mid);}
+.mkt-tiendas{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.mkt-tcard{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-sm);transition:.22s;text-decoration:none;color:inherit;display:block;}
+.mkt-tcard:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.mkt-tcover{height:90px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));position:relative;}
+.mkt-tlogo{position:absolute;left:18px;bottom:-22px;width:52px;height:52px;border-radius:14px;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--rose-dark);overflow:hidden;box-shadow:var(--shadow-sm);}
+.mkt-tlogo img{width:100%;height:100%;object-fit:cover;}
+.mkt-tbody{padding:30px 18px 18px;}
+.mkt-tbody h4{font-size:16px;color:var(--text-dark);}
+.mkt-tbody .rub{font-size:12.5px;color:var(--text-soft);margin-top:2px;}
+.mkt-tbody .go{margin-top:12px;font-size:13px;color:var(--rose-dark);display:inline-flex;gap:6px;align-items:center;}
+.mkt-empren{background:var(--cream-dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.mkt-feats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.mkt-feat{background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 18px;}
+.mkt-feat .fi{width:44px;height:44px;border-radius:12px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.mkt-feat h4{font-size:15.5px;color:var(--text-dark);margin-bottom:5px;}
+.mkt-feat p{font-size:13px;color:var(--text-mid);line-height:1.55;}
+.mkt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:860px;margin:0 auto;}
+.mkt-stat{text-align:center;}
+.mkt-stat .n{font-size:38px;color:var(--rose-dark);letter-spacing:-.02em;}
+.mkt-stat .t{font-size:13.5px;color:var(--text-mid);}
+.mkt-footer{background:#fff;border-top:1px solid var(--border);}
+.mkt-footer-in{max-width:1180px;margin:0 auto;padding:44px 28px 26px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px;}
+.mkt-footer h5{font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);margin-bottom:12px;}
+.mkt-footer a{display:block;font-size:14px;color:var(--text-mid);padding:5px 0;cursor:pointer;}
+.mkt-footer a:hover{color:var(--rose-dark);}
+.mkt-footer .desc{font-size:13.5px;color:var(--text-soft);line-height:1.6;max-width:260px;margin-top:12px;}
+.mkt-copy{border-top:1px solid var(--border);text-align:center;font-size:12.5px;color:var(--text-soft);padding:16px;}
+@media(max-width:900px){
+  .mkt-hero{grid-template-columns:1fr;} .mkt-visual{height:300px;order:-1;}
+  .mkt-cats{grid-template-columns:repeat(4,1fr);} .mkt-tiendas,.mkt-feats{grid-template-columns:repeat(2,1fr);}
+  .mkt-stats{grid-template-columns:1fr;gap:26px;} .mkt-footer-in{grid-template-columns:1fr 1fr;}
+}
+</style>
+
 <!-- HERO -->
-<div class="wrap">
-  <section class="hero">
-    <span class="eyebrow">La plataforma de tiendas</span>
-    <h1>Crea tu tienda o<br><em>descubre</em> las que ya existen</h1>
-    <p>SIWEPE es donde los emprendedores levantan su tienda en línea y los clientes encuentran todo en un solo lugar. Elige tu camino.</p>
-  </section>
+<section class="mkt-hero">
+  <div>
+    <span class="mkt-eyebrow">El marketplace de emprendedores</span>
+    <h1>Compra local.<br>Vende online.<br><span class="g">Crece con SIWEPE.</span></h1>
+    <p class="lead">Miles de productos de emprendedores hondureños en un solo lugar. Descubrí tiendas, comprá directo y hacé crecer tu negocio.</p>
+    <form class="mkt-search" onsubmit="buscarMkt(event)">
+      <input id="mkt-q" type="search" placeholder="¿Qué estás buscando?">
+      <button type="submit">Buscar</button>
+    </form>
+    <div class="mkt-tags"><span class="lbl">Popular:</span>
+      <span class="mkt-tag" onclick="irTiendas()">Ropa</span><span class="mkt-tag" onclick="irTiendas()">Belleza</span><span class="mkt-tag" onclick="irTiendas()">Tecnología</span><span class="mkt-tag" onclick="irTiendas()">Accesorios</span><span class="mkt-tag" onclick="irTiendas()">Hogar</span>
+    </div>
+    <div class="mkt-cta-row">
+      <button class="mkt-cta prim" onclick="irTiendas()">Explorar tiendas <small>Descubrí productos ahora</small></button>
+      <button class="mkt-cta ghost" onclick="abrirCrear()">Crear mi tienda <small>Empezá a vender hoy</small></button>
+    </div>
+  </div>
+  <div class="mkt-visual">
+    <div class="mkt-panel"></div>
+    <div class="mkt-fcard" style="top:22px;left:20px">
+      <div class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>
+      <div><b>Más productos</b><span>de tiendas reales</span></div>
+    </div>
+    <div class="mkt-fcard" style="bottom:118px;left:12px">
+      <div class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></div>
+      <div><b>Tiendas verificadas</b><span>compra con confianza</span></div>
+    </div>
+    <div class="mkt-prodcard">
+      <div class="ph"></div>
+      <div class="bd"><b>Bolso de cuero</b><div class="pr">L 890.00</div><button onclick="irTiendas()">Ver tiendas</button></div>
+    </div>
+  </div>
+</section>
 
-  <!-- DOS CAMINOS -->
-  <section class="paths">
-    <div class="path crear">
-      <div class="path-ic">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M12 13v4M10 15h4"/></svg>
-      </div>
-      <h3>Crear tu empresa</h3>
-      <p>Registra tu negocio, sube tus productos y empieza a vender con tu propia tienda en línea, panel de administración incluido.</p>
-      <button class="path-cta" onclick="abrirCrear()">Empezar ahora →</button>
-    </div>
-    <div class="path descubrir">
-      <div class="path-ic">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
-      </div>
-      <h3>Descubrir productos</h3>
-      <p>Explora lo que venden las tiendas de SIWEPE y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
-      <button class="path-cta" onclick="document.getElementById('productos').scrollIntoView()">Ver productos →</button>
-    </div>
-  </section>
+<!-- CATEGORÍAS -->
+<section class="mkt-sec">
+  <div class="mkt-sec-head"><h2>Explorá por categoría</h2></div>
+  <div class="mkt-cats" id="mkt-cats"></div>
+</section>
 
-  <!-- PRODUCTOS -->
-  <section class="section" id="productos">
-    <div class="section-head">
-      <h2>Productos en SIWEPE</h2>
-      <p>Lo que están vendiendo las tiendas de la plataforma</p>
-    </div>
-    <div class="productos-grid" id="productos-grid">
-      <div class="empty-state"><div class="es-ic"></div><h3>Cargando productos…</h3></div>
-    </div>
-  </section>
-</div>
+<!-- TIENDAS DESTACADAS -->
+<section class="mkt-sec" id="tiendas" style="padding-top:0">
+  <div class="mkt-sec-head"><h2>Tiendas destacadas</h2><a onclick="irTiendas()">Ver todas →</a></div>
+  <div class="mkt-tiendas" id="tiendas-grid"><div class="empty-state" style="grid-column:1/-1"><h3>Cargando tiendas…</h3></div></div>
+</section>
 
-<footer class="footer">
-  © <span id="anio"></span> SIWEPE · Plataforma de tiendas en línea · Todos los derechos reservados
+<!-- PARA EMPRENDEDORES -->
+<section class="mkt-empren">
+  <div class="mkt-sec">
+    <div style="margin-bottom:24px"><span class="mkt-eyebrow">Para emprendedores</span><h2 style="font-size:28px;letter-spacing:-.02em;color:var(--text-dark);margin-top:6px">Todo lo que necesitás para vender y crecer</h2></div>
+    <div class="mkt-feats" id="mkt-feats"></div>
+    <div style="margin-top:26px"><button class="mkt-cta prim" style="flex-direction:row" onclick="abrirCrear()">Crear tienda gratis →</button></div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="mkt-sec">
+  <div class="mkt-stats">
+    <div class="mkt-stat"><div class="n" id="stat-tiendas">+25</div><div class="t">Tiendas activas</div></div>
+    <div class="mkt-stat"><div class="n">+500</div><div class="t">Productos publicados</div></div>
+    <div class="mkt-stat"><div class="n">+1,000</div><div class="t">Clientes satisfechos</div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="mkt-footer">
+  <div class="mkt-footer-in">
+    <div>
+      <img src="assets/img/siwepe-logo.png" alt="SIWEPE" style="height:46px;width:auto;display:block">
+      <p class="desc">El marketplace hecho para emprendedores hondureños: creá tu tienda, vendé en línea y crecé con SIWEPE.</p>
+    </div>
+    <div><h5>Explorar</h5><a onclick="irTiendas()">Tiendas</a><a onclick="document.getElementById('mkt-cats').scrollIntoView({behavior:'smooth'})">Categorías</a><a onclick="abrirCuenta()">Mi cuenta</a></div>
+    <div><h5>Para emprendedores</h5><a onclick="abrirCrear()">Crear tienda</a><a href="admin.html?login=1">Panel de administración</a></div>
+    <div><h5>SIWEPE</h5><a onclick="abrirCuenta()">Iniciar sesión</a><a onclick="abrirCrear()">Vender en SIWEPE</a></div>
+  </div>
+  <div class="mkt-copy">© <span id="anio"></span> SIWEPE · Todos los derechos reservados</div>
 </footer>
 
 <!-- MODAL CREAR EMPRESA (asistente por pasos) -->
@@ -789,7 +901,44 @@ async function crearEmpresa(){
 }
 
 initPaises();
-cargarProductos();
+/* ===== Landing marketplace: categorías, features y tiendas reales ===== */
+const _mIco={
+  moda:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l6 3 6-3 3 5-3 2v11H6V10L3 8z"/></svg>',
+  belleza:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 5H10z"/><rect x="8" y="8" width="8" height="13" rx="2"/></svg>',
+  acc:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8 12l-2 9 6-3 6 3-2-9"/></svg>',
+  hogar:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  tec:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  alim:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v7a3 3 0 0 0 6 0V2M9 2v20M18 2c-2 1-3 4-3 7 0 2 1 3 3 3v10"/></svg>',
+  dep:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18M3 12h18"/></svg>',
+  mas:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg>'
+};
+const CATS=[['Moda','moda'],['Belleza','belleza'],['Accesorios','acc'],['Hogar','hogar'],['Tecnología','tec'],['Alimentos','alim'],['Deportes','dep'],['Más categorías','mas']];
+function renderCats(){ const el=document.getElementById('mkt-cats'); if(el) el.innerHTML=CATS.map(([n,k])=>`<div class="mkt-cat" onclick="irTiendas()"><div class="ci">${_mIco[k]}</div><span>${n}</span></div>`).join(''); }
+const FEATS=[
+  ['Tu tienda','Personalizá nombre, logo, colores y catálogo de productos.','<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M5 9v11h14V9"/><path d="M3 9h18"/></svg>'],
+  ['Tu negocio','Administrá inventario, entradas, salidas y ventas al día.','<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>'],
+  ['Tus clientes','Recibí pedidos y contactá directo con los compradores.','<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'],
+  ['Tus estadísticas','Conocé el crecimiento de tu negocio con reportes claros.','<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>']
+];
+function renderFeats(){ const el=document.getElementById('mkt-feats'); if(el) el.innerHTML=FEATS.map(([t,d,i])=>`<div class="mkt-feat"><div class="fi">${i}</div><h4>${t}</h4><p>${d}</p></div>`).join(''); }
+function irTiendas(){ const el=document.getElementById('tiendas'); if(el) el.scrollIntoView({behavior:'smooth'}); }
+function buscarMkt(e){ e.preventDefault(); irTiendas(); }
+async function cargarTiendas(){
+  const grid=document.getElementById('tiendas-grid'); if(!grid) return;
+  let empresas=[];
+  try{ const r=await fetch(API_BASE+'/api/empresas'); if(r.ok) empresas=await r.json(); }catch(e){}
+  const stat=document.getElementById('stat-tiendas'); if(stat && Array.isArray(empresas) && empresas.length) stat.textContent='+'+empresas.length;
+  if(!Array.isArray(empresas)||!empresas.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><h3>Aún no hay tiendas</h3><p>Sé el primero en crear tu tienda en SIWEPE.</p><button class="es-btn" onclick="abrirCrear()">Crear la primera tienda</button></div>`; return;
+  }
+  grid.innerHTML=empresas.slice(0,8).map(e=>{
+    const slug=e.slug||e.id, ini=(e.nombre||'T')[0].toUpperCase();
+    const logo=e.logo?`<img src="${e.logo}" alt="">`:esc(ini);
+    const meta=[e.rubro,e.ciudad].filter(Boolean).map(esc).join(' · ');
+    return `<a class="mkt-tcard" href="tienda.html?e=${encodeURIComponent(slug)}"><div class="mkt-tcover"><div class="mkt-tlogo">${logo}</div></div><div class="mkt-tbody"><h4>${esc(e.nombre||'Tienda')}</h4><div class="rub">${meta||'&nbsp;'}</div><span class="go">Entrar a la tienda →</span></div></a>`;
+  }).join('');
+}
+renderCats(); renderFeats(); cargarTiendas();
 
 /* Aviso al volver del enlace de verificación del correo */
 (function(){
