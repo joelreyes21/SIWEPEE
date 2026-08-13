@@ -113,6 +113,28 @@ button{font-family:inherit;cursor:pointer;}
 .fld label{font-size:11.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text-mid);}
 .fld input{padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:14.5px;outline:none;background:var(--cream);transition:all .2s;font-family:'Inter',sans-serif;}
 .fld input:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+
+/* ── Modal de cuenta (login / registro / perfil) — diseño limpio ── */
+.cta-modal{max-width:420px;}
+.cta-top{text-align:center;padding:30px 30px 4px;position:relative;}
+.cta-logo{width:58px;height:58px;border-radius:17px;background:linear-gradient(145deg,var(--rose),var(--rose-dark));color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 10px 24px rgba(79,134,198,.38);}
+.cta-top h3{font-family:'Fraunces',serif;font-size:24px;letter-spacing:-.01em;}
+.cta-top p{font-size:13.5px;color:var(--text-soft);margin-top:4px;}
+.cta-body{padding:16px 30px 28px;}
+.cta-lbl{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-mid);margin:0 0 6px 3px;display:block;}
+.cta-in{position:relative;margin-bottom:15px;}
+.cta-in .ic{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--text-soft);display:flex;pointer-events:none;}
+.cta-in input{width:100%;padding:14px 15px 14px 46px;border:1.5px solid var(--border);border-radius:13px;font-size:14.5px;background:var(--cream);outline:none;transition:all .2s;}
+.cta-in input:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+.cta-primary{width:100%;padding:15px;border:none;border-radius:13px;background:var(--rose);color:#fff;font-size:15px;cursor:pointer;box-shadow:0 8px 22px rgba(79,134,198,.36);transition:all .2s;margin-top:4px;}
+.cta-primary:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.cta-sec{width:100%;padding:14px;border:1.5px solid var(--border);border-radius:13px;background:var(--cream-dark);color:var(--text-mid);font-size:14.5px;cursor:pointer;transition:all .2s;}
+.cta-sec:hover{background:var(--rose-light);color:var(--rose-dark);border-color:var(--rose-mid);}
+.cta-link{color:var(--rose-dark);cursor:pointer;}
+.cta-alt{text-align:center;font-size:13px;color:var(--text-soft);margin-top:16px;}
+.cta-msg{font-size:13px;min-height:16px;margin:2px 0 10px;}
+.cta-div{border:none;border-top:1px solid var(--border);margin:22px 0 16px;}
+.cta-secn-title{font-family:'Fraunces',serif;font-size:17px;margin-bottom:2px;}
 .fld-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
 .modal-err{font-size:13px;color:#D46A6A;min-height:16px;margin-bottom:6px;}
 .modal-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--rose);color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(79,134,198,.34);transition:all .2s;}
@@ -365,7 +387,7 @@ button{font-family:inherit;cursor:pointer;}
 
 <!-- ===== MODAL CUENTA (login / registro / perfil global de SIWEPE) ===== -->
 <div class="modal-ov" id="cuenta-ov">
-  <div class="modal" id="cuenta-modal"><div id="cuenta-body"></div></div>
+  <div class="modal cta-modal" id="cuenta-modal"><div id="cuenta-body"></div></div>
 </div>
 
 <script>
@@ -398,13 +420,13 @@ const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
    La cuenta del cliente es una sola para TODA la plataforma (no una por tienda),
    así que el acceso y el perfil viven también acá, en la página principal. */
 function _tok(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
-function sesionCliente(){
-  try{ const t=localStorage.getItem('bs_token'), r=localStorage.getItem('bs_role');
-    return (t && r==='cliente') ? { token:t, nombre: localStorage.getItem('bs_user')||'Mi cuenta' } : null; }catch(e){ return null; }
+function sesionActiva(){
+  try{ const t=localStorage.getItem('bs_token');
+    return t ? { token:t, role: localStorage.getItem('bs_role')||'', nombre: localStorage.getItem('bs_user')||'Mi cuenta' } : null; }catch(e){ return null; }
 }
 function refrescarNavCuenta(){
   const btn=document.getElementById('nav-cuenta'); if(!btn) return;
-  const s=sesionCliente();
+  const s=sesionActiva();
   if(s){
     const ini=((s.nombre||'?').trim()[0]||'?').toUpperCase();
     const fn=(s.nombre||'').split(' ')[0]||'Mi cuenta';
@@ -421,57 +443,67 @@ async function apiCuenta(ruta, method='GET', datos=null, auth=false){
   return j;
 }
 function _ctaErr(id,msg,ok){ const e=document.getElementById(id); if(e){ e.textContent=msg||''; e.style.color= ok?'#3F9D6A':'#D46A6A'; } }
-function abrirCuenta(){ if(sesionCliente()) renderPerfilCuenta(); else renderLoginCuenta(); document.getElementById('cuenta-ov').classList.add('open'); }
+function abrirCuenta(){ if(sesionActiva()) renderPerfilCuenta(); else renderLoginCuenta(); document.getElementById('cuenta-ov').classList.add('open'); }
 function cerrarCuenta(){ document.getElementById('cuenta-ov').classList.remove('open'); }
 document.getElementById('cuenta-ov').addEventListener('click', e=>{ if(e.target.id==='cuenta-ov') cerrarCuenta(); });
 
+/* Iconos e input con ícono (diseño limpio del modal) */
+const _icoChat='<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg>';
+const _icoMail='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>';
+const _icoLock='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const _icoUser='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+const _icoPhone='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></svg>';
+const _icoPin='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+function _in(id,ico,type,ph,val){ return `<div class="cta-in"><span class="ic">${ico}</span><input type="${type}" id="${id}" placeholder="${ph||''}" value="${esc(val||'')}"></div>`; }
+
 function renderLoginCuenta(){
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="modal-head"><h3>Iniciar sesión</h3><p>Tu cuenta de SIWEPE sirve para todas las tiendas</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
-    <div style="padding:10px 28px 26px">
-      <div class="fld"><label>Correo</label><input type="email" id="cta-log-correo" placeholder="tucorreo@correo.com" autocomplete="email"></div>
-      <div class="fld"><label>Contraseña</label><input type="password" id="cta-log-pass" placeholder="Tu contraseña" autocomplete="current-password"></div>
-      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
-      <button class="wz-btn prim" style="width:100%" onclick="loginCuenta()">Entrar</button>
-      <p style="text-align:center;font-size:13px;color:var(--text-soft);margin-top:14px">¿No tenés cuenta? <a onclick="renderRegistroCuenta()" style="color:var(--rose-dark);font-weight:700;cursor:pointer">Crear cuenta</a></p>
+    <div class="cta-top"><div class="cta-logo">${_icoChat}</div><h3>Iniciar sesión</h3><p>Tu cuenta de SIWEPE sirve para todo</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-body">
+      <label class="cta-lbl">Correo</label>${_in('cta-log-correo',_icoMail,'email','tucorreo@correo.com')}
+      <label class="cta-lbl">Contraseña</label>${_in('cta-log-pass',_icoLock,'password','Tu contraseña')}
+      <div id="cta-err" class="cta-msg"></div>
+      <button class="cta-primary" onclick="loginCuenta()">Entrar →</button>
+      <p class="cta-alt">¿No tenés cuenta? <a class="cta-link" onclick="renderRegistroCuenta()">Crear cuenta</a></p>
     </div>`;
 }
 function renderRegistroCuenta(){
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="modal-head"><h3>Crear cuenta</h3><p>Una sola cuenta para comprar en cualquier tienda</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
-    <div style="padding:10px 28px 26px">
-      <div class="fld"><label>Nombre completo</label><input type="text" id="cta-reg-nombre"></div>
-      <div class="fld"><label>Correo</label><input type="email" id="cta-reg-correo" placeholder="tucorreo@correo.com" autocomplete="email"></div>
-      <div class="fld"><label>Teléfono (opcional)</label><input type="tel" id="cta-reg-tel"></div>
-      <div class="fld"><label>Contraseña</label><input type="password" id="cta-reg-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
-      <div class="fld"><label>Confirmar contraseña</label><input type="password" id="cta-reg-pass2" autocomplete="new-password"></div>
-      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
-      <button class="wz-btn prim" style="width:100%" onclick="registroCuenta()">Crear cuenta</button>
-      <p style="text-align:center;font-size:13px;color:var(--text-soft);margin-top:14px">¿Ya tenés cuenta? <a onclick="renderLoginCuenta()" style="color:var(--rose-dark);font-weight:700;cursor:pointer">Iniciar sesión</a></p>
+    <div class="cta-top"><div class="cta-logo">${_icoChat}</div><h3>Crear cuenta</h3><p>Una cuenta para comprar en cualquier tienda</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-body">
+      <label class="cta-lbl">Nombre completo</label>${_in('cta-reg-nombre',_icoUser,'text','Tu nombre')}
+      <label class="cta-lbl">Correo</label>${_in('cta-reg-correo',_icoMail,'email','tucorreo@correo.com')}
+      <label class="cta-lbl">Teléfono (opcional)</label>${_in('cta-reg-tel',_icoPhone,'tel','')}
+      <label class="cta-lbl">Contraseña</label>${_in('cta-reg-pass',_icoLock,'password','Mínimo 8 caracteres')}
+      <label class="cta-lbl">Confirmar contraseña</label>${_in('cta-reg-pass2',_icoLock,'password','Repetí la contraseña')}
+      <div id="cta-err" class="cta-msg"></div>
+      <button class="cta-primary" onclick="registroCuenta()">Crear cuenta →</button>
+      <p class="cta-alt">¿Ya tenés cuenta? <a class="cta-link" onclick="renderLoginCuenta()">Iniciar sesión</a></p>
     </div>`;
 }
 async function renderPerfilCuenta(){
   let u={};
   try{ u=await apiCuenta('/api/mi-cuenta','GET',null,true); }catch(e){ /* token vencido */ salirCuenta(true); renderLoginCuenta(); return; }
+  const ini=((u.nombre||'?').trim()[0]||'?').toUpperCase();
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="modal-head"><h3>Mi cuenta</h3><p>Tu perfil de SIWEPE</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
-    <div style="padding:10px 28px 26px">
-      <div class="fld"><label>Nombre</label><input type="text" id="cta-p-nombre" value="${esc(u.nombre||'')}"></div>
-      <div class="fld"><label>Correo (con este iniciás sesión)</label><input type="email" id="cta-p-correo" value="${esc(u.email||'')}"></div>
-      <div class="fld"><label>Teléfono</label><input type="tel" id="cta-p-tel" value="${esc(u.telefono||'')}"></div>
-      <div class="fld"><label>WhatsApp</label><input type="tel" id="cta-p-wa" value="${esc(u.whatsapp||'')}"></div>
-      <div class="fld"><label>Dirección</label><input type="text" id="cta-p-dir" value="${esc(u.direccion||'')}"></div>
-      <div id="cta-err" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
-      <button class="wz-btn prim" style="width:100%" onclick="guardarCuenta()">Guardar cambios</button>
-      <div style="border-top:1px solid var(--border);margin:22px 0 12px"></div>
-      <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:2px">Cambiar contraseña</div>
+    <div class="cta-top"><div class="cta-logo" style="font-size:24px">${esc(ini)}</div><h3>Mi cuenta</h3><p>Tu perfil de SIWEPE</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-body">
+      <label class="cta-lbl">Nombre</label>${_in('cta-p-nombre',_icoUser,'text','',u.nombre)}
+      <label class="cta-lbl">Correo (con este iniciás sesión)</label>${_in('cta-p-correo',_icoMail,'email','',u.email)}
+      <label class="cta-lbl">Teléfono</label>${_in('cta-p-tel',_icoPhone,'tel','',u.telefono)}
+      <label class="cta-lbl">WhatsApp</label>${_in('cta-p-wa',_icoPhone,'tel','',u.whatsapp)}
+      <label class="cta-lbl">Dirección</label>${_in('cta-p-dir',_icoPin,'text','',u.direccion)}
+      <div id="cta-err" class="cta-msg"></div>
+      <button class="cta-primary" onclick="guardarCuenta()">Guardar cambios</button>
+      <hr class="cta-div">
+      <div class="cta-secn-title">Cambiar contraseña</div>
       <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px">Dejá esto en blanco si no querés cambiarla.</p>
-      <div class="fld"><label>Contraseña actual</label><input type="password" id="cta-p-pa" autocomplete="current-password"></div>
-      <div class="fld"><label>Nueva contraseña</label><input type="password" id="cta-p-pn" placeholder="Mínimo 8 caracteres" autocomplete="new-password"></div>
-      <div class="fld"><label>Confirmar nueva</label><input type="password" id="cta-p-pc" autocomplete="new-password"></div>
-      <div id="cta-perr" style="font-size:13px;min-height:16px;margin-bottom:8px"></div>
-      <button class="wz-btn sec" style="width:100%" onclick="cambiarPassCuenta()">Cambiar contraseña</button>
-      <p style="text-align:center;margin-top:16px"><a onclick="salirCuenta()" style="color:var(--text-soft);font-size:13px;cursor:pointer;font-weight:600">Cerrar sesión</a></p>
+      <label class="cta-lbl">Contraseña actual</label>${_in('cta-p-pa',_icoLock,'password','')}
+      <label class="cta-lbl">Nueva contraseña</label>${_in('cta-p-pn',_icoLock,'password','Mínimo 8 caracteres')}
+      <label class="cta-lbl">Confirmar nueva</label>${_in('cta-p-pc',_icoLock,'password','')}
+      <div id="cta-perr" class="cta-msg"></div>
+      <button class="cta-sec" onclick="cambiarPassCuenta()">Cambiar contraseña</button>
+      <p class="cta-alt" style="margin-top:18px"><a class="cta-link" onclick="salirCuenta()" style="font-weight:600">Cerrar sesión</a></p>
     </div>`;
 }
 async function loginCuenta(){
@@ -480,9 +512,11 @@ async function loginCuenta(){
   if(!email||!password){ _ctaErr('cta-err','Escribí tu correo y contraseña.'); return; }
   try{
     const {token,user}=await apiCuenta('/api/auth/login','POST',{email,password});
-    if(user.role!=='cliente'){ _ctaErr('cta-err','Esa cuenta es de un negocio. Ingresá desde "¿Tenés tienda?".'); return; }
-    localStorage.setItem('bs_token',token); localStorage.setItem('bs_role','cliente'); localStorage.setItem('bs_user',user.nombre||'');
-    refrescarNavCuenta(); renderPerfilCuenta();
+    // Sirve para cualquier rol: cliente ve su perfil acá; dueño/proveedor van a su panel.
+    localStorage.setItem('bs_token',token); localStorage.setItem('bs_role',user.role||'cliente'); localStorage.setItem('bs_user',user.nombre||'');
+    refrescarNavCuenta();
+    if(user.role==='admin'||user.role==='proveedor'){ window.location.href='admin.html'; return; }
+    renderPerfilCuenta();
   }catch(e){ _ctaErr('cta-err', e.message||'Correo o contraseña incorrectos.'); }
 }
 async function registroCuenta(){
