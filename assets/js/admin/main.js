@@ -99,6 +99,56 @@ function openModal(titulo, sub, html, maxw='580px'){
 }
 function closeModal(){ $('#modal-overlay').classList.remove('open'); }
 
+/* ── MI CUENTA (perfil del dueño / usuario logueado) ── */
+async function abrirMiCuenta(){
+  let u={};
+  try{ u=await apiGet('/api/mi-cuenta'); }
+  catch(e){ toast('No se pudo cargar tu cuenta: '+(e.message||''),'error'); return; }
+  openModal('Mi cuenta','Tus datos de acceso al panel', `
+    <div class="form-grid">
+      <div class="field span2"><label>Nombre</label><input id="mc-nombre" value="${esc(u.nombre||'')}"><span class="ferr"></span></div>
+      <div class="field span2"><label>Correo <span style="font-weight:400;color:var(--text-muted)">(con este iniciás sesión)</span></label><input id="mc-correo" type="email" value="${esc(u.email||'')}"><span class="ferr"></span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-primary" onclick="guardarMiCuenta()">${svgIcon('check',14)} Guardar cambios</button>
+    </div>
+    <div style="border-top:1px solid var(--border);margin:20px 0 14px"></div>
+    <h3 style="font-size:15px;font-weight:600;margin-bottom:2px;color:var(--text-primary)">Cambiar contraseña</h3>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px">Dejá esto en blanco si no querés cambiarla.</p>
+    <div class="form-grid">
+      <div class="field span2"><label>Contraseña actual</label><input id="mc-pass-actual" type="password" autocomplete="current-password"></div>
+      <div class="field"><label>Nueva contraseña</label><input id="mc-pass-nueva" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
+      <div class="field"><label>Confirmar nueva</label><input id="mc-pass-conf" type="password" autocomplete="new-password"></div>
+    </div>
+    <div class="ferr" id="mc-pass-err" style="min-height:16px;display:block"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="cambiarMiPassword()">Cambiar contraseña</button>
+    </div>`);
+}
+async function guardarMiCuenta(){
+  const nombre=($('#mc-nombre').value||'').trim();
+  const correo=($('#mc-correo').value||'').trim();
+  if(!nombre){ toast('Escribí tu nombre','warn'); return; }
+  try{
+    await apiPut('/api/mi-cuenta',{nombre,correo});
+    toast('Cuenta actualizada'); closeModal();
+  }catch(e){ toast(e.message||'No se pudo guardar','error'); }
+}
+async function cambiarMiPassword(){
+  const actual=$('#mc-pass-actual').value||'', nueva=$('#mc-pass-nueva').value||'', conf=$('#mc-pass-conf').value||'';
+  const err=$('#mc-pass-err'); const set=t=>{ if(err) err.textContent=t; };
+  if(!actual||!nueva){ set('Completá la contraseña actual y la nueva.'); return; }
+  if(nueva.length<8){ set('La nueva contraseña debe tener al menos 8 caracteres.'); return; }
+  if(nueva!==conf){ set('Las contraseñas nuevas no coinciden.'); return; }
+  try{
+    await apiPut('/api/mi-cuenta/password',{actual,nueva});
+    set(''); ['mc-pass-actual','mc-pass-nueva','mc-pass-conf'].forEach(id=>{ const e=$('#'+id); if(e) e.value=''; });
+    toast('Contraseña actualizada');
+  }catch(e){ set(e.message||'No se pudo cambiar la contraseña.'); }
+}
+window.abrirMiCuenta=abrirMiCuenta; window.guardarMiCuenta=guardarMiCuenta; window.cambiarMiPassword=cambiarMiPassword;
+
 function openConfirm(texto, fn){
   $('#confirm-text').textContent = texto;
   _modalConfirmFn = fn;

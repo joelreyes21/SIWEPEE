@@ -208,15 +208,29 @@ function entrarComoCliente(cli){
 }
 
 /* ── MI PERFIL (cliente) ── */
-function abrirPerfilCliente(){
+async function abrirPerfilCliente(){
   if(!clienteActivo) return;
   const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=val||''; };
+  // Mostrar de una lo que ya tenemos en memoria…
   set('perfil-cli-nombre', clienteActivo.nombre);
-  set('perfil-cli-telefono', clienteActivo.telefono);
   set('perfil-cli-correo', clienteActivo.correo);
+  set('perfil-cli-telefono', clienteActivo.telefono);
+  set('perfil-cli-whatsapp', clienteActivo.whatsapp);
   set('perfil-cli-direccion', clienteActivo.direccion);
+  ['perfil-cli-pass-actual','perfil-cli-pass-nueva','perfil-cli-pass-conf'].forEach(id=>set(id,''));
   const errEl=document.getElementById('perfil-cli-error'); if(errEl) errEl.textContent='';
+  const perr=document.getElementById('perfil-cli-pass-error'); if(perr) perr.textContent='';
   document.getElementById('t-perfil-overlay')?.classList.add('open');
+  // …y refrescar con TODA la info guardada en el servidor (por si falta algo en memoria).
+  try{
+    const u=await apiGet('/api/mi-cuenta');
+    if(u){
+      clienteActivo.nombre=u.nombre; clienteActivo.correo=u.email;
+      clienteActivo.telefono=u.telefono; clienteActivo.whatsapp=u.whatsapp; clienteActivo.direccion=u.direccion;
+      set('perfil-cli-nombre', u.nombre); set('perfil-cli-correo', u.email);
+      set('perfil-cli-telefono', u.telefono); set('perfil-cli-whatsapp', u.whatsapp); set('perfil-cli-direccion', u.direccion);
+    }
+  }catch(e){ /* si falla, quedan los datos en memoria */ }
 }
 function cerrarPerfilCliente(){
   document.getElementById('t-perfil-overlay')?.classList.remove('open');
@@ -224,22 +238,39 @@ function cerrarPerfilCliente(){
 async function guardarPerfilCliente(){
   const nombre=(document.getElementById('perfil-cli-nombre')?.value||'').trim();
   const telefono=(document.getElementById('perfil-cli-telefono')?.value||'').trim();
+  const whatsapp=(document.getElementById('perfil-cli-whatsapp')?.value||'').trim();
   const correo=(document.getElementById('perfil-cli-correo')?.value||'').trim();
   const direccion=(document.getElementById('perfil-cli-direccion')?.value||'').trim();
   const errEl=document.getElementById('perfil-cli-error');
   if(!nombre){ if(errEl) errEl.textContent='El nombre es obligatorio.'; return; }
   try{
-    await apiPut('/api/clientes/mi',{nombre,telefono,correo,direccion});
-    clienteActivo.nombre=nombre; clienteActivo.telefono=telefono; clienteActivo.correo=correo; clienteActivo.direccion=direccion;
+    await apiPut('/api/clientes/mi',{nombre,telefono,whatsapp,correo,direccion});
+    clienteActivo.nombre=nombre; clienteActivo.telefono=telefono; clienteActivo.whatsapp=whatsapp; clienteActivo.correo=correo; clienteActivo.direccion=direccion;
     actualizarHeaderSesion();
     if(errEl) errEl.textContent='';
     toastT('Perfil actualizado');
-    cerrarPerfilCliente();
   }catch(e){ if(errEl) errEl.textContent=e.message||'No se pudo guardar el perfil.'; }
+}
+async function cambiarPassCliente(){
+  const actual=(document.getElementById('perfil-cli-pass-actual')?.value||'');
+  const nueva=(document.getElementById('perfil-cli-pass-nueva')?.value||'');
+  const conf=(document.getElementById('perfil-cli-pass-conf')?.value||'');
+  const errEl=document.getElementById('perfil-cli-pass-error');
+  const set=t=>{ if(errEl) errEl.textContent=t; };
+  if(!actual||!nueva){ set('Completá tu contraseña actual y la nueva.'); return; }
+  if(nueva.length<8){ set('La nueva contraseña debe tener al menos 8 caracteres.'); return; }
+  if(nueva!==conf){ set('Las contraseñas nuevas no coinciden.'); return; }
+  try{
+    await apiPut('/api/mi-cuenta/password',{actual,nueva});
+    set('');
+    ['perfil-cli-pass-actual','perfil-cli-pass-nueva','perfil-cli-pass-conf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    toastT('Contraseña actualizada');
+  }catch(e){ set(e.message||'No se pudo cambiar la contraseña.'); }
 }
 window.abrirPerfilCliente=abrirPerfilCliente;
 window.cerrarPerfilCliente=cerrarPerfilCliente;
 window.guardarPerfilCliente=guardarPerfilCliente;
+window.cambiarPassCliente=cambiarPassCliente;
 
 function salirTienda(){
   try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
@@ -906,6 +937,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $t('#t-perfil-close')?.addEventListener('click',cerrarPerfilCliente);
   $t('#t-perfil-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-perfil-overlay') cerrarPerfilCliente(); });
   $t('#btn-guardar-perfil-cli')?.addEventListener('click',guardarPerfilCliente);
+  $t('#btn-cambiar-pass-cli')?.addEventListener('click',cambiarPassCliente);
   $t('#btn-confirmar-ped')?.addEventListener('click',confirmarPedidoT);
   $t('#t-comprobante-inp')?.addEventListener('change',onComprobanteSeleccion);
 

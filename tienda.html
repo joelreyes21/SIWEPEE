@@ -481,7 +481,7 @@
 
 <!-- MI PERFIL -->
 <div class="t-perfil-overlay" id="t-perfil-overlay">
-  <div class="t-perfil-panel">
+  <div class="t-perfil-panel" style="max-height:88vh;overflow-y:auto">
     <div class="t-perfil-head">
       <h3>Mi perfil</h3>
       <button class="t-perfil-close" id="t-perfil-close">
@@ -493,12 +493,16 @@
       <div class="sw-input-wrap"><input type="text" id="perfil-cli-nombre"></div>
     </div>
     <div class="sw-field">
+      <label>Correo</label>
+      <div class="sw-input-wrap"><input type="email" id="perfil-cli-correo"></div>
+    </div>
+    <div class="sw-field">
       <label>Teléfono</label>
       <div class="sw-input-wrap"><input type="tel" id="perfil-cli-telefono"></div>
     </div>
     <div class="sw-field">
-      <label>Correo</label>
-      <div class="sw-input-wrap"><input type="email" id="perfil-cli-correo"></div>
+      <label>WhatsApp</label>
+      <div class="sw-input-wrap"><input type="tel" id="perfil-cli-whatsapp"></div>
     </div>
     <div class="sw-field">
       <label>Dirección</label>
@@ -506,6 +510,24 @@
     </div>
     <div class="sw-error" id="perfil-cli-error"></div>
     <button class="sw-btn-main" id="btn-guardar-perfil-cli">Guardar cambios</button>
+
+    <div style="border-top:1px solid var(--border);margin:24px 0 16px"></div>
+    <h3 style="font-size:16px;margin-bottom:4px;color:var(--text-dark)">Cambiar contraseña</h3>
+    <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:14px">Dejá esto en blanco si no querés cambiarla.</p>
+    <div class="sw-field">
+      <label>Contraseña actual</label>
+      <div class="sw-input-wrap"><input type="password" id="perfil-cli-pass-actual" autocomplete="current-password"></div>
+    </div>
+    <div class="sw-field">
+      <label>Nueva contraseña</label>
+      <div class="sw-input-wrap"><input type="password" id="perfil-cli-pass-nueva" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></div>
+    </div>
+    <div class="sw-field">
+      <label>Confirmar nueva contraseña</label>
+      <div class="sw-input-wrap"><input type="password" id="perfil-cli-pass-conf" autocomplete="new-password"></div>
+    </div>
+    <div class="sw-error" id="perfil-cli-pass-error"></div>
+    <button class="sw-btn-main" id="btn-cambiar-pass-cli">Cambiar contraseña</button>
   </div>
 </div>
 
