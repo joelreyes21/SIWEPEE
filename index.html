@@ -135,6 +135,11 @@ button{font-family:inherit;cursor:pointer;}
 .cta-msg{font-size:13px;min-height:16px;margin:2px 0 10px;}
 .cta-div{border:none;border-top:1px solid var(--border);margin:22px 0 16px;}
 .cta-secn-title{font-family:'Fraunces',serif;font-size:17px;margin-bottom:2px;}
+.cta-tabs{display:flex;gap:6px;background:var(--cream-dark);border-radius:13px;padding:5px;margin-bottom:20px;}
+.cta-tab{flex:1;padding:11px 8px;border:none;background:transparent;border-radius:9px;font-size:13.5px;color:var(--text-mid);cursor:pointer;transition:all .18s;}
+.cta-tab.active{background:#fff;color:var(--rose-dark);box-shadow:0 2px 8px rgba(40,80,140,.10);}
+.cta-logout{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:13px;background:transparent;color:var(--text-soft);font-size:13.5px;cursor:pointer;margin-top:18px;transition:all .18s;}
+.cta-logout:hover{border-color:#E7B4B4;color:#C8554C;background:#FCF3F2;}
 .fld-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
 .modal-err{font-size:13px;color:#D46A6A;min-height:16px;margin-bottom:6px;}
 .modal-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--rose);color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(79,134,198,.34);transition:all .2s;}
@@ -486,25 +491,41 @@ async function renderPerfilCuenta(){
   try{ u=await apiCuenta('/api/mi-cuenta','GET',null,true); }catch(e){ /* token vencido */ salirCuenta(true); renderLoginCuenta(); return; }
   const ini=((u.nombre||'?').trim()[0]||'?').toUpperCase();
   document.getElementById('cuenta-body').innerHTML=`
-    <div class="cta-top"><div class="cta-logo" style="font-size:24px">${esc(ini)}</div><h3>Mi cuenta</h3><p>Tu perfil de SIWEPE</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
+    <div class="cta-top"><div class="cta-logo" style="font-size:24px">${esc(ini)}</div><h3>${esc(u.nombre||'Mi cuenta')}</h3><p>${esc(u.email||'Tu perfil de SIWEPE')}</p><button class="modal-x" onclick="cerrarCuenta()">×</button></div>
     <div class="cta-body">
-      <label class="cta-lbl">Nombre</label>${_in('cta-p-nombre',_icoUser,'text','',u.nombre)}
-      <label class="cta-lbl">Correo (con este iniciás sesión)</label>${_in('cta-p-correo',_icoMail,'email','',u.email)}
-      <label class="cta-lbl">Teléfono</label>${_in('cta-p-tel',_icoPhone,'tel','',u.telefono)}
-      <label class="cta-lbl">WhatsApp</label>${_in('cta-p-wa',_icoPhone,'tel','',u.whatsapp)}
-      <label class="cta-lbl">Dirección</label>${_in('cta-p-dir',_icoPin,'text','',u.direccion)}
-      <div id="cta-err" class="cta-msg"></div>
-      <button class="cta-primary" onclick="guardarCuenta()">Guardar cambios</button>
-      <hr class="cta-div">
-      <div class="cta-secn-title">Cambiar contraseña</div>
-      <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px">Dejá esto en blanco si no querés cambiarla.</p>
-      <label class="cta-lbl">Contraseña actual</label>${_in('cta-p-pa',_icoLock,'password','')}
-      <label class="cta-lbl">Nueva contraseña</label>${_in('cta-p-pn',_icoLock,'password','Mínimo 8 caracteres')}
-      <label class="cta-lbl">Confirmar nueva</label>${_in('cta-p-pc',_icoLock,'password','')}
-      <div id="cta-perr" class="cta-msg"></div>
-      <button class="cta-sec" onclick="cambiarPassCuenta()">Cambiar contraseña</button>
-      <p class="cta-alt" style="margin-top:18px"><a class="cta-link" onclick="salirCuenta()" style="font-weight:600">Cerrar sesión</a></p>
+      <div class="cta-tabs">
+        <button class="cta-tab active" id="cta-tab-datos" onclick="ctaTab('datos')">Mis datos</button>
+        <button class="cta-tab" id="cta-tab-seg" onclick="ctaTab('seg')">Contraseña</button>
+      </div>
+
+      <div id="cta-pane-datos">
+        <label class="cta-lbl">Nombre</label>${_in('cta-p-nombre',_icoUser,'text','',u.nombre)}
+        <label class="cta-lbl">Correo (con este iniciás sesión)</label>${_in('cta-p-correo',_icoMail,'email','',u.email)}
+        <label class="cta-lbl">Teléfono</label>${_in('cta-p-tel',_icoPhone,'tel','',u.telefono)}
+        <label class="cta-lbl">WhatsApp</label>${_in('cta-p-wa',_icoPhone,'tel','',u.whatsapp)}
+        <label class="cta-lbl">Dirección</label>${_in('cta-p-dir',_icoPin,'text','',u.direccion)}
+        <div id="cta-err" class="cta-msg"></div>
+        <button class="cta-primary" onclick="guardarCuenta()">Guardar cambios</button>
+      </div>
+
+      <div id="cta-pane-seg" style="display:none">
+        <p style="font-size:12.5px;color:var(--text-soft);margin:2px 0 14px">Cambiá tu contraseña de acceso. Dejala en blanco si no querés cambiarla.</p>
+        <label class="cta-lbl">Contraseña actual</label>${_in('cta-p-pa',_icoLock,'password','')}
+        <label class="cta-lbl">Nueva contraseña</label>${_in('cta-p-pn',_icoLock,'password','Mínimo 8 caracteres')}
+        <label class="cta-lbl">Confirmar nueva</label>${_in('cta-p-pc',_icoLock,'password','')}
+        <div id="cta-perr" class="cta-msg"></div>
+        <button class="cta-primary" onclick="cambiarPassCuenta()">Cambiar contraseña</button>
+      </div>
+
+      <button class="cta-logout" onclick="salirCuenta()">Cerrar sesión</button>
     </div>`;
+}
+function ctaTab(t){
+  const datos=t==='datos';
+  document.getElementById('cta-tab-datos')?.classList.toggle('active',datos);
+  document.getElementById('cta-tab-seg')?.classList.toggle('active',!datos);
+  const pd=document.getElementById('cta-pane-datos'); if(pd) pd.style.display=datos?'':'none';
+  const ps=document.getElementById('cta-pane-seg'); if(ps) ps.style.display=datos?'none':'';
 }
 async function loginCuenta(){
   const email=(document.getElementById('cta-log-correo')?.value||'').trim();
