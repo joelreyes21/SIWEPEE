@@ -928,16 +928,20 @@ function openFormCompra(){
   ['fc-prod','fc-cant','fc-precio'].forEach(id=>document.getElementById(id).addEventListener('input',upd));
 }
 
-function saveCompra(){
+async function saveCompra(){
   const ok=validar([['fc-prod',noVacio,'Elige un producto'],['fc-prov',noVacio,'Elige un proveedor'],['fc-cant',entPos,'Cantidad inválida'],['fc-precio',numPos,'Precio inválido'],['fc-fecha',noVacio,'Elige una fecha']]);
   if(!ok) return;
   const pid=+$('#fc-prod').value,cant=+$('#fc-cant').value,precio=+$('#fc-precio').value;
   const prov=provPor(+$('#fc-prov').value),obs=$('#fc-obs').value.trim();
-  const p=prodPor(pid); p.stock+=cant;
-  DB.compras.push({id:nuevoId('compra'),producto_id:pid,proveedor_id:prov.id,cantidad:cant,precio,fecha:$('#fc-fecha').value,obs});
-  DB.movimientos.push({id:nuevoId('movimiento'),tipo:'entrada',producto_id:pid,cantidad:cant,fecha:$('#fc-fecha').value,usuario:'Admin',obs:obs?`Compra · ${obs}`:`Compra a ${prov.nombre}`});
-  dbGuardar(); closeModal(); renderCompras(); renderProductos(); renderDashboard();
-  toast(`Entrada registrada · ${p.nombre} ahora tiene ${p.stock} uds`);
+  const btn=$('#modal-overlay .btn-primary'); if(btn) btn.disabled=true;
+  try{
+    // La ENTRADA la registra el backend (autoridad): valida, suma el stock en
+    // transacción y guarda compra + movimiento con stock antes/después.
+    const r=await apiPostAuth('/api/inventario/movimiento',{tipo:'entrada',producto_id:pid,cantidad:cant,precio,proveedor_id:prov?prov.id:null,fecha:$('#fc-fecha').value,motivo:'Compra',observacion:obs?`Compra · ${obs}`:(prov?`Compra a ${prov.nombre}`:'Compra')});
+    await refrescarEstado();
+    closeModal(); renderCompras(); renderProductos(); renderDashboard(); renderMovimientos();
+    toast(`Entrada registrada · ${r.producto.nombre} ahora tiene ${r.producto.stock} uds`);
+  }catch(e){ if(btn) btn.disabled=false; toast(e.message||'No se pudo registrar la compra','error'); }
 }
 
 /* ── VENTAS ── */
@@ -973,19 +977,25 @@ function openFormVenta(){
   ['fv-prod','fv-cant','fv-precio'].forEach(id=>document.getElementById(id).addEventListener('input',upd));
 }
 
-function saveVenta(){
+async function saveVenta(){
   const ok=validar([['fv-prod',noVacio,'Elige un producto'],['fv-cli',noVacio,'Elige un cliente'],['fv-cant',entPos,'Cantidad inválida'],['fv-precio',numPos,'Precio inválido'],['fv-fecha',noVacio,'Elige una fecha']]);
   if(!ok) return;
   const pid=+$('#fv-prod').value,cant=+$('#fv-cant').value,precio=+$('#fv-precio').value;
   const p=prodPor(pid);
-  if(cant>p.stock){ validar([['fv-cant',()=>false,`Solo hay ${p.stock} uds`]]); return; }
-  const cli=cliPor(+$('#fv-cli').value); p.stock-=cant;
+  if(p&&cant>p.stock){ validar([['fv-cant',()=>false,`Solo hay ${p.stock} uds`]]); return; } // pre-check de UX; el backend igual lo valida
+  const cli=cliPor(+$('#fv-cli').value);
   const total=+(cant*precio).toFixed(2);
-  DB.ventas.push({id:nuevoId('venta'),producto_id:pid,cliente_id:cli.id,cantidad:cant,precio,fecha:$('#fv-fecha').value,total});
-  DB.movimientos.push({id:nuevoId('movimiento'),tipo:'salida',producto_id:pid,cantidad:cant,fecha:$('#fv-fecha').value,usuario:'Admin',obs:`Venta a ${cli.nombre}`});
-  dbGuardar(); closeModal(); renderVentas(); renderProductos(); renderDashboard();
-  if(p.stock<=p.stock_min) toast(`"${p.nombre}" quedó con stock bajo (${p.stock} uds)`,'warn');
-  toast(`Venta registrada por ${dinero(total)}`);
+  const btn=$('#modal-overlay .btn-primary'); if(btn) btn.disabled=true;
+  try{
+    // La SALIDA la registra el backend: valida stock (nunca negativo), resta en
+    // transacción y guarda venta + movimiento con stock antes/después.
+    const r=await apiPostAuth('/api/inventario/movimiento',{tipo:'salida',producto_id:pid,cantidad:cant,precio,cliente_id:cli?cli.id:null,fecha:$('#fv-fecha').value,motivo:'Venta',observacion:cli?`Venta a ${cli.nombre}`:'Venta'});
+    await refrescarEstado();
+    closeModal(); renderVentas(); renderProductos(); renderDashboard(); renderMovimientos();
+    const pf=prodPor(pid);
+    if(pf&&pf.stock<=pf.stock_min) toast(`"${r.producto.nombre}" quedó con stock bajo (${r.producto.stock} uds)`,'warn');
+    toast(`Venta registrada por ${dinero(total)}`);
+  }catch(e){ if(btn) btn.disabled=false; toast(e.message||'No se pudo registrar la venta','error'); }
 }
 
 /* ── MOVIMIENTOS con gráficos ── */
@@ -1075,16 +1085,21 @@ function openFormAjuste(){
     </div>`);
 }
 
-function saveAjuste(){
+async function saveAjuste(){
   const ok=validar([['fa-prod',noVacio,'Elige un producto'],['fa-cant',entPos,'Cantidad inválida'],['fa-motivo',noVacio,'Escribe el motivo'],['fa-fecha',noVacio,'Elige una fecha']]);
   if(!ok) return;
   const pid=+$('#fa-prod').value, cant=+$('#fa-cant').value, signo=$('#fa-signo').value, motivo=$('#fa-motivo').value.trim();
   const p=prodPor(pid);
-  if(signo==='-'&&cant>p.stock){ validar([['fa-cant',()=>false,`Solo hay ${p.stock} en stock`]]); return; }
-  p.stock += (signo==='+'?cant:-cant);
-  DB.movimientos.push({id:nuevoId('movimiento'),tipo:'ajuste',signo,producto_id:pid,cantidad:cant,fecha:$('#fa-fecha').value,usuario:'Admin',obs:`Ajuste · ${motivo}`});
-  dbGuardar(); closeModal(); renderMovimientos(); renderProductos(); renderDashboard();
-  toast(`Ajuste registrado · "${p.nombre}" ahora tiene ${p.stock} uds`);
+  if(signo==='-'&&p&&cant>p.stock){ validar([['fa-cant',()=>false,`Solo hay ${p.stock} en stock`]]); return; } // pre-check de UX; el backend igual lo valida
+  const btn=$('#modal-overlay .btn-primary'); if(btn) btn.disabled=true;
+  try{
+    // El AJUSTE (+/−) lo registra el backend: valida, aplica en transacción y
+    // guarda el movimiento con stock antes/después.
+    const r=await apiPostAuth('/api/inventario/movimiento',{tipo:'ajuste',signo,producto_id:pid,cantidad:cant,fecha:$('#fa-fecha').value,motivo,observacion:`Ajuste · ${motivo}`});
+    await refrescarEstado();
+    closeModal(); renderMovimientos(); renderProductos(); renderDashboard();
+    toast(`Ajuste registrado · "${r.producto.nombre}" ahora tiene ${r.producto.stock} uds`);
+  }catch(e){ if(btn) btn.disabled=false; toast(e.message||'No se pudo registrar el ajuste','error'); }
 }
 
 /* ── PEDIDOS ── */

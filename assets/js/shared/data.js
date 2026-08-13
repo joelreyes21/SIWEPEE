@@ -127,6 +127,16 @@ async function apiPut(ruta, datos){
   if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
   return j;
 }
+/* POST autenticado (usa el token de sesión) */
+async function apiPostAuth(ruta, datos){
+  const tok = bsToken();
+  const r = await fetch(API_BASE + ruta, {
+    method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+tok}, body: JSON.stringify(datos)
+  });
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+  return j;
+}
 function guardarSesionToken(token, role, nombre){
   try{
     localStorage.setItem('bs_token', token || '');
