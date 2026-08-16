@@ -432,5 +432,6 @@ const dinero  = n => `${DB.config.moneda} ${Number(n||0).toLocaleString('es-HN',
 const esc     = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fechaCorta = f => { if(!f) return '—'; const [a,m,d]=f.split('-'); const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${+d} ${M[+m-1]} ${a}`; };
 
-/* Helper mensajes */
+/* Helper mensajes — usado por admin/main.js (badge de chat en Pedidos) */
+const mensajesNoLeidos = (pedId, autor) => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId&&m.autor!==autor&&!m.leido).length;
 const msgsDePedido = pedId => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId).sort((a,b)=>a.id-b.id);
