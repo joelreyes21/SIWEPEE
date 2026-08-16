@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SIWEPE · © 2026 Joel Reyes. Todos los derechos reservados. · Prohibida su reproduccion o distribucion sin autorizacion. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIWEPE · Descubre tiendas y productos</title>
+<meta name="theme-color" content="#4F86C6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6F9FC; --cream-dark:#F0F5FB;
+  --rose:#4F86C6; --rose-light:#EAF2FB; --rose-mid:#A9CBEC; --rose-dark:#3A6DA8;
+  --text-dark:#21303D; --text-mid:#5A6B78; --text-soft:#9AAAB6;
+  --surface:#FFFFFF; --border:#E2EBF3;
+  --shadow-sm:0 2px 10px rgba(40,80,140,.07);
+  --shadow-md:0 8px 28px rgba(40,80,140,.10);
+  --shadow-lg:0 20px 56px rgba(40,80,140,.14);
+  --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:30px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+*,*::before,*::after{font-family:'Manrope',sans-serif;}
+body{font-family:'Manrope',sans-serif;background:var(--cream);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+.bg-orbs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;}
+.orb.a{width:420px;height:420px;background:var(--rose-light);top:-120px;left:-100px;}
+.orb.b{width:360px;height:360px;background:var(--rose-mid);bottom:-120px;right:-80px;opacity:.35;}
+.orb.c{width:300px;height:300px;background:#E6EEF8;top:40%;right:20%;opacity:.4;}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(246,249,252,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{max-width:1180px;margin:0 auto;height:70px;display:flex;align-items:center;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,var(--rose),var(--rose-mid));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#fff;box-shadow:0 8px 20px rgba(79,134,198,.35);}
+.brand-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.01em;}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid transparent;transition:all .18s;}
+.nav-btn.ghost{color:var(--text-mid);}
+.nav-btn.ghost:hover{color:var(--rose-dark);background:var(--rose-light);}
+.nav-btn.solid{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.32);}
+.nav-btn.solid:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.nav-btn.subtle{padding:8px 6px;font-weight:500;font-size:13px;color:var(--text-soft);}
+.nav-btn.subtle:hover{color:var(--rose-dark);background:none;}
+
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* hero + buscador */
+.disc-hero{text-align:center;padding:56px 0 8px;}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rose);background:var(--rose-light);padding:7px 16px;border-radius:999px;margin-bottom:20px;}
+.disc-hero h1{font-family:'Fraunces',serif;font-size:clamp(30px,4.6vw,46px);font-weight:600;line-height:1.08;letter-spacing:-.02em;margin-bottom:14px;}
+.disc-hero p{font-size:15.5px;color:var(--text-mid);max-width:520px;margin:0 auto;}
+.search-wrap{max-width:580px;margin:28px auto 0;position:relative;}
+.search-wrap input{width:100%;padding:16px 20px 16px 50px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:15px;outline:none;box-shadow:var(--shadow-sm);transition:all .2s;color:var(--text-dark);}
+.search-wrap input:focus{border-color:var(--rose);box-shadow:0 0 0 4px var(--rose-light);}
+.search-ic{position:absolute;left:19px;top:50%;transform:translateY(-50%);color:var(--text-soft);pointer-events:none;display:flex;}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:var(--cream-dark);color:var(--text-mid);display:none;align-items:center;justify-content:center;}
+.search-clear:hover{background:var(--rose-light);color:var(--rose-dark);}
+.search-wrap.has-q .search-clear{display:flex;}
+.search-hint{text-align:center;font-size:12.5px;color:var(--text-soft);margin-top:10px;}
+
+/* secciones */
+.section{padding:46px 0 10px;}
+.section.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1);}
+.section.reveal-in{opacity:1;transform:none;}
+@media(prefers-reduced-motion:reduce){.section.reveal{opacity:1;transform:none;transition:none;}}
+.section-head{text-align:center;margin-bottom:28px;}
+.section-head h2{font-family:'Fraunces',serif;font-size:29px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px;}
+.section-head p{color:var(--text-soft);font-size:14px;}
+
+/* grids (tiendas / productos) */
+.productos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s;cursor:pointer;display:flex;flex-direction:column;}
+.prod-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.prod-cover{height:150px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.prod-cover img{width:100%;height:100%;object-fit:cover;}
+.prod-cover span{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--rose);}
+.prod-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.prod-tienda{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--rose-dark);}
+.prod-body h4{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.3;}
+.prod-precio{margin-top:auto;font-size:15.5px;font-weight:700;color:var(--text-dark);}
+.empty-state{grid-column:1/-1;text-align:center;padding:56px 24px;color:var(--text-soft);}
+.empty-state .es-ic{font-size:44px;margin-bottom:12px;}
+.empty-state h3{font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:var(--text-mid);margin-bottom:8px;}
+.empty-state .es-btn{margin-top:18px;display:inline-block;padding:12px 24px;border-radius:999px;background:var(--rose);color:#fff;font-weight:700;font-size:14px;}
+
+/* carrusel destacadas */
+#destacadas-sec{display:none;}
+.carousel{position:relative;overflow:hidden;}
+.cs-track{display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);}
+.cs-slide{flex:0 0 100%;min-width:0;padding:4px 52px;}
+.cs-page{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.cs-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:26px 22px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;transition:transform .24s,box-shadow .24s;min-width:0;}
+.cs-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.cs-logo{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;margin-bottom:8px;}
+.cs-logo img{width:100%;height:100%;object-fit:cover;}
+.cs-logo span{font-family:'Fraunces',serif;font-size:27px;font-weight:600;color:var(--rose);}
+.cs-rubro{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--rose-dark);}
+.cs-card h4{font-family:'Fraunces',serif;font-size:18px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cs-ubic{font-size:12.5px;color:var(--text-soft);}
+.cs-arrow{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;color:var(--text-mid);cursor:pointer;transition:all .2s;z-index:2;}
+.cs-arrow:hover{background:var(--rose-light);color:var(--rose-dark);}
+.cs-arrow.prev{left:2px;} .cs-arrow.next{right:2px;}
+.carousel.cs-una-pagina .cs-arrow{display:none;}
+.cs-dots{display:flex;justify-content:center;gap:8px;padding:14px 0 18px;}
+.cs-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:none;cursor:pointer;transition:all .2s;padding:0;}
+.cs-dot.active{background:var(--rose);width:22px;border-radius:999px;}
+@media(max-width:980px){ .cs-page{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:640px){ .cs-page{grid-template-columns:repeat(1,1fr);} .cs-slide{padding:4px 44px;} }
+
+.footer{position:relative;z-index:1;text-align:center;padding:40px 20px 48px;color:var(--text-soft);font-size:13px;border-top:1px solid var(--border);margin-top:40px;}
+
+@media(max-width:760px){
+  .nav-in{padding:0 18px;}
+}
+@media(max-width:640px){
+  .cs-arrow{display:none;}
+}
+@media(max-width:560px){
+  .wrap{padding:0 16px;}
+  .disc-hero{padding:38px 0 6px;}
+  .disc-hero h1{font-size:clamp(31px,9vw,39px);}
+  .disc-hero p{font-size:14.5px;}
+  .search-wrap{margin-top:22px;}
+  .search-wrap input{min-height:54px;padding:14px 46px;font-size:16px;}
+  .section{padding-top:38px;}
+  .section-head{margin-bottom:22px;}
+  .section-head h2{font-size:27px;}
+  .cs-slide{padding:4px 2px;}
+  .cs-card{padding:23px 18px;}
+  .productos-grid{gap:14px;}
+  .prod-cover{height:140px;}
+}
+@media(hover:none){
+  .cs-card:hover,.prod-card:hover{transform:none;}
+}
+</style>
+<link rel="icon" type="image/png" href="../assets/img/siwepe-mark.png">
+<link rel="stylesheet" href="../assets/css/platform.css?v=20260813.5">
+</head>
+<body>
+
+<div class="bg-orbs"><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <div class="brand-mark"><img src="../assets/img/siwepe-mark.png" alt=""></div>
+      <span class="brand-name">SIWEPE</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn ghost" href="index.html">Inicio</a>
+      <a class="nav-btn subtle" href="admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
+      <a class="nav-btn solid" href="index.html?crear=1">Crear tu empresa</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="disc-hero">
+    <span class="eyebrow">Descubrir</span>
+    <h1>Encuentra tu próxima tienda favorita</h1>
+    <p>Explora todos los negocios de SIWEPE y lo que están vendiendo, todo en un solo lugar.</p>
+    <div class="search-wrap" id="search-wrap">
+      <span class="search-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.2-4.2"/></svg></span>
+      <input id="buscador" type="search" placeholder="Buscar una tienda o un producto…" autocomplete="off" maxlength="100">
+      <button class="search-clear" id="btn-limpiar-busq" title="Limpiar búsqueda">×</button>
+    </div>
+    <p class="search-hint" id="search-hint"></p>
+  </section>
+
+  <!-- DESTACADAS -->
+  <section class="section" id="destacadas-sec">
+    <div class="section-head">
+      <h2>Tiendas destacadas</h2>
+      <p>Las más visitadas de la plataforma</p>
+    </div>
+    <div class="carousel" id="carousel">
+      <button class="cs-arrow prev" id="cs-prev" aria-label="Anterior"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="cs-track" id="cs-track"></div>
+      <button class="cs-arrow next" id="cs-next" aria-label="Siguiente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+    <div class="cs-dots" id="cs-dots"></div>
+  </section>
+
+  <!-- TIENDAS -->
+  <section class="section" id="tiendas-sec">
+    <div class="section-head">
+      <h2>Todas las tiendas</h2>
+      <p id="tiendas-count">Cargando…</p>
+    </div>
+    <div class="productos-grid" id="tiendas-grid">
+      <div class="empty-state"><div class="es-ic"></div><h3>Cargando tiendas…</h3></div>
+    </div>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <section class="section" id="productos-sec">
+    <div class="section-head">
+      <h2>Todos los productos</h2>
+      <p id="productos-count">Cargando…</p>
+    </div>
+    <div class="productos-grid" id="productos-grid">
+      <div class="empty-state"><div class="es-ic"></div><h3>Cargando productos…</h3></div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  © <span id="anio"></span> SIWEPE · Plataforma de tiendas en línea · Todos los derechos reservados
+  · <a href="terminos.html" style="color:inherit;text-decoration:underline">Términos, privacidad y cookies</a>
+</footer>
+
+<script>
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://backendsiwepe-production.up.railway.app';
+
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtPrecio = (moneda, val) => `${moneda||'L'} ${Number(val||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const normaliza = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function coincide(nombre, q){
+  if(!q) return true;
+  const n = normaliza(nombre);
+  return n.startsWith(q) || n.split(/\s+/).some(w=>w.startsWith(q));
+}
+
+let EMPRESAS = [], PRODUCTOS = [];
+
+async function cargarTodo(){
+  const [rE, rP] = await Promise.allSettled([
+    fetch(API_BASE + '/api/empresas').then(r=>r.ok?r.json():[]),
+    fetch(API_BASE + '/api/marketplace').then(r=>r.ok?r.json():{productos:[]}),
+  ]);
+  EMPRESAS = rE.status==='fulfilled' && Array.isArray(rE.value) ? rE.value : [];
+  PRODUCTOS = rP.status==='fulfilled' && Array.isArray(rP.value.productos) ? rP.value.productos : [];
+  renderCarousel();
+  aplicarFiltro('');
+}
+
+/* ── Tiendas ── */
+function tarjetaTienda(e){
+  const ini = (e.nombre||'T')[0].toUpperCase();
+  const img = e.logo ? `<img src="${e.logo}" alt="">` : `<span>${esc(ini)}</span>`;
+  const ubic = [e.ciudad, e.pais].filter(Boolean).join(', ');
+  const url = 'tienda.html?e=' + encodeURIComponent(e.slug || e.id) + '&app=20260813.4';
+  return `<a class="prod-card" href="${url}">
+    <div class="prod-cover">${img}</div>
+    <div class="prod-body">
+      <span class="prod-tienda">${esc(e.rubro || 'Tienda')}</span>
+      <h4>${esc(e.nombre || 'Tienda')}</h4>
+      <span class="prod-precio" style="color:var(--text-soft);font-weight:500">${esc(ubic || 'SIWEPE')}</span>
+    </div>
+  </a>`;
+}
+function renderTiendas(lista, q){
+  const grid = document.getElementById('tiendas-grid');
+  const count = document.getElementById('tiendas-count');
+  if(!EMPRESAS.length){
+    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Aún no hay tiendas</h3><p>Sé el primero en crear tu tienda en SIWEPE.</p><a class="es-btn" href="index.html?crear=1">Crear la primera empresa</a></div>`;
+    count.textContent = '';
+    return;
+  }
+  if(!lista.length){
+    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Sin resultados</h3><p>Ninguna tienda coincide con "${esc(q)}".</p></div>`;
+    count.textContent = '0 tiendas';
+    return;
+  }
+  grid.innerHTML = lista.map(tarjetaTienda).join('');
+  count.textContent = `${lista.length} tienda${lista.length===1?'':'s'}`;
+}
+
+/* ── Productos ── */
+function tarjetaProducto(p){
+  const ini = (p.nombre||'P')[0].toUpperCase();
+  const img = p.imagen ? `<img src="${p.imagen}" alt="">` : `<span>${esc(ini)}</span>`;
+  const moneda = (p.empresa && p.empresa.moneda) || 'L';
+  const url = 'tienda.html?e=' + encodeURIComponent((p.empresa&&p.empresa.slug) || '') + '&app=20260813.4';
+  return `<a class="prod-card" href="${url}">
+    <div class="prod-cover">${img}</div>
+    <div class="prod-body">
+      <span class="prod-tienda">${esc((p.empresa&&p.empresa.nombre)||'Tienda')}</span>
+      <h4>${esc(p.nombre||'Producto')}</h4>
+      <span class="prod-precio">${fmtPrecio(moneda, p.precio_venta)}</span>
+    </div>
+  </a>`;
+}
+function renderProductos(lista, q){
+  const grid = document.getElementById('productos-grid');
+  const count = document.getElementById('productos-count');
+  if(!PRODUCTOS.length){
+    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Aún no hay productos publicados</h3><p>Las tiendas de SIWEPE todavía no cargan su catálogo.</p></div>`;
+    count.textContent = '';
+    return;
+  }
+  if(!lista.length){
+    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Sin resultados</h3><p>Ningún producto coincide con "${esc(q)}".</p></div>`;
+    count.textContent = '0 productos';
+    return;
+  }
+  grid.innerHTML = lista.slice(0,60).map(tarjetaProducto).join('');
+  count.textContent = `${lista.length} producto${lista.length===1?'':'s'}` + (lista.length>60 ? ' (mostrando 60)' : '');
+}
+
+/* ── Buscador (click = ver todo, escribir = filtra por inicio de palabra) ── */
+function aplicarFiltro(qCrudo){
+  const q = normaliza(qCrudo.trim());
+  const searchWrap = document.getElementById('search-wrap');
+  searchWrap.classList.toggle('has-q', !!qCrudo.trim());
+  document.getElementById('destacadas-sec').style.display = (q && EMPRESAS.length) ? 'none' : (EMPRESAS.length ? 'block' : 'none');
+
+  const tiendasFiltradas = EMPRESAS.filter(e => coincide(e.nombre, q) || coincide(e.rubro, q));
+  const productosFiltrados = PRODUCTOS.filter(p => coincide(p.nombre, q) || coincide(p.empresa && p.empresa.nombre, q));
+  renderTiendas(tiendasFiltradas, qCrudo);
+  renderProductos(productosFiltrados, qCrudo);
+
+  const hint = document.getElementById('search-hint');
+  hint.textContent = q ? `${tiendasFiltradas.length + productosFiltrados.length} resultado(s) para "${qCrudo.trim()}"` : '';
+}
+const buscador = document.getElementById('buscador');
+buscador.addEventListener('input', () => aplicarFiltro(buscador.value));
+document.getElementById('btn-limpiar-busq').addEventListener('click', () => { buscador.value=''; buscador.focus(); aplicarFiltro(''); });
+
+/* ── Carrusel de destacadas (más visitadas): varias tarjetas por página,
+   avanza una página entera cada 4.5s, la cantidad de tarjetas por página
+   se adapta al ancho de pantalla (3 / 2 / 1) igual que el CSS. ── */
+let csIdx = 0, csLen = 0, csTimer = null;
+function tarjetasPorVista(){
+  const w = window.innerWidth;
+  if(w < 640) return 1;
+  if(w < 980) return 2;
+  return 3;
+}
+function tarjetaDestacada(e){
+  const ini = (e.nombre||'T')[0].toUpperCase();
+  const img = e.logo ? `<img src="${e.logo}" alt="">` : `<span>${esc(ini)}</span>`;
+  const ubic = [e.ciudad, e.pais].filter(Boolean).join(', ');
+  const url = 'tienda.html?e=' + encodeURIComponent(e.slug || e.id) + '&app=20260813.4';
+  return `<a class="cs-card" href="${url}">
+    <div class="cs-logo">${img}</div>
+    <span class="cs-rubro">${esc(e.rubro || 'Tienda')}</span>
+    <h4>${esc(e.nombre || 'Tienda')}</h4>
+    <span class="cs-ubic">${esc(ubic || 'SIWEPE')}</span>
+  </a>`;
+}
+function renderCarousel(){
+  const sec = document.getElementById('destacadas-sec');
+  const destacadas = [...EMPRESAS].sort((a,b)=>(b.visitas||0)-(a.visitas||0)).slice(0,9);
+  if(!destacadas.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  const porVista = tarjetasPorVista();
+  const paginas = [];
+  for(let i=0;i<destacadas.length;i+=porVista) paginas.push(destacadas.slice(i,i+porVista));
+  document.getElementById('cs-track').innerHTML = paginas.map(pagina =>
+    `<div class="cs-slide"><div class="cs-page">${pagina.map(tarjetaDestacada).join('')}</div></div>`
+  ).join('');
+  document.getElementById('cs-dots').innerHTML = paginas.length>1
+    ? paginas.map((_,i)=>`<button class="cs-dot" data-i="${i}" aria-label="Página ${i+1}"></button>`).join('') : '';
+  document.getElementById('carousel').classList.toggle('cs-una-pagina', paginas.length<=1);
+  csLen = paginas.length; csIdx = 0;
+  irACarrusel(0);
+  reiniciarAutoplay();
+}
+function irACarrusel(i){
+  csIdx = ((i % csLen) + csLen) % csLen;
+  document.getElementById('cs-track').style.transform = `translateX(-${csIdx*100}%)`;
+  document.querySelectorAll('.cs-dot').forEach((d,idx)=>d.classList.toggle('active', idx===csIdx));
+}
+function reiniciarAutoplay(){
+  clearInterval(csTimer);
+  if(csLen>1) csTimer = setInterval(()=>irACarrusel(csIdx+1), 4500);
+}
+document.getElementById('cs-dots').addEventListener('click', e=>{ const b=e.target.closest('.cs-dot'); if(b){ irACarrusel(+b.dataset.i); reiniciarAutoplay(); } });
+document.getElementById('cs-prev').addEventListener('click', ()=>{ irACarrusel(csIdx-1); reiniciarAutoplay(); });
+document.getElementById('cs-next').addEventListener('click', ()=>{ irACarrusel(csIdx+1); reiniciarAutoplay(); });
+document.getElementById('carousel').addEventListener('mouseenter', ()=>clearInterval(csTimer));
+document.getElementById('carousel').addEventListener('mouseleave', reiniciarAutoplay);
+
+/* Si cambia cuántas tarjetas caben por fila (ej. redimensionar la ventana),
+   re-arma las páginas para que sigan alineadas con el CSS. */
+let _csResizeT=null, _csPorVista=tarjetasPorVista();
+window.addEventListener('resize', ()=>{
+  clearTimeout(_csResizeT);
+  _csResizeT = setTimeout(()=>{
+    const actual = tarjetasPorVista();
+    if(actual!==_csPorVista){ _csPorVista=actual; if(EMPRESAS.length) renderCarousel(); }
+  }, 200);
+});
+
+/* ── Animación de entrada al hacer scroll ── */
+(function(){
+  const els = document.querySelectorAll('.section');
+  if(!('IntersectionObserver' in window) || !els.length) return;
+  els.forEach(el=>el.classList.add('reveal'));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('reveal-in'); io.unobserve(en.target); } });
+  }, { threshold:.1 });
+  els.forEach(el=>io.observe(el));
+})();
+
+cargarTodo();
+</script>
+</body>
+</html>

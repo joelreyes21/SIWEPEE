@@ -14,30 +14,42 @@ const API_BASE = (typeof location !== 'undefined'
   : 'https://backendsiwepe-production.up.railway.app';
 
 function bsToken(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
+function bsRole(){ try{ return localStorage.getItem('bs_role')||''; }catch(e){ return ''; } }
 
-/* Empresa/tienda activa: viene en la URL como ?e=slug (o id). Se recuerda en
-   localStorage para que sobreviva a la navegación dentro de la misma tienda. */
+/* Empresa/tienda activa: el formato actual es ?e=slug. También se aceptan
+   ?empresa= y ?tienda= para que enlaces guardados de versiones anteriores no
+   abran una tienda genérica ni rompan el acceso del cliente. */
 function bsEmpresa(){
   try{
-    const u = new URLSearchParams(location.search).get('e');
+    const qs = new URLSearchParams(location.search);
+    const u = qs.get('e') || qs.get('empresa') || qs.get('tienda');
     if(u){ localStorage.setItem('bs_empresa', u); return u; }
     return localStorage.getItem('bs_empresa') || '';
   }catch(e){ return ''; }
 }
 
 /* Cache local (respaldo si el backend no está disponible).
-   Se guarda por empresa (bs_empresa) para que el respaldo de una tienda
-   nunca se muestre encima de otra si el fetch de la tienda actual falla. */
+   Se guarda por empresa para que el respaldo de una tienda nunca se muestre
+   encima de otra si el fetch de la tienda actual falla.
+   IMPORTANTE: al escribir, la clave sale del `db` recién cargado (su propio
+   empresa_id/slug), NUNCA de bsEmpresa() — esa función cae a un valor viejo
+   de localStorage en páginas sin ?e= (p. ej. admin.html), y si se usara aquí,
+   el estado completo de un admin podría guardarse bajo la clave de la ÚLTIMA
+   tienda que visitó como comprador, envenenando el respaldo de esa tienda
+   para cualquiera que la abra después. Al leer sí se usa bsEmpresa() (la
+   tienda que se está pidiendo ahora), pero se valida contra lo guardado
+   antes de confiar en ello (ver bootstrapDB). */
 const almacen = {
-  leer:  ()=>{ try{ return localStorage.getItem(BS_CLAVE + ':' + (bsEmpresa()||'_')); }catch(e){ return null; } },
-  escribir: v=>{ try{ localStorage.setItem(BS_CLAVE + ':' + (bsEmpresa()||'_'), v); }catch(e){} }
+  leer:  (clave)=>{ try{ return localStorage.getItem(BS_CLAVE + ':' + (clave||'_')); }catch(e){ return null; } },
+  escribir: (v,db)=>{ try{ const clave=(db&&(db.empresa&&db.empresa.slug||db.empresa_id))||bsEmpresa()||'_'; localStorage.setItem(BS_CLAVE + ':' + clave, v); }catch(e){} }
 };
 
 let DB = null;
 let _guardandoHasta = 0;   // evita pisar un guardado reciente al refrescar
+let _colaGuardado = Promise.resolve();
 
 function _esqueletoDB(){
-  return { config:{nombre:'SIWEPE',logo:'',moneda:'L',tema:'cielo',pinAdmin:'1234',banners:[],pago:{}},
+  return { empresa_id:null, empresa:null, _revision:0, config:{nombre:'SIWEPE',logo:'',moneda:'L',tema:'cielo',banners:[],galeria:[],pago:{}},
     seq:{}, categorias:[], proveedores:[], clientes:[], productos:[], compras:[], ventas:[], movimientos:[], pedidos:[], mensajes:[] };
 }
 
@@ -46,49 +58,48 @@ function _esqueletoDB(){
    - Invitado (sin token): solo catálogo público (/api/catalog).
    - Sin backend: respaldo local/semilla. */
 async function bootstrapDB(opts){
-  let tok = bsToken();
-  /* Un token de cliente pertenece a UNA tienda (empresa_id va adentro del JWT).
-     Si estás logueado como cliente de la Tienda A y navegás a la URL de la
-     Tienda B, seguir usando ese token mezclaría los datos de A dentro de la
-     página de B. bsEmpresa() ya cambia con la URL; acá comparamos contra la
-     empresa con la que se guardó la sesión y, si no coincide, se descarta
-     (la página actual entra como invitada, no como sesión de otra tienda). */
-  if(opts && opts.checkEmpresa && tok){
-    // La VITRINA siempre muestra la tienda del ?e=slug (catálogo público). No se
-    // usa /api/state acá (devolvería la empresa del token —la tuya—, no la que
-    // elegiste). Si la sesión guardada es de OTRA tienda, se descarta del todo;
-    // en cualquier caso, esta carga usa el catálogo de la tienda elegida.
-    const empresaActual = bsEmpresa();
-    let empresaToken=''; try{ empresaToken = localStorage.getItem('bs_token_empresa')||''; }catch(e){}
-    if(empresaActual && empresaToken && empresaActual!==empresaToken){
-      limpiarSesionToken();
-      try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
-    }
-    tok='';
-  }
+  const tok=bsToken(), role=bsRole();
   try{
-    // Con sesión: estado completo (el token ya sabe de qué empresa es).
-    // Invitado: catálogo público de la tienda indicada en la URL (?e=slug).
-    const ruta = tok ? '/api/state' : ('/api/catalog?empresa=' + encodeURIComponent(bsEmpresa()));
-    const r = await fetch(API_BASE + ruta, tok ? { headers:{ 'Authorization':'Bearer '+tok } } : undefined);
-    if(!r.ok) throw new Error('estado ' + r.status);
-    const data = await r.json();
-    if(tok){
-      DB = data;
-    }else{
+    const comoComprador=tok&&(role==='cliente'||(role==='admin'&&opts&&opts.asBuyer));
+    if(comoComprador){
+      const [catalogo,perfil,historial]=await Promise.all([
+        apiGet('/api/catalog?empresa='+encodeURIComponent(bsEmpresa())),
+        apiGet('/api/clientes/mi'),
+        apiGet('/api/mis-pedidos')
+      ]);
       DB = _esqueletoDB();
-      DB.config = Object.assign(DB.config, data.config||{});
-      DB.categorias = data.categorias || [];
-      DB.productos = data.productos || [];
+      DB.empresa_id=catalogo.empresa_id;
+      DB.empresa=catalogo.empresa||null;
+      DB.config=Object.assign(DB.config,catalogo.config||{});
+      DB.categorias=catalogo.categorias||[];
+      DB.productos=catalogo.productos||[];
+      DB.clientes=[perfil];
+      DB.pedidos=historial.pedidos||[];
+      DB.mensajes=DB.pedidos.flatMap(p=>(p.mensajes||[]).map(m=>({...m,empresa_id:m.empresa_id||p.empresa?.id,pedido_id:m.pedido_id||p.id})));
+    }else if(tok){
+      const r=await fetch(API_BASE+'/api/state',{headers:{'Authorization':'Bearer '+tok}});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(j.error||('estado '+r.status));
+      DB=j;
+    }else{
+      const r=await fetch(API_BASE+'/api/catalog?empresa='+encodeURIComponent(bsEmpresa()));
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(data.error||('catálogo '+r.status));
+      DB=_esqueletoDB();
+      DB.empresa_id=data.empresa_id;
+      DB.empresa=data.empresa||null;
+      DB.config=Object.assign(DB.config,data.config||{});
+      DB.categorias=data.categorias||[];
+      DB.productos=data.productos||[];
     }
-    almacen.escribir(JSON.stringify(DB));
+    // El estado de /api/state (admin/proveedor autenticado, rama `else if(tok)`)
+    // no trae empresa_id/slug en la respuesta — no hay forma fiable de
+    // saber bajo qué tienda cachearlo, así que mejor NO se guarda ahí:
+    // guardarlo bajo bsEmpresa() podría ser la clave de otra tienda que este
+    // mismo admin visitó como comprador, contaminando su respaldo.
+    if(DB.empresa_id!=null || (DB.empresa&&DB.empresa.slug)) almacen.escribir(JSON.stringify(DB), DB);
   }catch(e){
-    if(tok){
-      /* Con sesión, un fallo del backend (token inválido/vencido, cuenta sin
-         empresa asociada como el admin de plataforma, etc.) NO debe tapar el
-         error mostrando el respaldo local como si fuera el estado actual:
-         ese respaldo puede pertenecer a OTRA cuenta/tienda probada antes en
-         este mismo navegador. Se corta la sesión y se avisa a quien llamó. */
+    if(tok&&(e.status===401||e.status===403)){
       limpiarSesionToken();
       try{ localStorage.removeItem('bs_sesion_cli'); localStorage.removeItem('bs_sesion_admin'); }catch(e2){}
       DB = _esqueletoDB();
@@ -96,8 +107,19 @@ async function bootstrapDB(opts){
       throw e;
     }
     console.warn('Sin conexión al backend, usando datos locales:', e.message);
-    const raw = almacen.leer();
-    DB = raw ? JSON.parse(raw) : _esqueletoDB();
+    // Solo se confía en el respaldo si es justo el de la tienda que se pidió
+    // ahora (bsEmpresa()) — si el guardado más reciente bajo esa clave
+    // pertenece a otra empresa (dato corrupto de una versión anterior, o
+    // nunca se visitó esta tienda antes), mejor mostrar vacío que mezclar.
+    const empresaPedida = bsEmpresa();
+    const raw = almacen.leer(empresaPedida);
+    let candidato = null;
+    try{ candidato = raw ? JSON.parse(raw) : null; }catch(e2){ candidato = null; }
+    const coincide = candidato && empresaPedida && (
+      String(candidato.empresa && candidato.empresa.slug || '') === String(empresaPedida) ||
+      String(candidato.empresa_id || '') === String(empresaPedida)
+    );
+    DB = coincide ? candidato : _esqueletoDB();
   }
   _migrar();
   aplicarTema(DB.config.tema);
@@ -110,7 +132,19 @@ async function apiPost(ruta, datos){
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)
   });
   const j = await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+  if(!r.ok){ const e=new Error(j.error || ('Error ' + r.status)); e.status=r.status; throw e; }
+  return j;
+}
+
+async function apiPostAuth(ruta, datos){
+  const tok=bsToken();
+  const r=await fetch(API_BASE+ruta,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+    body:JSON.stringify(datos||{})
+  });
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){ const e=new Error(j.error||('Error '+r.status)); Object.assign(e,j); e.status=r.status; throw e; }
   return j;
 }
 
@@ -119,7 +153,7 @@ async function apiGet(ruta){
   const tok = bsToken();
   const r = await fetch(API_BASE + ruta, tok ? { headers:{ 'Authorization':'Bearer '+tok } } : undefined);
   const j = await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+  if(!r.ok){ const e=new Error(j.error || ('Error ' + r.status)); Object.assign(e,j); e.status=r.status; throw e; }
   return j;
 }
 async function apiPut(ruta, datos){
@@ -128,17 +162,21 @@ async function apiPut(ruta, datos){
     method:'PUT', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+tok}, body: JSON.stringify(datos)
   });
   const j = await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+  if(!r.ok){ const e=new Error(j.error || ('Error ' + r.status)); e.status=r.status; throw e; }
   return j;
 }
-/* POST autenticado (usa el token de sesión) */
-async function apiPostAuth(ruta, datos){
-  const tok = bsToken();
-  const r = await fetch(API_BASE + ruta, {
-    method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+tok}, body: JSON.stringify(datos)
-  });
-  const j = await r.json().catch(()=>({}));
-  if(!r.ok) throw new Error(j.error || ('Error ' + r.status));
+async function apiPatch(ruta, datos){
+  const tok=bsToken();
+  const r=await fetch(API_BASE+ruta,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify(datos||{})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){ const e=new Error(j.error||('Error '+r.status)); e.status=r.status; throw e; }
+  return j;
+}
+async function apiDelete(ruta){
+  const tok=bsToken();
+  const r=await fetch(API_BASE+ruta,{method:'DELETE',headers:{'Authorization':'Bearer '+tok}});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){ const e=new Error(j.error||('Error '+r.status)); e.status=r.status; throw e; }
   return j;
 }
 function guardarSesionToken(token, role, nombre){
@@ -146,10 +184,8 @@ function guardarSesionToken(token, role, nombre){
     localStorage.setItem('bs_token', token || '');
     localStorage.setItem('bs_role', role || '');
     if(nombre) localStorage.setItem('bs_user', nombre);
-    // Solo el rol cliente está atado a una tienda puntual (?e=); admin/proveedor
-    // no dependen de la URL, así que no hace sentido guardarles una "empresa".
-    if(role==='cliente') localStorage.setItem('bs_token_empresa', bsEmpresa());
-    else localStorage.removeItem('bs_token_empresa');
+    // La cuenta de cliente es global: no queda atada a la tienda actual.
+    localStorage.removeItem('bs_token_empresa');
   }catch(e){}
 }
 function limpiarSesionToken(){
@@ -159,115 +195,73 @@ function limpiarSesionToken(){
   }catch(e){}
 }
 
+/* ──────────────────────────────────────────────────────────────
+   CARRITO GLOBAL SIWEPE
+   El carrito persiste entre páginas, pero cada línea conserva la empresa a
+   la que pertenece. Así nunca se vuelve a enviar un item sin empresa_id y el
+   checkout puede validar precios/stock contra el catálogo correcto.
+────────────────────────────────────────────────────────────── */
+const SIWEPE_CART_KEY='siwepe_cart_v2';
+const siwepeCart={
+  get(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(SIWEPE_CART_KEY)||'[]');
+      return (Array.isArray(raw)?raw:[]).map(x=>({
+        empresa_id:Number(x.empresa_id)||0,
+        empresa_slug:String(x.empresa_slug||''),
+        empresa_nombre:String(x.empresa_nombre||''),
+        producto_id:Number(x.producto_id)||0,
+        nombre:String(x.nombre||'Producto'),
+        precio:Math.max(0,Number(x.precio)||0),
+        cantidad:Math.max(1,Math.trunc(Number(x.cantidad)||1)),
+        imagen:String(x.imagen||''),
+        stock:Math.max(0,Math.trunc(Number(x.stock)||0))
+      })).filter(x=>x.empresa_id&&x.producto_id);
+    }catch(e){ return []; }
+  },
+  set(items){
+    const limpio=(Array.isArray(items)?items:[]).filter(x=>Number(x.empresa_id)&&Number(x.producto_id)&&Number(x.cantidad)>0);
+    try{ localStorage.setItem(SIWEPE_CART_KEY,JSON.stringify(limpio)); }catch(e){}
+    try{ window.dispatchEvent(new CustomEvent('siwepe:cart',{detail:{items:limpio}})); }catch(e){}
+    return limpio;
+  },
+  deEmpresa(ref){
+    const valor=String(ref==null?'':ref);
+    return this.get().filter(x=>String(x.empresa_id)===valor||x.empresa_slug===valor);
+  },
+  add(item){
+    const next=this.get();
+    const empresaId=Number(item&&item.empresa_id), productoId=Number(item&&item.producto_id);
+    if(!empresaId||!productoId) throw new Error('No se pudo identificar la tienda o el producto.');
+    const idx=next.findIndex(x=>x.empresa_id===empresaId&&x.producto_id===productoId);
+    const limite=Math.max(0,Math.trunc(Number(item.stock)||0));
+    if(idx>=0){
+      const cantidad=Math.max(1,Math.trunc(Number(next[idx].cantidad)||1))+Math.max(1,Math.trunc(Number(item.cantidad)||1));
+      next[idx]={...next[idx],...item,empresa_id:empresaId,producto_id:productoId,cantidad:limite?Math.min(cantidad,limite):cantidad,stock:limite};
+    }else{
+      next.push({...item,empresa_id:empresaId,producto_id:productoId,cantidad:Math.max(1,Math.trunc(Number(item.cantidad)||1)),stock:limite});
+    }
+    return this.set(next);
+  },
+  update(empresaId,productoId,cantidad){
+    const next=this.get(), idx=next.findIndex(x=>x.empresa_id===Number(empresaId)&&x.producto_id===Number(productoId));
+    if(idx<0) return next;
+    const n=Math.trunc(Number(cantidad)||0);
+    if(n<=0) next.splice(idx,1);
+    else next[idx].cantidad=next[idx].stock?Math.min(n,next[idx].stock):n;
+    return this.set(next);
+  },
+  clearEmpresa(ref){
+    const valor=String(ref==null?'':ref);
+    return this.set(this.get().filter(x=>!(String(x.empresa_id)===valor||x.empresa_slug===valor)));
+  },
+  count(ref){ return this.deEmpresa(ref).reduce((n,x)=>n+x.cantidad,0); },
+  total(ref){ return this.deEmpresa(ref).reduce((n,x)=>n+x.precio*x.cantidad,0); }
+};
+if(typeof window!=='undefined') window.siwepeCart=siwepeCart;
+
 const hoy = (d=0) => { const x=new Date(); x.setDate(x.getDate()+d); return x.toISOString().slice(0,10); };
 const mesActual = () => hoy().slice(0,7);
-
-function semilla(){
-  return {
-    config:{ nombre:'SIWEPE', logo:'', moneda:'L', tema:'cielo', pinAdmin:'1234', banners:[] },
-    seq:{ producto:8,categoria:5,proveedor:3,cliente:4,compra:5,venta:6,movimiento:11,pedido:2 },
-    categorias:[
-      {id:1,nombre:'Maquillaje',descripcion:'Labiales, sombras, bases',estado:'activo'},
-      {id:2,nombre:'Cuidado de la piel',descripcion:'Cremas, sérums, limpiadores',estado:'activo'},
-      {id:3,nombre:'Perfumería',descripcion:'Fragancias y splash corporales',estado:'activo'},
-      {id:4,nombre:'Accesorios',descripcion:'Aretes, bolsos y detalles',estado:'activo'},
-      {id:5,nombre:'Cabello',descripcion:'Tratamientos y styling',estado:'activo'}
-    ],
-    productos:[
-      {id:1,codigo:'MAQ-001',nombre:'Labial mate Rosé',categoria_id:1,descripcion:'Larga duración, tono rosa nude. Fórmula hidratante que no reseca.',precio_compra:120,precio_venta:220,stock:24,stock_min:8,imagen:'',estado:'activo',destacado:true},
-      {id:2,codigo:'MAQ-002',nombre:'Paleta de sombras Sunset',categoria_id:1,descripcion:'12 tonos cálidos satinados. Pigmentación intensa, fácil difuminado.',precio_compra:280,precio_venta:480,stock:6,stock_min:10,imagen:'',estado:'activo',destacado:true},
-      {id:3,codigo:'PIEL-001',nombre:'Sérum de vitamina C',categoria_id:2,descripcion:'Ilumina y unifica el tono de la piel en 4 semanas. 30 ml.',precio_compra:210,precio_venta:390,stock:15,stock_min:6,imagen:'',estado:'activo',destacado:true},
-      {id:4,codigo:'PIEL-002',nombre:'Crema hidratante de rosas',categoria_id:2,descripcion:'Con agua de rosas y ácido hialurónico. Para piel sensible.',precio_compra:160,precio_venta:295,stock:3,stock_min:5,imagen:'',estado:'activo',destacado:false},
-      {id:5,codigo:'PERF-001',nombre:'Perfume Fleur Dorée 50 ml',categoria_id:3,descripcion:'Notas de peonía, vainilla y ámbar. Duración 8+ horas.',precio_compra:520,precio_venta:890,stock:9,stock_min:4,imagen:'',estado:'activo',destacado:true},
-      {id:6,codigo:'ACC-001',nombre:'Aretes perla dorada',categoria_id:4,descripcion:'Baño de oro 18k. Hipoalergénicos, ideales para piel sensible.',precio_compra:85,precio_venta:180,stock:30,stock_min:10,imagen:'',estado:'activo',destacado:false},
-      {id:7,codigo:'ACC-002',nombre:'Bolso mini beige',categoria_id:4,descripcion:'Piel sintética premium con cadena dorada. 20×15×6 cm.',precio_compra:340,precio_venta:620,stock:0,stock_min:3,imagen:'',estado:'activo',destacado:true},
-      {id:8,codigo:'CAB-001',nombre:'Mascarilla de keratina',categoria_id:5,descripcion:'Reparación profunda para cabello dañado. 250 g.',precio_compra:140,precio_venta:260,stock:18,stock_min:6,imagen:'',estado:'activo',destacado:false}
-    ],
-    proveedores:[
-      {id:1,nombre:'Karla Pineda',telefono:'9988-1122',correo:'ventas@bellezahn.com',empresa:'Belleza HN',direccion:'Col. Palmira, Tegucigalpa',whatsapp:'50499881122',estado:'activo'},
-      {id:2,nombre:'Luis Fernández',telefono:'3344-5566',correo:'luis@cosmetigroup.com',empresa:'CosmetiGroup',direccion:'San Pedro Sula',whatsapp:'50433445566',estado:'activo'},
-      {id:3,nombre:'María Castillo',telefono:'8877-2233',correo:'maria@doradaimport.com',empresa:'Dorada Import',direccion:'Comayagüela',whatsapp:'',estado:'inactivo'}
-    ],
-    clientes:[
-      {id:1,nombre:'Andrea López',telefono:'9911-4455',correo:'andrea.lopez@gmail.com',direccion:'Res. El Trapiche',whatsapp:'50499114455',pin:'1111'},
-      {id:2,nombre:'Sofía Martínez',telefono:'3300-7788',correo:'sofi.mtz@hotmail.com',direccion:'Col. Kennedy',whatsapp:'50433007788',pin:'2222'},
-      {id:3,nombre:'Daniela Reyes',telefono:'9455-0000',correo:'dani.reyes@gmail.com',direccion:'Lomas del Guijarro',whatsapp:'50494550000',pin:'3333'},
-      {id:4,nombre:'Cliente general',telefono:'—',correo:'—',direccion:'—',whatsapp:'',pin:'0000'}
-    ],
-    compras:[
-      {id:1,producto_id:1,proveedor_id:1,cantidad:12,precio:120,fecha:hoy(-15),obs:'Reposición mensual'},
-      {id:2,producto_id:5,proveedor_id:2,cantidad:6,precio:520,fecha:hoy(-10),obs:'Lote fragancias'},
-      {id:3,producto_id:6,proveedor_id:1,cantidad:20,precio:85,fecha:hoy(-7),obs:''},
-      {id:4,producto_id:3,proveedor_id:2,cantidad:10,precio:210,fecha:hoy(-5),obs:''},
-      {id:5,producto_id:2,proveedor_id:3,cantidad:8,precio:280,fecha:hoy(-3),obs:'Reposición'},
-      {id:6,producto_id:1,proveedor_id:1,cantidad:10,precio:120,fecha:hoy(-38),obs:''},
-      {id:7,producto_id:4,proveedor_id:2,cantidad:8,precio:160,fecha:hoy(-35),obs:''},
-      {id:8,producto_id:8,proveedor_id:1,cantidad:12,precio:140,fecha:hoy(-42),obs:''},
-      {id:9,producto_id:2,proveedor_id:3,cantidad:6,precio:280,fecha:hoy(-70),obs:''},
-      {id:10,producto_id:5,proveedor_id:2,cantidad:4,precio:520,fecha:hoy(-65),obs:''},
-      {id:11,producto_id:6,proveedor_id:1,cantidad:15,precio:85,fecha:hoy(-98),obs:''},
-      {id:12,producto_id:3,proveedor_id:2,cantidad:8,precio:210,fecha:hoy(-100),obs:''},
-      {id:13,producto_id:1,proveedor_id:1,cantidad:14,precio:120,fecha:hoy(-130),obs:''},
-      {id:14,producto_id:8,proveedor_id:1,cantidad:10,precio:140,fecha:hoy(-160),obs:''}
-    ],
-    ventas:[
-      // Mes actual
-      {id:1,producto_id:1,cliente_id:1,cantidad:2,precio:220,fecha:hoy(-8),total:440},
-      {id:2,producto_id:3,cliente_id:2,cantidad:1,precio:390,fecha:hoy(-5),total:390},
-      {id:3,producto_id:6,cliente_id:3,cantidad:3,precio:180,fecha:hoy(-3),total:540},
-      {id:4,producto_id:5,cliente_id:1,cantidad:1,precio:890,fecha:hoy(-2),total:890},
-      {id:5,producto_id:2,cliente_id:2,cantidad:1,precio:480,fecha:hoy(-1),total:480},
-      {id:6,producto_id:1,cliente_id:3,cantidad:3,precio:220,fecha:hoy(),total:660},
-      {id:7,producto_id:8,cliente_id:1,cantidad:2,precio:260,fecha:hoy(-4),total:520},
-      // Mes -1
-      {id:8,producto_id:1,cliente_id:2,cantidad:4,precio:220,fecha:hoy(-35),total:880},
-      {id:9,producto_id:3,cliente_id:1,cantidad:2,precio:390,fecha:hoy(-30),total:780},
-      {id:10,producto_id:5,cliente_id:3,cantidad:1,precio:890,fecha:hoy(-32),total:890},
-      {id:11,producto_id:2,cliente_id:1,cantidad:2,precio:480,fecha:hoy(-28),total:960},
-      {id:12,producto_id:6,cliente_id:2,cantidad:5,precio:180,fecha:hoy(-27),total:900},
-      {id:13,producto_id:4,cliente_id:3,cantidad:2,precio:295,fecha:hoy(-25),total:590},
-      // Mes -2
-      {id:14,producto_id:1,cliente_id:1,cantidad:3,precio:220,fecha:hoy(-65),total:660},
-      {id:15,producto_id:8,cliente_id:2,cantidad:3,precio:260,fecha:hoy(-62),total:780},
-      {id:16,producto_id:5,cliente_id:1,cantidad:2,precio:890,fecha:hoy(-58),total:1780},
-      {id:17,producto_id:3,cliente_id:3,cantidad:1,precio:390,fecha:hoy(-60),total:390},
-      {id:18,producto_id:6,cliente_id:2,cantidad:4,precio:180,fecha:hoy(-55),total:720},
-      // Mes -3
-      {id:19,producto_id:2,cliente_id:1,cantidad:3,precio:480,fecha:hoy(-95),total:1440},
-      {id:20,producto_id:1,cliente_id:3,cantidad:5,precio:220,fecha:hoy(-92),total:1100},
-      {id:21,producto_id:5,cliente_id:2,cantidad:1,precio:890,fecha:hoy(-88),total:890},
-      {id:22,producto_id:3,cliente_id:1,cantidad:2,precio:390,fecha:hoy(-90),total:780},
-      {id:23,producto_id:4,cliente_id:2,cantidad:3,precio:295,fecha:hoy(-85),total:885},
-      // Mes -4
-      {id:24,producto_id:1,cliente_id:2,cantidad:6,precio:220,fecha:hoy(-125),total:1320},
-      {id:25,producto_id:6,cliente_id:1,cantidad:8,precio:180,fecha:hoy(-122),total:1440},
-      {id:26,producto_id:2,cliente_id:3,cantidad:2,precio:480,fecha:hoy(-118),total:960},
-      {id:27,producto_id:8,cliente_id:2,cantidad:4,precio:260,fecha:hoy(-115),total:1040},
-      // Mes -5
-      {id:28,producto_id:3,cliente_id:1,cantidad:3,precio:390,fecha:hoy(-155),total:1170},
-      {id:29,producto_id:5,cliente_id:3,cantidad:2,precio:890,fecha:hoy(-152),total:1780},
-      {id:30,producto_id:1,cliente_id:2,cantidad:4,precio:220,fecha:hoy(-148),total:880},
-      {id:31,producto_id:4,cliente_id:1,cantidad:2,precio:295,fecha:hoy(-150),total:590}
-    ],
-    movimientos:[
-      {id:1,tipo:'entrada',producto_id:1,cantidad:12,fecha:hoy(-15),usuario:'Admin',obs:'Compra · Reposición mensual'},
-      {id:2,tipo:'entrada',producto_id:5,cantidad:6,fecha:hoy(-10),usuario:'Admin',obs:'Compra · Lote fragancias'},
-      {id:3,tipo:'salida',producto_id:1,cantidad:2,fecha:hoy(-8),usuario:'Admin',obs:'Venta a Andrea López'},
-      {id:4,tipo:'entrada',producto_id:6,cantidad:20,fecha:hoy(-7),usuario:'Admin',obs:'Compra'},
-      {id:5,tipo:'salida',producto_id:3,cantidad:1,fecha:hoy(-5),usuario:'Admin',obs:'Venta a Sofía Martínez'},
-      {id:6,tipo:'entrada',producto_id:3,cantidad:10,fecha:hoy(-5),usuario:'Admin',obs:'Compra'},
-      {id:7,tipo:'salida',producto_id:6,cantidad:3,fecha:hoy(-3),usuario:'Admin',obs:'Venta a Daniela Reyes'},
-      {id:8,tipo:'salida',producto_id:5,cantidad:1,fecha:hoy(-2),usuario:'Admin',obs:'Venta a Andrea López'},
-      {id:9,tipo:'entrada',producto_id:2,cantidad:8,fecha:hoy(-3),usuario:'Admin',obs:'Compra'},
-      {id:10,tipo:'salida',producto_id:2,cantidad:1,fecha:hoy(-1),usuario:'Admin',obs:'Venta a Sofía Martínez'},
-      {id:11,tipo:'salida',producto_id:1,cantidad:3,fecha:hoy(),usuario:'Admin',obs:'Venta a Daniela Reyes'}
-    ],
-    pedidos:[
-      {id:1,cliente_id:1,items:[{producto_id:1,cantidad:2,precio:220,subtotal:440},{producto_id:3,cantidad:1,precio:390,subtotal:390}],total:830,nota:'Para regalo, envolver por favor',fecha:hoy(-2),estado:'aprobado'},
-      {id:2,cliente_id:2,items:[{producto_id:5,cantidad:1,precio:890,subtotal:890}],total:890,nota:'',fecha:hoy(),estado:'pendiente'}
-    ]
-  };
-}
 
 /* Compat: el front-end llama dbCargar() en muchos lados para "refrescar".
    Con backend, el estado ya vive en memoria (cargado por bootstrapDB).
@@ -315,59 +309,112 @@ function aplicarTema(key){
   if(!s){ s=document.createElement('style'); s.id='__tema_vars'; document.head.appendChild(s); }
   s.textContent=':root{'+Object.entries(map).map(([k,v])=>k+':'+v).join(';')+'}';
 }
+/* Avisa un error de guardado usando el toast de la página que esté cargada
+   (admin usa `toast`, tienda usa `toastT`); si ninguno existe, alert(). */
+function _avisoGuardado(msg){
+  if(typeof window!=='undefined'){
+    if(typeof window.toast==='function') return window.toast(msg,'error');
+    if(typeof window.toastT==='function') return window.toastT(msg,'error');
+  }
+  try{ window.alert(msg); }catch(e){}
+}
+
 function dbGuardar(){
   /* 1) Cache local inmediata (respaldo/offline) */
   try{ almacen.escribir(JSON.stringify(DB)); }
   catch(e){
-    const msg='No hay espacio para guardar más imágenes. Sube fotos más livianas o quita algunas.';
-    if(typeof toast==='function') toast(msg,'error');
-    else if(typeof window!=='undefined') window.alert(msg);
+    _avisoGuardado('No hay espacio para guardar más imágenes. Sube fotos más livianas o quita algunas.');
     console.warn('dbGuardar (cache):',e);
   }
-  /* 2) Persistir en el backend (MySQL) si hay sesión con token */
-  const tok = bsToken();
-  if(tok){
+  /* 2) Persistir en el backend (MySQL) si hay sesión con token.
+     Importante: esta función devuelve `true` de inmediato (varias pantallas
+     la usan como `if(dbGuardar())` para actualizar la UI al toque), pero el
+     fetch es asíncrono — si el guardado en el servidor falla, antes esto solo
+     quedaba en la consola y la UI igual mostraba "guardado" como si nada.
+     Ahora si falla se avisa explícitamente, para no dar una falsa sensación
+     de que sí se guardó cuando el cambio solo quedó en este navegador. */
+  const tok=bsToken(), role=bsRole();
+  if(tok&&role==='admin'){
     _guardandoHasta = Date.now() + 2500;   // no refrescar encima de este guardado
-    fetch(API_BASE + '/api/state', {
-      method:'PUT',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
-      body: JSON.stringify(DB)
-    }).then(r=>{ if(!r.ok) console.warn('Guardado en backend falló:', r.status); })
-      .catch(e=>console.warn('Guardado en backend error:', e.message));
+    _colaGuardado=_colaGuardado.then(async()=>{
+      const r=await fetch(API_BASE+'/api/state',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:JSON.stringify(DB)});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(j.error||('Error '+r.status));
+      if(j.revision!=null) DB._revision=j.revision;
+      almacen.escribir(JSON.stringify(DB));
+    }).catch(e=>{ console.warn('Guardado en backend error:',e.message); _avisoGuardado(e.message||'No se pudo guardar en el servidor.'); });
+  }else if(tok&&role==='proveedor'){
+    _avisoGuardado('Tu rol de proveedor es de consulta. Un administrador debe realizar este cambio.');
   }
   return true;
 }
 
 /* Trae el estado más reciente del backend (para refresco en vivo).
-   No pisa un guardado local reciente. Devuelve true si actualizó. */
-async function refrescarEstado(){
+   No pisa un guardado local reciente. Devuelve true si actualizó.
+   Función compartida entre admin.html (refresca SU propio negocio) y el
+   poll de chat de tienda.html (refresca pedidos/mensajes mientras se
+   navega una tienda como comprador) — opts.asBuyer distingue el segundo
+   caso. Sin esto, un admin navegando OTRA tienda con "Abrir portal
+   cliente" tiene bsRole()==='admin', así que caía SIEMPRE en la rama de
+   /api/state (SU propio negocio) y cada 3s pisaba en memoria el
+   DB.productos/categorias de la tienda que estaba viendo con los de su
+   propia tienda — el catálogo se veía bien al cargar la página y se
+   arruinaba solo con quedarse navegando/cambiando de pestaña un rato. */
+async function refrescarEstado(opts){
   const tok = bsToken();
   if(!tok) return false;
   if(Date.now() < _guardandoHasta) return false;
+  const comoComprador = bsRole()==='cliente' || (bsRole()==='admin' && opts && opts.asBuyer);
   try{
+    if(comoComprador){
+      const historial=await apiGet('/api/mis-pedidos');
+      DB.pedidos=historial.pedidos||[];
+      DB.mensajes=DB.pedidos.flatMap(p=>(p.mensajes||[]).map(m=>({...m,empresa_id:m.empresa_id||p.empresa?.id,pedido_id:m.pedido_id||p.id})));
+      almacen.escribir(JSON.stringify(DB), DB);
+      return true;
+    }
     const r = await fetch(API_BASE + '/api/state', { headers:{ 'Authorization':'Bearer '+tok } });
     if(!r.ok) return false;
     DB = await r.json();
     _migrar();
-    almacen.escribir(JSON.stringify(DB));
+    almacen.escribir(JSON.stringify(DB), DB);
     return true;
   }catch(e){ return false; }
 }
 function nuevoId(t){ return ++DB.seq[t]; }
 
 function _migrar(){
-  if(!DB.pedidos) DB.pedidos=[];
+  if(!DB||typeof DB!=='object') DB=_esqueletoDB();
+  if(!DB.config) DB.config=_esqueletoDB().config;
+  for(const k of ['categorias','proveedores','clientes','productos','compras','ventas','movimientos','pedidos','mensajes']) if(!Array.isArray(DB[k])) DB[k]=[];
+  if(!DB.seq||typeof DB.seq!=='object') DB.seq={};
   if(!DB.seq.pedido) DB.seq.pedido=0;
-  if(!DB.config.pinAdmin) DB.config.pinAdmin='1234';
   if(!Array.isArray(DB.config.banners)) DB.config.banners=[];
+  if(!Array.isArray(DB.config.galeria)) DB.config.galeria=[];
+  DB.config.galeria=DB.config.galeria.filter(Boolean).map((g,i)=>typeof g==='string'?{id:i+1,imagen:g,titulo:'',descripcion:''}:{id:g.id||i+1,imagen:g.imagen||'',titulo:g.titulo||'',descripcion:g.descripcion||''}).filter(g=>g.imagen);
   if(!DB.config.pago||typeof DB.config.pago!=='object') DB.config.pago={banco:'',cuenta:'',titular:'',tipo:'',nota:''};
   /* Migrar claves de tema viejas → nuevas */
   const _mapTema={default:'cielo',admin:'cielo',slate:'lavanda',forest:'salvia',wine:'durazno',ocean:'cielo'};
   if(_mapTema[DB.config.tema]) DB.config.tema=_mapTema[DB.config.tema];
   if(!DB.config.tema||!TEMAS[DB.config.tema]) DB.config.tema='cielo';
-  DB.clientes.forEach(c=>{ if(!c.pin) c.pin='0000'; if(c.whatsapp===undefined) c.whatsapp=''; });
-  DB.productos.forEach(p=>{ if(p.destacado===undefined) p.destacado=false; if(p.marca===undefined) p.marca=''; if(!Array.isArray(p.tipoPiel)) p.tipoPiel=[]; });
-  DB.proveedores.forEach(p=>{ if(p.whatsapp===undefined) p.whatsapp=''; });
+  DB.clientes.forEach(c=>{ if(c.whatsapp===undefined) c.whatsapp=''; });
+  DB.productos.forEach(p=>{
+    if(p.destacado===undefined) p.destacado=false;
+    if(p.marca===undefined) p.marca='';
+    if(!Array.isArray(p.tipoPiel)) p.tipoPiel=[];
+    if(!Array.isArray(p.imagenes)) p.imagenes=[];
+    p.imagenes=p.imagenes.filter(Boolean);
+    if(p.imagen&&!p.imagenes.includes(p.imagen)) p.imagenes.unshift(p.imagen);
+    if(!p.imagen&&p.imagenes.length) p.imagen=p.imagenes[0];
+    if(p.stock_inventario===undefined) p.stock_inventario=0;
+    if(p.publicado_alguna_vez===undefined) p.publicado_alguna_vez=!!(p.stock>0||p.estado==='activo');
+  });
+  DB.ventas.forEach(v=>{
+    if(v.origen_stock===undefined) v.origen_stock='tienda';
+    if(v.stock_tienda_usado===undefined) v.stock_tienda_usado=Number(v.cantidad)||0;
+    if(v.stock_inventario_usado===undefined) v.stock_inventario_usado=0;
+  });
+  DB.proveedores.forEach(p=>{ if(p.whatsapp===undefined) p.whatsapp=''; if(!p.origen) p.origen='registrado'; });
   if(!DB.mensajes) DB.mensajes=[];
   if(!DB.seq.mensaje) DB.seq.mensaje=0;
   DB.clientes.forEach(c=>{ if(c.registrado===undefined) c.registrado=true; });
@@ -385,33 +432,5 @@ const dinero  = n => `${DB.config.moneda} ${Number(n||0).toLocaleString('es-HN',
 const esc     = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fechaCorta = f => { if(!f) return '—'; const [a,m,d]=f.split('-'); const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${+d} ${M[+m-1]} ${a}`; };
 
-/* ── MIGRACIÓN: mensajes de chat por pedido ── */
-function _migrarChat(){
-  if(!DB.mensajes) DB.mensajes=[];
-  if(!DB.seq.mensaje) DB.seq.mensaje=0;
-  /* Asegurar que clientes tengan campo registrado */
-  DB.clientes.forEach(c=>{ if(c.registrado===undefined) c.registrado=true; });
-}
-
-/* Sobreescribir _migrar para incluir chat */
-const _migrarOriginal = _migrar;
-// Ya llamamos _migrarChat() desde dbCargar extendido
-
 /* Helper mensajes */
 const msgsDePedido = pedId => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId).sort((a,b)=>a.id-b.id);
-const mensajesNoLeidos = (pedId, autor) => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId&&m.autor!==autor&&!m.leido).length;
-
-function enviarMensaje(pedido_id, autor, texto){
-  if(!DB.mensajes) DB.mensajes=[];
-  if(!DB.seq.mensaje) DB.seq.mensaje=0;
-  const msg={id:++DB.seq.mensaje, pedido_id, autor, texto, fecha:new Date().toISOString(), leido:false};
-  DB.mensajes.push(msg);
-  dbGuardar();
-  return msg;
-}
-
-function marcarLeidosMensajes(pedido_id, autor){
-  if(!DB.mensajes) return;
-  DB.mensajes.filter(m=>m.pedido_id===pedido_id&&m.autor!==autor).forEach(m=>m.leido=true);
-  dbGuardar();
-}

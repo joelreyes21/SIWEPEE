@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SIWEPE · © 2026 Joel Reyes. Todos los derechos reservados. · Prohibida su reproduccion o distribucion sin autorizacion. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIWEPE · Crea y descubre tiendas</title>
+<link rel="icon" type="image/png" href="../assets/img/siwepe-mark.png">
+<meta name="theme-color" content="#4F86C6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6F9FC; --cream-dark:#F0F5FB;
+  --rose:#4F86C6; --rose-light:#EAF2FB; --rose-mid:#A9CBEC; --rose-dark:#3A6DA8;
+  --text-dark:#21303D; --text-mid:#5A6B78; --text-soft:#9AAAB6;
+  --surface:#FFFFFF; --border:#E2EBF3;
+  --shadow-sm:0 2px 10px rgba(40,80,140,.07);
+  --shadow-md:0 8px 28px rgba(40,80,140,.10);
+  --shadow-lg:0 20px 56px rgba(40,80,140,.14);
+  --r-sm:12px; --r-md:16px; --r-lg:22px; --r-xl:30px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+*,*::before,*::after{font-family:'Manrope',sans-serif;}
+body{font-family:'Manrope',sans-serif;background:var(--cream);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+/* fondo con orbes suaves */
+.bg-orbs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;}
+.orb.a{width:420px;height:420px;background:var(--rose-light);top:-120px;left:-100px;}
+.orb.b{width:360px;height:360px;background:var(--rose-mid);bottom:-120px;right:-80px;opacity:.35;}
+.orb.c{width:300px;height:300px;background:#E6EEF8;top:40%;right:20%;opacity:.4;}
+
+/* header */
+.nav{position:sticky;top:0;z-index:50;background:rgba(246,249,252,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{max-width:1180px;margin:0 auto;height:70px;display:flex;align-items:center;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,var(--rose),var(--rose-mid));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:#fff;box-shadow:0 8px 20px rgba(79,134,198,.35);}
+.brand-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.01em;}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid transparent;transition:all .18s;}
+.nav-btn.ghost{color:var(--text-mid);}
+.nav-btn.ghost:hover{color:var(--rose-dark);background:var(--rose-light);}
+.nav-btn.solid{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.32);}
+.nav-btn.solid:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.nav-btn.subtle{padding:8px 6px;font-weight:500;font-size:13px;color:var(--text-soft);}
+.nav-btn.subtle:hover{color:var(--rose-dark);background:none;}
+
+/* hero */
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 28px;}
+.hero{text-align:center;padding:72px 0 26px;}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rose);background:var(--rose-light);padding:7px 16px;border-radius:999px;margin-bottom:22px;}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(38px,6vw,64px);font-weight:600;line-height:1.05;letter-spacing:-.02em;margin-bottom:18px;}
+.hero h1 em{font-style:italic;color:var(--rose-dark);}
+.hero p{font-size:clamp(16px,2.2vw,19px);color:var(--text-mid);max-width:560px;margin:0 auto;line-height:1.65;}
+
+/* dos caminos */
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:48px 0 20px;}
+.path{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:40px 34px;box-shadow:var(--shadow-sm);transition:transform .28s cubic-bezier(.4,0,.2,1),box-shadow .28s;overflow:hidden;text-align:left;display:flex;flex-direction:column;}
+.path::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:var(--rose-light);opacity:.6;transition:transform .4s;}
+.path:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:var(--rose-mid);}
+.path:hover::before{transform:scale(1.25);}
+.path-ic{position:relative;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;color:#fff;}
+.path.crear .path-ic{background:linear-gradient(145deg,var(--rose),var(--rose-dark));}
+.path.descubrir .path-ic{background:linear-gradient(145deg,#3A6DA8,#2C5488);}
+.path h3{position:relative;font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:10px;letter-spacing:-.01em;}
+.path p{position:relative;font-size:15px;color:var(--text-mid);line-height:1.6;margin-bottom:26px;flex:1;}
+.path-cta{position:relative;display:inline-flex;align-items:center;gap:9px;align-self:flex-start;padding:13px 26px;border-radius:999px;font-size:15px;font-weight:700;border:none;transition:all .2s;}
+.path.crear .path-cta{background:var(--rose);color:#fff;box-shadow:0 8px 20px rgba(79,134,198,.34);}
+.path.crear .path-cta:hover{background:var(--rose-dark);transform:translateX(3px);}
+.path.descubrir .path-cta{background:#EAF2FB;color:#2C5488;}
+.path.descubrir .path-cta:hover{background:#E2EBF3;transform:translateX(3px);}
+
+/* seccion productos */
+.section{padding:64px 0 40px;}
+.section-head{text-align:center;margin-bottom:34px;}
+.section-head h2{font-family:'Fraunces',serif;font-size:34px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px;}
+.section-head p{color:var(--text-soft);font-size:15px;}
+.productos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s;cursor:pointer;display:flex;flex-direction:column;}
+.prod-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.prod-cover{height:150px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.prod-cover img{width:100%;height:100%;object-fit:cover;}
+.prod-cover span{font-family:'Fraunces',serif;font-size:34px;font-weight:600;color:var(--rose);}
+.prod-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.prod-tienda{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--rose-dark);}
+.prod-body h4{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.3;}
+.prod-precio{margin-top:auto;font-size:15.5px;font-weight:700;color:var(--text-dark);}
+.empty-state{grid-column:1/-1;text-align:center;padding:56px 24px;color:var(--text-soft);}
+.empty-state .es-ic{font-size:44px;margin-bottom:12px;}
+.empty-state h3{font-family:'Fraunces',serif;font-size:22px;font-style:italic;color:var(--text-mid);margin-bottom:8px;}
+.empty-state .es-btn{margin-top:18px;display:inline-block;padding:12px 24px;border-radius:999px;background:var(--rose);color:#fff;font-weight:700;font-size:14px;}
+
+/* footer */
+.footer{position:relative;z-index:1;text-align:center;padding:40px 20px 48px;color:var(--text-soft);font-size:13px;border-top:1px solid var(--border);margin-top:40px;}
+
+/* entrada suave al hacer scroll */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1);}
+.reveal-in{opacity:1;transform:none;}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
+
+/* modal crear empresa */
+.modal-ov{position:fixed;inset:0;z-index:100;background:rgba(33,48,61,.4);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r-xl);width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop .25s ease;}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal-head{padding:26px 28px 4px;position:relative;}
+.modal-head h3{font-family:'Fraunces',serif;font-size:25px;font-weight:600;letter-spacing:-.01em;}
+.modal-head p{font-size:14px;color:var(--text-soft);margin-top:3px;}
+.modal-x{position:absolute;top:20px;right:22px;width:34px;height:34px;border-radius:50%;border:none;background:var(--cream-dark);color:var(--text-mid);font-size:18px;display:flex;align-items:center;justify-content:center;}
+.modal-x:hover{background:var(--rose-light);color:var(--rose-dark);}
+.modal-body{padding:16px 28px 26px;}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:15px;}
+.fld label{font-size:11.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text-mid);}
+.fld input{padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:14.5px;outline:none;background:var(--cream);transition:all .2s;font-family:'Inter',sans-serif;}
+.fld input:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.modal-err{font-size:13px;color:#D46A6A;min-height:16px;margin-bottom:6px;}
+.modal-btn{width:100%;padding:15px;border:none;border-radius:12px;background:var(--rose);color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(79,134,198,.34);transition:all .2s;}
+.modal-btn:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.modal-note{font-size:12px;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.5;}
+
+@media(max-width:760px){
+  .paths{grid-template-columns:1fr;}
+  .nav-in{padding:0 18px;}
+  .hero{padding:48px 0 18px;}
+}
+@media(max-width:560px){
+  .wrap{padding:0 16px;}
+  .hero{padding:38px 0 10px;}
+  .hero h1{font-size:clamp(33px,10.5vw,43px);line-height:1.08;}
+  .hero p{font-size:15.5px;}
+  .paths{gap:16px;margin-top:34px;}
+  .path{padding:28px 22px;border-radius:24px;}
+  .path h3{font-size:24px;}
+  .path-cta{width:100%;justify-content:center;min-height:48px;padding:12px 18px;}
+  .section{padding-top:46px;}
+  .section-head h2{font-size:28px;}
+  .productos-grid{gap:14px;}
+  .modal-ov{align-items:flex-end;padding:0;}
+  .modal{max-width:none;max-height:94dvh;border-radius:24px 24px 0 0;}
+  .modal-head{padding:22px 20px 4px;}
+  .modal-body{padding:14px 20px calc(24px + env(safe-area-inset-bottom));}
+  .fld-row{grid-template-columns:1fr;gap:0;}
+  .fld input{min-height:48px;font-size:16px;}
+  .modal-btn{min-height:50px;}
+}
+@media(max-width:360px){
+  .hero h1{font-size:31px;}
+  .eyebrow{letter-spacing:1.25px;padding-inline:12px;}
+}
+@media(hover:none){
+  .path:hover,.prod-card:hover{transform:none;}
+}
+
+/* Portada SIWEPE 2026 */
+.hero{padding-top:88px}.hero:before{content:"";display:block;width:74px;height:2px;margin:0 auto 22px;background:linear-gradient(90deg,transparent,var(--rose),transparent)}
+.paths{gap:18px}.path{min-height:330px;border-radius:28px}.path h3{font-family:'Manrope',sans-serif;font-weight:800;letter-spacing:-.035em}.path-number{position:absolute;top:28px;right:30px;color:#d8e6f5;font-size:12px;font-weight:800;letter-spacing:.13em}
+.home-proof{display:grid;grid-template-columns:1.2fr repeat(3,1fr);align-items:center;gap:1px;margin:20px 0 82px;overflow:hidden;border:1px solid var(--border);border-radius:20px;background:var(--border);box-shadow:var(--shadow-sm)}.home-proof>div{min-height:92px;padding:20px 22px;background:rgba(255,255,255,.9)}.home-proof .proof-lead{display:flex;align-items:center;gap:12px}.proof-lead span{display:grid;place-items:center;width:38px;height:38px;flex:0 0 auto;border-radius:12px;background:var(--rose-light);color:var(--rose-dark)}.proof-lead strong{font-size:13px;line-height:1.35}.proof-item strong,.proof-item small{display:block}.proof-item strong{color:#0a4e8d;font-size:20px}.proof-item small{margin-top:2px;color:var(--text-soft);font-size:10.5px}
+.home-discovery{position:relative;z-index:1;margin-top:10px;padding:82px 28px 72px;background:linear-gradient(180deg,#f0f6fb 0%,#e9f2fa 100%);border-top:1px solid var(--border)}.home-discovery-in{max-width:1180px;margin:auto}.home-section-head{display:flex;align-items:end;justify-content:space-between;gap:32px;margin-bottom:28px}.home-section-head span{display:block;margin-bottom:7px;color:#087dc2;font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}.home-section-head h2{max-width:620px;color:#102940;font-size:clamp(29px,4vw,43px);line-height:1.08;letter-spacing:-.045em}.home-section-head p{max-width:390px;color:var(--text-mid);font-size:13px;line-height:1.65}.home-category-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.home-category{position:relative;min-height:164px;padding:22px;border:1px solid #d5e4f1;border-radius:20px;background:#fff;box-shadow:0 9px 25px rgba(17,63,105,.055);transition:transform .22s,border-color .22s,box-shadow .22s}.home-category:hover{transform:translateY(-5px);border-color:#85bbe1;box-shadow:0 16px 38px rgba(17,63,105,.1)}.home-category-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:22px;border-radius:13px;background:#e9f6ff;color:#087dc2}.home-category h3{margin-bottom:5px;color:#102940;font-size:14px}.home-category p{color:var(--text-soft);font-size:10.5px;line-height:1.5}.home-category>svg{position:absolute;right:19px;top:23px;color:#afc3d4}
+.mega-footer{position:relative;z-index:1;padding:64px 28px 26px;background:radial-gradient(circle at 85% 10%,rgba(36,170,225,.2),transparent 30%),linear-gradient(135deg,#031a3b,#06366d 58%,#075995);color:#fff}.mega-footer-in{max-width:1180px;margin:auto}.mega-footer-top{display:grid;grid-template-columns:1.25fr .8fr .8fr .8fr;gap:48px;padding-bottom:45px}.mega-footer-brand img{width:58px;height:50px;object-fit:contain;padding:5px;border-radius:14px;background:#fff}.mega-footer-brand h2{margin:17px 0 9px;font-size:25px;letter-spacing:-.035em}.mega-footer-brand p{max-width:370px;color:rgba(255,255,255,.6);font-size:12.5px;line-height:1.7}.mega-footer-col strong{display:block;margin-bottom:15px;color:#63d4ff;font-size:9px;letter-spacing:.14em;text-transform:uppercase}.mega-footer-col a{display:block;width:max-content;max-width:100%;margin:9px 0;color:rgba(255,255,255,.68);font-size:11.5px;transition:color .2s,transform .2s}.mega-footer-col a:hover{color:#fff;transform:translateX(3px)}.mega-footer-cta{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:25px 28px;border:1px solid rgba(255,255,255,.12);border-radius:21px;background:rgba(255,255,255,.075);backdrop-filter:blur(10px)}.mega-footer-cta strong,.mega-footer-cta span{display:block}.mega-footer-cta strong{font-size:17px}.mega-footer-cta span{margin-top:3px;color:rgba(255,255,255,.58);font-size:11px}.mega-footer-cta button{flex:0 0 auto;padding:12px 19px;border:0;border-radius:999px;background:#fff;color:#06447f;font-size:11.5px;font-weight:800}.mega-footer-bottom{display:flex;justify-content:space-between;gap:20px;margin-top:28px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.42);font-size:10px}.mega-footer-bottom a{text-decoration:underline;text-underline-offset:3px}
+.mega-footer.footer{margin-top:0;border-top:0;text-align:left}
+@media(max-width:900px){.home-proof{grid-template-columns:1fr 1fr}.home-category-grid{grid-template-columns:repeat(2,1fr)}.mega-footer-top{grid-template-columns:1.2fr 1fr 1fr}.mega-footer-col:last-child{display:none}}
+@media(max-width:640px){.hero{padding-top:48px}.home-proof{grid-template-columns:1fr 1fr;margin-bottom:54px}.proof-lead{grid-column:1/-1}.home-section-head{align-items:flex-start;flex-direction:column;gap:10px}.home-category-grid{grid-template-columns:1fr 1fr}.home-discovery{padding:58px 16px}.mega-footer{padding-inline:18px}.mega-footer-top{grid-template-columns:1fr 1fr;gap:32px 22px}.mega-footer-brand{grid-column:1/-1}.mega-footer-cta{align-items:flex-start;flex-direction:column}.mega-footer-cta button{width:100%}.mega-footer-bottom{flex-direction:column}}
+@media(max-width:420px){.home-category-grid{grid-template-columns:1fr}.home-proof{grid-template-columns:1fr}.proof-lead{grid-column:auto}.mega-footer-top{grid-template-columns:1fr}.mega-footer-col:last-child{display:block}}
+</style>
+<link rel="stylesheet" href="../assets/css/platform.css?v=20260813.5">
+</head>
+<body>
+
+<div class="bg-orbs"><span class="orb a"></span><span class="orb b"></span><span class="orb c"></span></div>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <div class="brand-mark"><img src="../assets/img/siwepe-mark.png" alt=""></div>
+      <span class="brand-name">SIWEPE</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn ghost" href="descubrir.html">Descubrir</a>
+      <a class="nav-btn subtle" href="admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
+      <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow">La plataforma de tiendas</span>
+    <h1>Crea tu tienda o<br><em>descubre</em> las que ya existen</h1>
+    <p>SIWEPE es donde los emprendedores levantan su tienda en línea y los clientes encuentran todo en un solo lugar. Elige tu camino.</p>
+  </section>
+
+  <!-- DOS CAMINOS -->
+  <section class="paths">
+    <div class="path crear">
+      <span class="path-number">01</span>
+      <div class="path-ic">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M12 13v4M10 15h4"/></svg>
+      </div>
+      <h3>Crear tu empresa</h3>
+      <p>Registra tu negocio, sube tus productos y empieza a vender con tu propia tienda en línea, panel de administración incluido.</p>
+      <button class="path-cta" onclick="abrirCrear()">Empezar ahora →</button>
+    </div>
+    <div class="path descubrir">
+      <span class="path-number">02</span>
+      <div class="path-ic">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg>
+      </div>
+      <h3>Descubrir productos</h3>
+      <p>Explora lo que venden las tiendas de SIWEPE y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
+      <a class="path-cta" href="descubrir.html" style="display:inline-flex">Ver productos →</a>
+    </div>
+  </section>
+  <section class="home-proof" aria-label="Ventajas de SIWEPE">
+    <div class="proof-lead"><span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 7v5c0 4.8 3.1 7.6 8 9 4.9-1.4 8-4.2 8-9V7l-8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><strong>Una operación profesional desde el primer día</strong></div>
+    <div class="proof-item"><strong>1 cuenta</strong><small>para descubrir todas las tiendas</small></div>
+    <div class="proof-item"><strong>2 saldos</strong><small>inventario físico y stock publicado</small></div>
+    <div class="proof-item"><strong>100%</strong><small>adaptado a cualquier pantalla</small></div>
+  </section>
+</div>
+
+<section class="home-discovery" aria-labelledby="categorias-siwepe">
+  <div class="home-discovery-in">
+    <div class="home-section-head"><div><span>Explora por categoría</span><h2 id="categorias-siwepe">Encuentra negocios que sí están cerca de lo que buscas</h2></div><p>Estas son algunas de las categorías más consultadas. En SIWEPE cada emprendimiento conserva su propia identidad.</p></div>
+    <div class="home-category-grid">
+      <a class="home-category" href="descubrir.html?categoria=ropa"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 4-5 3 3 5 2-1v9h8v-9l2 1 3-5-5-3c-.5 1.2-1.9 2-4 2S8.5 5.2 8 4Z"/></svg></div><h3>Ropa y calzado</h3><p>Moda, accesorios y productos para todas las edades.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=alimentos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h16v9H4zM7 11V8a5 5 0 0 1 10 0v3"/></svg></div><h3>Comida y bebidas</h3><p>Restaurantes, panaderías, cafés y alimentos preparados.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=belleza"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8v4H8zM6 7h12v14H6zM9 12h6"/></svg></div><h3>Belleza y cuidado</h3><p>Cosméticos, cuidado personal, fragancias y bienestar.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=tecnologia"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Tecnología</h3><p>Electrónica, informática, accesorios y equipos.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=hogar"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg></div><h3>Hogar y decoración</h3><p>Muebles, decoración y artículos que transforman espacios.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=ferreteria"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6 4-4 4 4-4 4M16 8 5 19l-2-2L14 6"/></svg></div><h3>Ferretería</h3><p>Herramientas, materiales y suministros para construcción.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html?categoria=regalos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18v12H3zM12 9v12M2 5h20v4H2z"/><path d="M12 5c-3-5-7-2-5 0h5Zm0 0c3-5 7-2 5 0h-5Z"/></svg></div><h3>Regalos y detalles</h3><p>Artesanías, obsequios y detalles para cada ocasión.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="descubrir.html"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg></div><h3>Ver todo SIWEPE</h3><p>Descubre todas las tiendas, productos y categorías disponibles.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<footer class="mega-footer footer">
+  <div class="mega-footer-in">
+    <div class="mega-footer-top">
+      <div class="mega-footer-brand"><img src="../assets/img/siwepe-mark.png" alt="SIWEPE"><h2>Negocios que avanzan.</h2><p>Una plataforma para crear tiendas, controlar inventario y descubrir emprendimientos desde una experiencia clara y conectada.</p></div>
+      <div class="mega-footer-col"><strong>Descubrir</strong><a href="descubrir.html">Todas las tiendas</a><a href="descubrir.html?categoria=ropa">Ropa y calzado</a><a href="descubrir.html?categoria=alimentos">Comida y bebidas</a><a href="descubrir.html?categoria=tecnologia">Tecnología</a></div>
+      <div class="mega-footer-col"><strong>Para negocios</strong><a href="#" onclick="abrirCrear();return false">Crear mi empresa</a><a href="admin.html?login=1&amp;v=20260813.12">Iniciar sesión</a><a href="terminos.html">Términos para empresas</a></div>
+      <div class="mega-footer-col"><strong>SIWEPE</strong><a href="terminos.html#privacidad">Privacidad</a><a href="terminos.html#cookies">Cookies</a><a href="terminos.html">Aviso legal</a></div>
+    </div>
+    <div class="mega-footer-cta"><div><strong>¿Listo para ordenar y hacer crecer tu negocio?</strong><span>Crea tu espacio en SIWEPE y empieza con una base profesional.</span></div><button onclick="abrirCrear()">Crear mi empresa →</button></div>
+    <div class="mega-footer-bottom"><span>© <span id="anio"></span> SIWEPE · Todos los derechos reservados</span><span><a href="terminos.html">Términos, privacidad y cookies</a></span></div>
+  </div>
+</footer>
+
+<!-- MODAL CREAR EMPRESA (asistente por pasos) -->
+<style>
+.wz-steps{display:flex;gap:8px;padding:16px 28px 4px;}
+.wz-step-ind{flex:1;height:5px;border-radius:999px;background:var(--border);transition:background .3s;}
+.wz-step-ind.done,.wz-step-ind.active{background:var(--rose);}
+.wz-count{padding:10px 28px 0;font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--rose);}
+.wz-page{display:none;}
+.wz-page.active{display:block;animation:wzIn .25s ease;}
+@keyframes wzIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.wz-title{font-family:'Fraunces',serif;font-size:22px;font-weight:600;padding:2px 28px 0;}
+.wz-sub{font-size:13.5px;color:var(--text-soft);padding:2px 28px 8px;}
+.fld select,.fld textarea{padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-size:14.5px;outline:none;background:var(--cream);font-family:'Inter',sans-serif;transition:all .2s;color:var(--text-dark);}
+.fld select:focus,.fld textarea:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 4px var(--rose-light);}
+.fld textarea{resize:none;min-height:62px;}
+.wz-nav{display:flex;gap:10px;padding:6px 28px 24px;}
+.wz-btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.wz-btn.prim{background:var(--rose);color:#fff;box-shadow:0 6px 18px rgba(79,134,198,.34);}
+.wz-btn.prim:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.wz-btn.prim:disabled{opacity:.6;cursor:default;transform:none;}
+.wz-btn.sec{flex:0 0 auto;padding:14px 22px;background:var(--cream-dark);color:var(--text-mid);}
+.wz-btn.sec:hover{background:var(--border);}
+.wz-resumen{background:var(--cream-dark);border:1px solid var(--border);border-radius:14px;padding:14px 18px;margin:0 28px 14px;}
+.wz-resumen .rr{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:5px 0;}
+.wz-resumen .rr span{color:var(--text-soft);}
+.wz-resumen .rr b{color:var(--text-dark);text-align:right;word-break:break-word;}
+.wz-terms{display:flex;align-items:flex-start;gap:10px;padding:0 28px 6px;font-size:13px;color:var(--text-mid);cursor:pointer;line-height:1.5;}
+.wz-terms input{width:17px;height:17px;margin-top:1px;accent-color:var(--rose);flex-shrink:0;}
+.wz-ok{text-align:center;padding:34px 30px 40px;}
+.wz-ok-ic{width:72px;height:72px;border-radius:50%;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.wz-ok h3{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:10px;}
+.wz-ok p{font-size:14.5px;color:var(--text-mid);line-height:1.6;max-width:340px;margin:0 auto 8px;}
+.wz-ok b{color:var(--text-dark);}.wz-spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);border-top-color:#4F86C6;display:inline-block;animation:wzspin .8s linear infinite}
+.wz-logo-row{display:flex;align-items:center;gap:14px;}
+.wz-logo-prev{width:56px;height:56px;border-radius:14px;background:var(--cream-dark);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text-soft);font-family:'Fraunces',serif;font-size:22px;font-weight:600;flex-shrink:0;}
+.wz-logo-prev img{width:100%;height:100%;object-fit:cover;}
+/* contraseña con UX */
+.pw-wrap{position:relative;display:flex;align-items:center;}
+.pw-wrap input{width:100%;padding-right:44px;}
+.pw-eye{position:absolute;right:11px;background:none;border:none;color:var(--text-soft);cursor:pointer;display:flex;padding:4px;border-radius:6px;}
+.pw-eye:hover{color:var(--text-mid);}
+.pw-bar{height:6px;border-radius:999px;background:var(--border);margin-top:10px;overflow:hidden;}
+.pw-bar span{display:block;height:100%;width:0;border-radius:999px;transition:width .25s ease,background .25s ease;}
+.pw-strength{font-size:12px;font-weight:600;margin-top:6px;color:var(--text-soft);}
+.pw-reqs{list-style:none;margin:11px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;}
+.pw-reqs li{font-size:12.5px;color:var(--text-soft);display:flex;align-items:center;gap:8px;transition:color .2s;}
+.pw-reqs li::before{content:'';width:16px;height:16px;border-radius:50%;border:1.6px solid var(--border);flex-shrink:0;background-position:center;background-repeat:no-repeat;transition:all .2s;}
+.pw-reqs li.ok{color:var(--text-dark);}
+.pw-reqs li.ok::before{background-color:#3F9D6A;border-color:#3F9D6A;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4.5 12.5 5 5L19.5 7'/%3E%3C/svg%3E");}
+.pw-match{font-size:12.5px;margin-top:8px;font-weight:600;min-height:15px;}
+.pw-match.ok{color:#3F9D6A;}
+.pw-match.no{color:#D46A6A;}
+/* teléfono con código de país */
+.tel-wrap{display:flex;align-items:stretch;}
+.tel-code{display:flex;align-items:center;padding:0 15px;background:var(--cream-dark);border:1.5px solid var(--border);border-right:none;border-radius:12px 0 0 12px;font-size:14.5px;font-weight:700;color:var(--text-mid);white-space:nowrap;min-width:56px;justify-content:center;}
+.tel-wrap input{border-radius:0 12px 12px 0 !important;flex:1;}
+.fld select:disabled{opacity:.6;cursor:not-allowed;}
+/* ocultar la barra de scroll del modal (el desplazamiento sigue funcionando) */
+.modal{scrollbar-width:none;-ms-overflow-style:none;}
+.modal::-webkit-scrollbar{display:none;width:0;height:0;}
+.wz-choice-intro{padding:4px 28px 16px;max-width:690px;color:var(--text-mid);font-size:14px;line-height:1.6;}
+.wz-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:4px 28px 22px;}
+.wz-choice-card{position:relative;border:1.5px solid var(--border);background:#fff;border-radius:18px;padding:18px;display:flex;align-items:center;gap:15px;text-align:left;color:var(--text-dark);cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;min-height:104px;}
+.wz-choice-card:hover{border-color:#99c4e9;box-shadow:0 10px 28px rgba(49,98,146,.10);transform:translateY(-2px);}
+.wz-choice-card.selected{border-color:#168ed1;background:linear-gradient(135deg,#f7fcff,#edf8ff);box-shadow:0 0 0 3px rgba(9,169,232,.11);}
+.wz-choice-card.selected::after{content:'✓';position:absolute;right:13px;top:13px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#0b91cf;color:#fff;font-size:12px;font-weight:900;}
+.wz-choice-emoji{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#eff8ff,#e4f3fd);color:#117fbd;flex:0 0 auto;}.wz-choice-emoji svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.wz-choice-copy{display:grid;gap:5px;padding-right:18px;}.wz-choice-copy strong{font-size:16px;}.wz-choice-copy small{font-size:12.5px;line-height:1.45;color:var(--text-soft);font-weight:500;}
+.wz-category-tools{display:flex;gap:10px;padding:5px 28px 14px;}.wz-search{position:relative;flex:1;}.wz-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7890a5;}.wz-search input{width:100%;height:48px;border:1.5px solid var(--border);border-radius:14px;background:#fff;padding:0 15px 0 44px;font-size:14px;outline:none;}.wz-search input:focus{border-color:#159bd8;box-shadow:0 0 0 4px rgba(9,169,232,.10);}
+.wz-cat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 28px 18px;max-height:355px;overflow:auto;scrollbar-width:thin;}
+.wz-cat-card{border:1.5px solid var(--border);background:#fff;border-radius:16px;padding:15px;text-align:left;cursor:pointer;min-height:132px;display:flex;flex-direction:column;transition:.2s;color:var(--text-dark);}.wz-cat-card:hover{border-color:#9cc9e6;transform:translateY(-2px);}.wz-cat-card.selected{border-color:#0a98d4;background:#eef9ff;box-shadow:0 0 0 3px rgba(9,169,232,.10);}.wz-cat-card .emoji{font-size:25px;margin-bottom:12px}.wz-cat-card strong{font-size:13.5px;line-height:1.3;margin-bottom:6px}.wz-cat-card small{font-size:11px;line-height:1.4;color:var(--text-soft)}
+.wz-cat-empty{grid-column:1/-1;padding:35px;text-align:center;color:var(--text-soft);font-size:13px;}.wz-category-detail{margin:0 28px 18px;padding:17px;border-radius:16px;background:#f4f9fd;border:1px solid #dceaf4;}.wz-category-detail[hidden]{display:none}.wz-category-detail .fld:last-child{margin-bottom:0}.wz-selected-summary{padding:0 28px 12px;color:#39708f;font-size:12px;font-weight:700;min-height:26px;}
+.wz-cat-card .category-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#eff8ff,#e5f3fb);color:#147eb7;margin-bottom:12px}.wz-cat-card .category-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.wz-cat-card.selected .category-icon{background:#d9f1fd;color:#0877ad}
+.wz-cat-card{position:relative;overflow:hidden}.wz-cat-card::after{content:'';position:absolute;inset:auto -40% -85% 20%;height:120px;background:radial-gradient(circle,rgba(22,158,215,.14),transparent 68%);opacity:0;transition:.25s}.wz-cat-card:hover::after,.wz-cat-card.selected::after{opacity:1}.wz-cat-order{position:absolute;right:12px;top:12px;width:25px;height:25px;border-radius:9px;background:#0b91cf;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;box-shadow:0 6px 16px rgba(11,145,207,.28);animation:wzpop .22s ease-out}.wz-selected-summary.limit{color:#b36528}.wz-selected-summary strong{color:#0b7fb7}
+.wz-native-hidden{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}.wz-fancy{position:relative}.wz-fancy-trigger{width:100%;min-height:50px;border:1.5px solid var(--border);border-radius:15px;background:linear-gradient(180deg,#fff,#f8fbfe);padding:0 14px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-dark);font:inherit;font-size:14px;cursor:pointer;transition:.2s;text-align:left}.wz-fancy-trigger:hover{border-color:#9cc9e6;transform:translateY(-1px);box-shadow:0 9px 24px rgba(45,94,132,.09)}.wz-fancy.open .wz-fancy-trigger{border-color:#159bd8;box-shadow:0 0 0 4px rgba(9,169,232,.10)}.wz-fancy-trigger svg{width:18px;transition:transform .22s;color:#4f7894}.wz-fancy.open .wz-fancy-trigger svg{transform:rotate(180deg)}.wz-fancy-trigger:disabled{opacity:.55;cursor:not-allowed;transform:none}.wz-fancy-menu{position:absolute;z-index:20;top:calc(100% + 8px);left:0;right:0;padding:7px;background:rgba(255,255,255,.98);border:1px solid #d9e8f2;border-radius:16px;box-shadow:0 20px 45px rgba(34,68,94,.18);max-height:240px;overflow:auto;opacity:0;visibility:hidden;transform:translateY(-8px) scale(.985);transition:.18s;transform-origin:top}.wz-fancy.open .wz-fancy-menu{opacity:1;visibility:visible;transform:none}.wz-fancy-option{width:100%;border:0;background:transparent;border-radius:11px;padding:11px 12px;display:flex;align-items:center;justify-content:space-between;text-align:left;color:var(--text-mid);font:inherit;font-size:13.5px;cursor:pointer;transition:.16s}.wz-fancy-option:hover{background:#eef8fe;color:#126d9e;padding-left:15px}.wz-fancy-option.selected{background:linear-gradient(135deg,#eaf7ff,#f4fbff);color:#087cb4;font-weight:800}.wz-fancy-option.selected::after{content:'✓';font-weight:900}.wz-fancy-empty{padding:14px;color:var(--text-soft);font-size:13px}@keyframes wzpop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.wz-nav{position:sticky;bottom:0;z-index:4;background:linear-gradient(180deg,rgba(255,255,255,.35),#fff 22%);padding-top:18px;border-radius:0 0 24px 24px;}
+@media(max-width:760px){.wz-cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none}.wz-choice-card{align-items:flex-start}.wz-choice-emoji{width:46px;height:46px}.wz-choice-copy strong{font-size:14px}.wz-choice-copy small{font-size:11.5px}}
+@media(max-width:520px){.wz-steps,.wz-count,.wz-title,.wz-sub,.wz-choice-intro,.wz-category-tools,.wz-cat-grid,.wz-selected-summary{padding-left:20px;padding-right:20px}.wz-type-grid{padding-left:20px;padding-right:20px;grid-template-columns:1fr}.wz-category-detail{margin-left:20px;margin-right:20px}.wz-cat-card{min-height:125px;padding:13px}.wz-nav{padding-left:20px;padding-right:20px}.wz-choice-intro{font-size:12.5px}}
+</style>
+<div class="modal-ov" id="crear-ov">
+  <div class="modal" style="max-width:1000px">
+    <div class="modal-head">
+      <h3>Crea tu empresa</h3>
+      <p>Registra tu negocio en SIWEPE</p>
+      <button class="modal-x" onclick="cerrarCrear()">×</button>
+    </div>
+
+    <div id="wz-form">
+      <!-- Trampa para bots: invisible para una persona, un bot que
+           autocompleta todos los campos del formulario sí la llena. -->
+      <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden" aria-hidden="true">
+        <label for="wz-web">No completar este campo</label>
+        <input type="text" id="wz-web" name="wz-web" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="wz-steps"><span class="wz-step-ind" data-i="1"></span><span class="wz-step-ind" data-i="2"></span><span class="wz-step-ind" data-i="3"></span><span class="wz-step-ind" data-i="4"></span><span class="wz-step-ind" data-i="5"></span></div>
+      <div class="wz-count" id="wz-count">Paso 1 de 5</div>
+
+      <!-- PASO 1 -->
+      <div class="wz-page" data-step="1">
+        <div class="wz-title">¿Qué vende tu negocio?</div>
+        <div class="wz-sub">Elegí la opción que mejor describe tu operación</div>
+        <p class="wz-choice-intro">Con esto SIWEPE adapta la experiencia inicial de tu tienda y te muestra categorías más relevantes.</p>
+        <div class="wz-type-grid" id="wz-type-grid">
+          <button type="button" class="wz-choice-card" data-tipo="Productos"><span class="wz-choice-emoji"><svg viewBox="0 0 24 24"><path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></span><span class="wz-choice-copy"><strong>Productos</strong><small>Artículos físicos, inventario y ventas por unidad.</small></span></button>
+          <button type="button" class="wz-choice-card" data-tipo="Comida y bebidas"><span class="wz-choice-emoji"><svg viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3v18M17 3c3 2 4 6 0 9"/></svg></span><span class="wz-choice-copy"><strong>Comida y bebidas</strong><small>Restaurantes, panaderías, cafés y alimentos preparados.</small></span></button>
+          <button type="button" class="wz-choice-card" data-tipo="Otro"><span class="wz-choice-emoji"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/></svg></span><span class="wz-choice-copy"><strong>Otro tipo de negocio</strong><small>Elegí esta opción si tu modelo combina o no encaja en los anteriores.</small></span></button>
+        </div>
+      </div>
+
+      <!-- PASO 2 -->
+      <div class="wz-page" data-step="2">
+        <div class="wz-title">¿Cuál es la categoría de tu negocio?</div>
+        <div class="wz-sub">Elegí una o dos categorías como máximo</div>
+        <div class="wz-category-tools"><label class="wz-search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="wz-cat-search" type="search" placeholder="Buscar por categoría…" autocomplete="off" maxlength="100"></label></div>
+        <div class="wz-selected-summary" id="wz-selected-summary"></div>
+        <div class="wz-cat-grid" id="wz-cat-grid"></div>
+        <input type="hidden" id="e-rubro">
+        <div class="wz-category-detail" id="e-rubro-otro-wrap" hidden>
+          <div class="fld"><label>¿Cómo describirías tu categoría? *</label><input id="e-rubro-otro" maxlength="60" placeholder="Ej. Alquiler de maquinaria pesada"></div>
+        </div>
+        <div class="wz-category-detail" id="wz-desc-wrap" hidden>
+          <div class="fld"><label>Descripción corta de lo que vendés</label><textarea id="e-desc" maxlength="255" placeholder="Contanos brevemente qué ofrece tu negocio"></textarea></div>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="wz-page" data-step="3">
+        <div class="wz-title">Datos de la empresa</div>
+        <div class="wz-sub">Ahora contanos cómo se llama y dónde está</div>
+        <div class="modal-body" style="padding-top:6px">
+          <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Nombre de tu empresa" maxlength="120"></div>
+          <div class="fld-row">
+            <div class="fld"><label>País *</label>
+              <select id="e-pais" onchange="paisCambio()"><option value="">Selecciona…</option></select>
+            </div>
+            <div class="fld"><label>Ciudad</label>
+              <select id="e-ciudad" disabled><option value="">Elegí el país primero</option></select>
+            </div>
+          </div>
+          <div class="fld"><label>Teléfono / WhatsApp</label>
+            <div class="tel-wrap">
+              <span class="tel-code" id="e-code">+—</span>
+              <input id="e-tel" placeholder="9999-9999" inputmode="tel" maxlength="30">
+            </div>
+          </div>
+          <div class="fld"><label>Logo (opcional)</label>
+            <div class="wz-logo-row">
+              <div class="wz-logo-prev" id="e-logo-prev">S</div>
+              <label class="wz-btn sec" style="cursor:pointer;flex:0 0 auto">Subir logo<input type="file" id="e-logo" accept="image/*" hidden></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- PASO 4 -->
+      <div class="wz-page" data-step="4">
+        <div class="wz-title">Tu cuenta de administrador</div>
+        <div class="wz-sub">Con esta cuenta vas a manejar tu tienda</div>
+        <div class="modal-body" style="padding-top:6px">
+          <div class="fld-row">
+            <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre" maxlength="120"></div>
+            <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com" maxlength="160"></div>
+          </div>
+          <div class="fld">
+            <label>Contraseña *</label>
+            <div class="pw-wrap">
+              <input id="e-pass" type="password" placeholder="Crea una contraseña segura" maxlength="72">
+              <button type="button" class="pw-eye" onclick="pwToggle('e-pass',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-bar"><span id="pw-bar-fill"></span></div>
+            <div class="pw-strength" id="pw-strength">Seguridad de la contraseña</div>
+            <ul class="pw-reqs" id="pw-reqs">
+              <li data-k="len">Mínimo 8 caracteres</li>
+              <li data-k="up">Una letra mayúscula</li>
+              <li data-k="low">Una letra minúscula</li>
+              <li data-k="num">Un número</li>
+              <li data-k="sym">Un símbolo (!@#$%)</li>
+            </ul>
+          </div>
+          <div class="fld">
+            <label>Confirmar contraseña *</label>
+            <div class="pw-wrap">
+              <input id="e-pass2" type="password" placeholder="Repite la contraseña" maxlength="72">
+              <button type="button" class="pw-eye" onclick="pwToggle('e-pass2',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-match" id="pw-match"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 5 -->
+      <div class="wz-page" data-step="5">
+        <div class="wz-title">Revisá y confirmá</div>
+        <div class="wz-sub">Verificá que todo esté bien</div>
+        <div class="wz-resumen" id="wz-resumen"></div>
+        <label class="wz-terms"><input type="checkbox" id="e-terminos"> Acepto los <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y confirmo que la información es verdadera.</label>
+      </div>
+
+      <div class="modal-err" id="e-err" style="padding:0 28px"></div>
+      <div class="wz-nav">
+        <button class="wz-btn sec" id="wz-prev" onclick="wzAtras()" style="display:none">Atrás</button>
+        <button class="wz-btn prim" id="wz-next" onclick="wzSiguiente()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ÉXITO: verificación por correo -->
+    <div class="wz-ok" id="wz-ok" style="display:none">
+      <div class="wz-ok-ic" id="wz-ok-ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></div>
+      <h3>¡Casi listo!</h3>
+      <p>Te enviamos un correo a <b id="wz-ok-mail"></b> para <b>verificar tu empresa</b>.</p>
+      <p>Al confirmar, SIWEPE iniciará tu sesión y te llevará directamente al panel de tu nueva tienda.</p>
+      <div id="wz-ok-dev" style="display:none;margin:16px 0;padding:14px 16px;border-radius:12px;background:#FFF6E5;border:1px solid #F0D9A8;text-align:left">
+        <p style="margin:0 0 8px;font-weight:700;color:#8A6416;font-size:13.5px">Modo local: no hay servicio de correo configurado</p>
+        <p style="margin:0 0 10px;font-size:13px;color:#6B5A3A">Nadie recibirá un correo real. Usá este enlace para simular la verificación:</p>
+        <a id="wz-ok-devlink" href="#" target="_blank" rel="noopener" style="word-break:break-all;font-size:12.5px;color:#4F86C6;font-weight:600"></a>
+      </div>
+      <p id="wz-ok-wait" style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--text-soft);font-size:13.5px;margin-top:14px">
+        <span class="wz-spin" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border);border-top-color:#4F86C6;display:inline-block;animation:wzspin .8s linear infinite"></span>
+        Esperando la confirmación para abrir tu panel…
+      </p>
+      <button class="wz-btn sec" style="max-width:260px;margin:14px auto 0" onclick="cerrarCrear()">Cerrar (confirmar más tarde)</button>
+    </div>
+    <style>@keyframes wzspin{to{transform:rotate(360deg)}}</style>
+  </div>
+</div>
+
+<script>
+/* Base del API: local vs Railway (mismo criterio que la tienda) */
+const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://backendsiwepe-production.up.railway.app';
+
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+function abrirCrear(){
+  wzPaso=1; wzLogo=''; wzTipos=[]; wzCategorias=[]; wzDescAutogenerada='';
+  initPaises();
+  ['e-nombre','e-rubro','e-rubro-otro','e-desc','e-tel','e-pais','e-dueno','e-correo','e-pass','e-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('e-rubro-otro-wrap').hidden=true;
+  document.getElementById('wz-desc-wrap').hidden=true;
+  document.querySelectorAll('.wz-choice-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('wz-cat-search').value='';
+  document.getElementById('wz-selected-summary').textContent='';
+  renderCategoriasRegistro();
+  paisCambio();
+  refrescarSelectsFrescos();
+  const t=document.getElementById('e-terminos'); if(t) t.checked=false;
+  document.getElementById('wz-form').style.display='';
+  document.getElementById('wz-ok').style.display='none';
+  document.getElementById('wz-ok-dev').style.display='none';
+  const prev=document.getElementById('e-logo-prev'); if(prev) prev.innerHTML='S';
+  if(typeof pwEval==='function') pwEval();
+  wzRender();
+  document.getElementById('crear-ov').classList.add('open');
+}
+function cerrarCrear(){
+  document.getElementById('crear-ov').classList.remove('open');
+  document.getElementById('e-err').textContent='';
+  wzDetenerEspera();
+}
+document.getElementById('crear-ov').addEventListener('click', e=>{ if(e.target.id==='crear-ov') cerrarCrear(); });
+
+const esc = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ── Países: código de teléfono + ciudades ── */
+const PAISES = {
+  'Honduras':      { code:'+504', ciudades:['Tegucigalpa','San Pedro Sula','La Ceiba','El Progreso','Choloma','Comayagua','Choluteca','Danlí','Juticalpa','Puerto Cortés'] },
+  'Guatemala':     { code:'+502', ciudades:['Ciudad de Guatemala','Mixco','Villa Nueva','Quetzaltenango','Escuintla'] },
+  'El Salvador':   { code:'+503', ciudades:['San Salvador','Santa Ana','San Miguel','Soyapango','Mejicanos'] },
+  'Belice':        { code:'+501', ciudades:['Ciudad de Belice','Belmopán','San Ignacio','Orange Walk','Dangriga'] },
+  'Nicaragua':     { code:'+505', ciudades:['Managua','León','Masaya','Chinandega','Granada'] },
+  'Costa Rica':    { code:'+506', ciudades:['San José','Alajuela','Cartago','Heredia','Liberia'] },
+  'Panamá':        { code:'+507', ciudades:['Ciudad de Panamá','San Miguelito','Colón','David','La Chorrera'] },
+  'República Dominicana':{ code:'+1', ciudades:['Santo Domingo','Santiago','La Romana','Puerto Plata','Punta Cana'] },
+  'Puerto Rico':   { code:'+1', ciudades:['San Juan','Bayamón','Carolina','Ponce','Caguas'] },
+  'Cuba':          { code:'+53', ciudades:['La Habana','Santiago de Cuba','Camagüey','Holguín','Santa Clara'] },
+  'Jamaica':       { code:'+1', ciudades:['Kingston','Montego Bay','Spanish Town','Portmore','Mandeville'] },
+  'México':        { code:'+52',  ciudades:['Ciudad de México','Guadalajara','Monterrey','Puebla','Tijuana','Cancún'] },
+  'Colombia':      { code:'+57',  ciudades:['Bogotá','Medellín','Cali','Barranquilla','Cartagena'] },
+  'Venezuela':     { code:'+58',  ciudades:['Caracas','Maracaibo','Valencia','Barquisimeto','Maracay'] },
+  'Ecuador':       { code:'+593', ciudades:['Quito','Guayaquil','Cuenca','Santo Domingo','Manta'] },
+  'Perú':          { code:'+51',  ciudades:['Lima','Arequipa','Trujillo','Cusco','Chiclayo'] },
+  'Bolivia':       { code:'+591', ciudades:['Santa Cruz','La Paz','Cochabamba','Sucre','Tarija'] },
+  'Chile':         { code:'+56',  ciudades:['Santiago','Valparaíso','Concepción','Antofagasta','Viña del Mar'] },
+  'Argentina':     { code:'+54',  ciudades:['Buenos Aires','Córdoba','Rosario','Mendoza','La Plata'] },
+  'Uruguay':       { code:'+598', ciudades:['Montevideo','Salto','Paysandú','Maldonado','Rivera'] },
+  'Paraguay':      { code:'+595', ciudades:['Asunción','Ciudad del Este','San Lorenzo','Luque','Encarnación'] },
+  'Brasil':        { code:'+55',  ciudades:['São Paulo','Río de Janeiro','Brasilia','Salvador','Belo Horizonte'] },
+  'Canadá':        { code:'+1',   ciudades:['Toronto','Montreal','Vancouver','Calgary','Ottawa'] },
+  'Estados Unidos':{ code:'+1',   ciudades:['Miami','Houston','Los Ángeles','Nueva York','Chicago','Orlando','Dallas'] },
+  'España':        { code:'+34',  ciudades:['Madrid','Barcelona','Valencia','Sevilla','Málaga','Bilbao'] },
+  'Portugal':      { code:'+351', ciudades:['Lisboa','Oporto','Braga','Coímbra','Faro'] },
+  'Italia':        { code:'+39',  ciudades:['Roma','Milán','Nápoles','Turín','Florencia'] },
+  'Francia':       { code:'+33',  ciudades:['París','Marsella','Lyon','Toulouse','Niza'] },
+  'Alemania':      { code:'+49',  ciudades:['Berlín','Hamburgo','Múnich','Colonia','Fráncfort'] }
+};
+function initPaises(){
+  const sel=document.getElementById('e-pais');
+  if(sel && sel.options.length<=1){
+    sel.insertAdjacentHTML('beforeend', Object.keys(PAISES).map(p=>`<option>${p}</option>`).join(''));
+  }
+  montarSelectFresco('e-pais','Seleccioná un país');
+  sel?._wzFancy?.refresh();
+}
+function paisCambio(){
+  const p=document.getElementById('e-pais').value;
+  const cs=document.getElementById('e-ciudad');
+  const code=document.getElementById('e-code');
+  if(!p || !PAISES[p]){ cs.innerHTML='<option value="">Elegí el país primero</option>'; cs.disabled=true; code.textContent='+—'; montarSelectFresco('e-ciudad','Elegí el país primero'); cs._wzFancy?.refresh(); return; }
+  code.textContent = PAISES[p].code;
+  cs.disabled=false;
+  cs.innerHTML = '<option value="">Selecciona…</option>' + PAISES[p].ciudades.map(c=>`<option>${c}</option>`).join('') + '<option>Otra</option>';
+  montarSelectFresco('e-ciudad','Seleccioná una ciudad');
+  cs._wzFancy?.refresh();
+}
+
+function montarSelectFresco(id,placeholder){
+  const select=document.getElementById(id); if(!select) return;
+  if(select._wzFancy){ select._wzFancy.placeholder=placeholder; select._wzFancy.refresh(); return; }
+  const shell=document.createElement('div'); shell.className='wz-fancy';
+  select.parentNode.insertBefore(shell,select); shell.appendChild(select); select.classList.add('wz-native-hidden');
+  shell.insertAdjacentHTML('beforeend',`<button type="button" class="wz-fancy-trigger"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="m7 10 5 5 5-5"/></svg></button><div class="wz-fancy-menu"></div>`);
+  const trigger=shell.querySelector('.wz-fancy-trigger'), label=trigger.querySelector('span'), menu=shell.querySelector('.wz-fancy-menu');
+  const api={placeholder,close(){shell.classList.remove('open')},refresh(){
+    trigger.disabled=select.disabled;
+    const elegida=select.options[select.selectedIndex]; label.textContent=(elegida&&elegida.value)?elegida.textContent:api.placeholder;
+    const opciones=[...select.options].filter(o=>o.value);
+    menu.innerHTML=opciones.length?opciones.map(o=>`<button type="button" class="wz-fancy-option${o.value===select.value?' selected':''}" data-value="${esc(o.value)}">${esc(o.textContent)}</button>`).join(''):'<div class="wz-fancy-empty">No hay opciones disponibles</div>';
+  }};
+  trigger.addEventListener('click',()=>{ if(trigger.disabled)return; document.querySelectorAll('.wz-fancy.open').forEach(x=>{if(x!==shell)x.classList.remove('open')}); shell.classList.toggle('open'); });
+  menu.addEventListener('click',e=>{const op=e.target.closest('[data-value]');if(!op)return;select.value=op.dataset.value;select.dispatchEvent(new Event('change',{bubbles:true}));api.close();api.refresh();});
+  select.addEventListener('change',()=>api.refresh()); select._wzFancy=api; api.refresh();
+}
+function refrescarSelectsFrescos(){document.querySelectorAll('select._wzFancy').forEach(s=>s._wzFancy.refresh());['e-pais','e-ciudad'].forEach(id=>document.getElementById(id)?._wzFancy?.refresh());}
+document.addEventListener('click',e=>{if(!e.target.closest('.wz-fancy'))document.querySelectorAll('.wz-fancy.open').forEach(x=>x.classList.remove('open'));});
+
+/* ── Wizard crear empresa ── */
+let wzPaso = 1;
+let wzLogo = '';
+let wzTipos = [];
+let wzCategorias = [];
+let wzDescAutogenerada = '';
+/* Anti-bot: momento en que cargó la página — un registro que llega en
+   segundos, sin haber pasado por los 5 pasos del wizard, casi seguro es un
+   script y no una persona llenando el formulario. */
+const _cargaTs = Date.now();
+const val = id => (document.getElementById(id).value||'').trim();
+
+const CATEGORIAS_REGISTRO = [
+  {nombre:'Ropa y calzado',emoji:'👕',desc:'Moda, prendas, uniformes y calzado.',tipos:['Productos']},
+  {nombre:'Belleza y cuidado personal',emoji:'💄',desc:'Maquillaje, cremas, perfumes y cuidado personal.',tipos:['Productos','Servicios']},
+  {nombre:'Regalos y detalles',emoji:'🎁',desc:'Souvenirs, peluches, arreglos y detalles.',tipos:['Productos']},
+  {nombre:'Accesorios y bisutería',emoji:'👜',desc:'Joyería, bolsos, accesorios y artesanías.',tipos:['Productos']},
+  {nombre:'Pulpería',emoji:'🧺',desc:'Abarrotes y productos básicos para el hogar.',tipos:['Productos']},
+  {nombre:'Minimercado',emoji:'🛒',desc:'Alimentos, aseo, frutas, verduras y más.',tipos:['Productos']},
+  {nombre:'Distribuidora y mayoreo',emoji:'📦',desc:'Comercialización y distribución al por mayor.',tipos:['Productos']},
+  {nombre:'Charcutería',emoji:'🧀',desc:'Quesos, jamones, embutidos y productos gourmet.',tipos:['Productos']},
+  {nombre:'Carnicería',emoji:'🥩',desc:'Carnes, proteína fresca y productos relacionados.',tipos:['Productos']},
+  {nombre:'Electrónica e informática',emoji:'💻',desc:'Tecnología, equipos, accesorios y computación.',tipos:['Productos','Servicios']},
+  {nombre:'Hogar y decoración',emoji:'🏠',desc:'Muebles, decoración y artículos para el hogar.',tipos:['Productos']},
+  {nombre:'Ferretería y construcción',emoji:'🔨',desc:'Herramientas, materiales y suministros de construcción.',tipos:['Productos']},
+  {nombre:'Repuestos y automotriz',emoji:'🚗',desc:'Repuestos, accesorios y productos para vehículos.',tipos:['Productos','Servicios']},
+  {nombre:'Librería y papelería',emoji:'📚',desc:'Útiles, libros, oficina y materiales escolares.',tipos:['Productos']},
+  {nombre:'Farmacia y salud',emoji:'🩺',desc:'Productos farmacéuticos, salud y bienestar.',tipos:['Productos','Servicios']},
+  {nombre:'Mascotas',emoji:'🐾',desc:'Alimentos, accesorios y cuidado para mascotas.',tipos:['Productos','Servicios']},
+  {nombre:'Deportes',emoji:'⚽',desc:'Ropa, equipo y accesorios deportivos.',tipos:['Productos','Servicios']},
+  {nombre:'Juguetería',emoji:'🧸',desc:'Juguetes, juegos y entretenimiento infantil.',tipos:['Productos']},
+  {nombre:'Artesanías',emoji:'🧶',desc:'Productos hechos a mano y arte local.',tipos:['Productos']},
+  {nombre:'Agricultura y campo',emoji:'🌱',desc:'Insumos, herramientas y productos agrícolas.',tipos:['Productos','Servicios']},
+  {nombre:'Restaurante',emoji:'🍽️',desc:'Platos preparados, menú y servicio de restaurante.',tipos:['Comida y bebidas']},
+  {nombre:'Panadería y repostería',emoji:'🥐',desc:'Pan, pasteles, postres y productos horneados.',tipos:['Comida y bebidas']},
+  {nombre:'Cafetería',emoji:'☕',desc:'Café, bebidas, desayunos y acompañamientos.',tipos:['Comida y bebidas']},
+  {nombre:'Comida rápida',emoji:'🍔',desc:'Hamburguesas, pizza, snacks y comida para llevar.',tipos:['Comida y bebidas']},
+  {nombre:'Catering y eventos',emoji:'🥘',desc:'Alimentos y bebidas preparados para eventos.',tipos:['Comida y bebidas','Servicios']},
+  {nombre:'Bar y bebidas',emoji:'🥤',desc:'Bebidas, coctelería y productos refrescantes.',tipos:['Comida y bebidas']},
+  {nombre:'Heladería y postres',emoji:'🍦',desc:'Helados, dulces, postres y antojos.',tipos:['Comida y bebidas']},
+  {nombre:'Belleza y estética',emoji:'💇',desc:'Salón, barbería, uñas, spa y tratamientos.',tipos:['Servicios']},
+  {nombre:'Reparaciones y mantenimiento',emoji:'🛠️',desc:'Reparación, instalación y mantenimiento especializado.',tipos:['Servicios']},
+  {nombre:'Servicios profesionales',emoji:'💼',desc:'Consultoría, asesoría y servicios especializados.',tipos:['Servicios']},
+  {nombre:'Educación y tutorías',emoji:'🎓',desc:'Cursos, clases, capacitación y acompañamiento educativo.',tipos:['Servicios']},
+  {nombre:'Fotografía y video',emoji:'📷',desc:'Fotografía, producción audiovisual y contenido.',tipos:['Servicios']},
+  {nombre:'Eventos y decoración',emoji:'🎈',desc:'Organización, montaje y decoración de eventos.',tipos:['Servicios']},
+  {nombre:'Transporte y entregas',emoji:'🚚',desc:'Transporte, mensajería, mudanzas y entregas.',tipos:['Servicios']},
+  {nombre:'Tecnología y soporte',emoji:'🧑‍💻',desc:'Desarrollo, soporte técnico y soluciones digitales.',tipos:['Servicios']},
+  {nombre:'Salud y bienestar',emoji:'🧘',desc:'Atención, terapia, entrenamiento y bienestar integral.',tipos:['Servicios']},
+  {nombre:'Limpieza',emoji:'🧹',desc:'Servicios de limpieza residencial y empresarial.',tipos:['Servicios']},
+  {nombre:'Diseño e impresión',emoji:'🎨',desc:'Diseño gráfico, publicidad e impresión.',tipos:['Servicios','Productos']},
+  {nombre:'Turismo y hospedaje',emoji:'🏨',desc:'Alojamiento, experiencias y servicios turísticos.',tipos:['Servicios']},
+  {nombre:'Bienes raíces',emoji:'🏘️',desc:'Venta, alquiler y administración de propiedades.',tipos:['Servicios']},
+  {nombre:'Otro',emoji:'✨',desc:'Una categoría creada especialmente para tu negocio.',tipos:['Productos','Servicios','Comida y bebidas','Otro']}
+];
+
+function normalizaRegistro(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+const ICONOS_REGISTRO = {
+  shirt:'<path d="M16 3l5 4-3 4-2-1v11H8V10l-2 1-3-4 5-4a4 4 0 0 0 8 0Z"/>',
+  sparkles:'<path d="m12 3 1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3ZM5 14l.8 2.2L8 17l-2.2.8L5 20l-.8-2.2L2 17l2.2-.8L5 14ZM19 13l.8 2.2L22 16l-2.2.8L19 19l-.8-2.2L16 16l2.2-.8L19 13Z"/>',
+  gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7.5 8C4 8 4 3 7 3c2 0 5 5 5 5M16.5 8C20 8 20 3 17 3c-2 0-5 5-5 5"/>',
+  bag:'<path d="M6 8h12l1 13H5L6 8ZM9 9V6a3 3 0 0 1 6 0v3"/>',
+  basket:'<path d="m5 10 2 11h10l2-11H5ZM9 10l3-7 3 7M3 10h18"/>',
+  cart:'<path d="M3 4h2l2.5 11h10l2-7H6M9 20h.01M17 20h.01"/>',
+  package:'<path d="m4 7 8-4 8 4-8 4-8-4ZM4 7v10l8 4 8-4V7M12 11v10"/>',
+  food:'<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3v18M17 3c3 2 4 6 0 9"/>',
+  laptop:'<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M2 20h20M8 20v-4h8v4"/>',
+  home:'<path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
+  hammer:'<path d="m14 4 6 6-3 3-6-6 3-3ZM12 8 4 16a3 3 0 0 0 4 4l8-8"/>',
+  car:'<path d="m5 16-1-4 2-5h12l2 5-1 4H5ZM7 16v3M17 16v3M4 12h16M8 13h.01M16 13h.01"/>',
+  book:'<path d="M4 5a3 3 0 0 1 3-2h5v17H7a3 3 0 0 0-3 2V5ZM20 5a3 3 0 0 0-3-2h-5v17h5a3 3 0 0 1 3 2V5Z"/>',
+  heart:'<path d="M20.8 5.7a5.5 5.5 0 0 0-7.8 0L12 6.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/><path d="M7 12h3l1-3 2 6 1-3h3"/>',
+  paw:'<circle cx="8" cy="7" r="2"/><circle cx="16" cy="7" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M12 12c-4 0-6 4-4 7 1.5 2 6.5 2 8 0 2-3 0-7-4-7Z"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0V4ZM10 17h4M12 13v4M8 6H4v2a4 4 0 0 0 4 4M16 6h4v2a4 4 0 0 1-4 4M7 21h10"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 0-4H12a2 2 0 0 1 0-4h5a4 4 0 0 0 4-4c0-3-4-6-9-6Z"/><circle cx="7.5" cy="10" r=".5"/><circle cx="9" cy="6.5" r=".5"/><circle cx="14" cy="6" r=".5"/>',
+  sprout:'<path d="M12 22V10M12 14c-5 0-8-3-8-8 5 0 8 3 8 8ZM12 10c0-4 3-7 8-7 0 5-3 8-8 8"/>',
+  coffee:'<path d="M4 7h13v8a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V7ZM17 9h2a3 3 0 0 1 0 6h-2M7 3v2M11 3v2"/>',
+  scissors:'<circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="m8.5 8.5 11 7.5M8.5 15.5 19 8"/>',
+  briefcase:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
+  camera:'<path d="M3 7h4l2-3h6l2 3h4v13H3V7Z"/><circle cx="12" cy="13" r="4"/>',
+  truck:'<path d="M3 6h11v11H3V6ZM14 10h4l3 3v4h-7v-7Z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+  map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6ZM9 3v15M15 6v15"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><path d="M17.5 14v7M14 17.5h7"/>'
+};
+function iconoRegistro(nombre){
+  const n=normalizaRegistro(nombre); let k='grid';
+  if(/ropa/.test(n))k='shirt'; else if(/belleza|estetica/.test(n))k='sparkles'; else if(/regalo|juguet/.test(n))k='gift'; else if(/accesorio|bisuteria/.test(n))k='bag'; else if(/pulperia/.test(n))k='basket'; else if(/minimercado/.test(n))k='cart'; else if(/distribuidora/.test(n))k='package'; else if(/charcuteria|carniceria|restaurante|comida rapida|catering|bar y bebidas/.test(n))k='food'; else if(/panaderia|heladeria/.test(n))k='gift'; else if(/cafeteria/.test(n))k='coffee'; else if(/electronica|tecnologia/.test(n))k='laptop'; else if(/hogar|bienes raices/.test(n))k='home'; else if(/ferreteria|reparaciones/.test(n))k='hammer'; else if(/repuestos|automotriz/.test(n))k='car'; else if(/libreria|educacion/.test(n))k='book'; else if(/farmacia|salud/.test(n))k='heart'; else if(/mascotas/.test(n))k='paw'; else if(/deportes/.test(n))k='trophy'; else if(/artesania|diseno/.test(n))k='palette'; else if(/agricultura/.test(n))k='sprout'; else if(/fotografia/.test(n))k='camera'; else if(/transporte/.test(n))k='truck'; else if(/turismo/.test(n))k='map'; else if(/servicios profesionales/.test(n))k='briefcase'; else if(/limpieza|eventos/.test(n))k='sparkles';
+  return `<span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONOS_REGISTRO[k]}</svg></span>`;
+}
+function categoriasVisiblesRegistro(){
+  const disponibles=CATEGORIAS_REGISTRO.filter(c=>c.nombre==='Otro'||c.tipos.some(t=>t!=='Servicios'));
+  if(!wzTipos.length || wzTipos.includes('Otro')) return disponibles;
+  return disponibles.filter(c=>c.nombre==='Otro'||c.tipos.some(t=>t!=='Servicios'&&wzTipos.includes(t)));
+}
+function renderCategoriasRegistro(){
+  const grid=document.getElementById('wz-cat-grid'); if(!grid) return;
+  const q=normalizaRegistro(val('wz-cat-search'));
+  const lista=categoriasVisiblesRegistro().filter(c=>!q||normalizaRegistro(c.nombre+' '+c.desc).includes(q));
+  grid.innerHTML=lista.length?lista.map(c=>{const pos=wzCategorias.indexOf(c.nombre);return `<button type="button" aria-pressed="${pos>=0}" class="wz-cat-card${pos>=0?' selected':''}" data-categoria="${esc(c.nombre)}">${pos>=0?`<span class="wz-cat-order">${pos+1}</span>`:''}${iconoRegistro(c.nombre)}<strong>${esc(c.nombre)}</strong><small>${esc(c.desc)}</small></button>`}).join(''):'<div class="wz-cat-empty">No encontramos esa categoría. Probá buscando “Otro” y describí tu negocio.</div>';
+}
+function elegirCategoria(nombre){
+  const actual=wzCategorias.indexOf(nombre), resumen=document.getElementById('wz-selected-summary');
+  if(actual>=0) wzCategorias.splice(actual,1);
+  else if(wzCategorias.length>=2){resumen.classList.add('limit');resumen.textContent='Máximo 2 categorías. Quitá una para elegir otra.';return;}
+  else wzCategorias.push(nombre);
+  document.getElementById('e-rubro').value=wzCategorias.join(' · ');
+  const esOtro=wzCategorias.includes('Otro');
+  document.getElementById('e-rubro-otro-wrap').hidden=!esOtro;
+  document.getElementById('wz-desc-wrap').hidden=!wzCategorias.length;
+  if(!esOtro) document.getElementById('e-rubro-otro').value='';
+  const desc=document.getElementById('e-desc');
+  const automatica=wzCategorias.filter(x=>x!=='Otro').map(x=>CATEGORIAS_REGISTRO.find(c=>c.nombre===x)?.desc||'').filter(Boolean).join(' ');
+  if(!desc.value.trim()||desc.value.trim()===wzDescAutogenerada){desc.value=automatica;wzDescAutogenerada=desc.value.trim();}
+  resumen.classList.remove('limit'); resumen.innerHTML=wzCategorias.length?`<strong>${wzCategorias.length} de 2</strong> · ${wzCategorias.map(esc).join(' + ')}`:'Elegí hasta dos categorías';
+  renderCategoriasRegistro(); wzActualizarNext();
+}
+function wzActualizarNext(){
+  const btn=document.getElementById('wz-next'); if(!btn) return;
+  if(wzPaso===1) btn.disabled=!wzTipos.length;
+  else if(wzPaso===2) btn.disabled=!wzCategorias.length;
+  else btn.disabled=false;
+}
+document.getElementById('wz-type-grid').addEventListener('click',e=>{
+  const card=e.target.closest('[data-tipo]'); if(!card) return;
+  const tipo=card.dataset.tipo;
+  if(wzTipos.includes(tipo)) wzTipos=wzTipos.filter(x=>x!==tipo); else wzTipos.push(tipo);
+  document.querySelectorAll('[data-tipo]').forEach(c=>c.classList.toggle('selected',wzTipos.includes(c.dataset.tipo)));
+  const visibles=new Set(categoriasVisiblesRegistro().map(c=>c.nombre));
+  wzCategorias=wzCategorias.filter(c=>visibles.has(c));
+  document.getElementById('e-rubro').value=wzCategorias.join(' · ');
+  document.getElementById('wz-selected-summary').innerHTML=wzCategorias.length?`<strong>${wzCategorias.length} de 2</strong> · ${wzCategorias.map(esc).join(' + ')}`:'Elegí hasta dos categorías';
+  renderCategoriasRegistro(); wzActualizarNext();
+});
+document.getElementById('wz-cat-grid').addEventListener('click',e=>{ const card=e.target.closest('[data-categoria]'); if(card) elegirCategoria(card.dataset.categoria); });
+document.getElementById('wz-cat-search').addEventListener('input',renderCategoriasRegistro);
+
+function wzRender(){
+  document.querySelectorAll('.wz-page').forEach(p=>p.classList.toggle('active', +p.dataset.step===wzPaso));
+  document.querySelectorAll('.wz-step-ind').forEach(s=>{ const i=+s.dataset.i; s.classList.toggle('active', i===wzPaso); s.classList.toggle('done', i<wzPaso); });
+  document.getElementById('wz-count').textContent = `Paso ${wzPaso} de 5`;
+  document.getElementById('wz-prev').style.display = wzPaso>1 ? 'block' : 'none';
+  document.getElementById('wz-next').textContent = wzPaso<5 ? 'Continuar →' : 'Crear empresa';
+  document.getElementById('e-err').textContent = '';
+  if(wzPaso===2) renderCategoriasRegistro();
+  if(wzPaso===5) wzResumen();
+  wzActualizarNext();
+}
+function rubrosFinales(){return wzCategorias.map(c=>c==='Otro'?val('e-rubro-otro'):c).filter(Boolean).slice(0,2);}
+function rubroFinal(){ return rubrosFinales()[0]||''; }
+function wzResumen(){
+  document.getElementById('wz-resumen').innerHTML = `
+    <div class="rr"><span>Empresa</span><b>${esc(val('e-nombre'))}</b></div>
+    <div class="rr"><span>Qué vende</span><b>${esc(wzTipos.join(', '))}</b></div>
+    <div class="rr"><span>Categorías</span><b>${esc(rubrosFinales().join(' · '))}</b></div>
+    <div class="rr"><span>Descripción</span><b>${esc(val('e-desc')||'—')}</b></div>
+    <div class="rr"><span>Ubicación</span><b>${esc([val('e-ciudad'),val('e-pais')].filter(Boolean).join(', ')||'—')}</b></div>
+    <div class="rr"><span>Responsable</span><b>${esc(val('e-dueno'))}</b></div>
+    <div class="rr"><span>Correo</span><b>${esc(val('e-correo'))}</b></div>`;
+}
+function wzValidar(){
+  const err=document.getElementById('e-err');
+  if(wzPaso===1){
+    if(!wzTipos.length){ err.textContent='Elegí al menos una opción sobre lo que vende tu negocio.'; return false; }
+  }
+  if(wzPaso===2){
+    if(!wzCategorias.length){ err.textContent='Elegí al menos una categoría para tu negocio.'; return false; }
+    if(wzCategorias.length>2){ err.textContent='Podés elegir como máximo dos categorías.'; return false; }
+    if(wzCategorias.includes('Otro') && !val('e-rubro-otro')){ err.textContent='Escribí la categoría personalizada para tu negocio.'; return false; }
+    if(!val('e-desc')){ err.textContent='Contanos brevemente qué vende u ofrece tu negocio.'; return false; }
+  }
+  if(wzPaso===3){
+    if(!val('e-nombre')){ err.textContent='Escribí el nombre de la empresa.'; return false; }
+    if(!val('e-pais')){ err.textContent='Elegí tu país.'; return false; }
+  }
+  if(wzPaso===4){
+    if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('e-correo'))){ err.textContent='Correo inválido.'; return false; }
+    if(!pwEval()){ err.textContent='La contraseña debe cumplir todos los requisitos.'; return false; }
+    if(val('e-pass')!==val('e-pass2')){ err.textContent='Las contraseñas no coinciden.'; return false; }
+  }
+  return true;
+}
+function wzAtras(){ if(wzPaso>1){ wzPaso--; wzRender(); } }
+function wzSiguiente(){
+  if(!wzValidar()) return;
+  if(wzPaso<5){ wzPaso++; wzRender(); return; }
+  if(!document.getElementById('e-terminos').checked){ document.getElementById('e-err').textContent='Tenés que aceptar los términos.'; return; }
+  crearEmpresa();
+}
+document.getElementById('e-logo').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ wzLogo=rd.result; document.getElementById('e-logo-prev').innerHTML=`<img src="${wzLogo}" alt="">`; };
+  rd.readAsDataURL(f);
+});
+
+/* ── Contraseña: requisitos + medidor en vivo ── */
+const PW_REGLAS = { len:p=>p.length>=8, up:p=>/[A-Z]/.test(p), low:p=>/[a-z]/.test(p), num:p=>/[0-9]/.test(p), sym:p=>/[^A-Za-z0-9]/.test(p) };
+function pwEval(){
+  const p = document.getElementById('e-pass').value;
+  let met = 0;
+  document.querySelectorAll('#pw-reqs li').forEach(li=>{ const ok=PW_REGLAS[li.dataset.k](p); li.classList.toggle('ok',ok); if(ok) met++; });
+  const fill=document.getElementById('pw-bar-fill'), lbl=document.getElementById('pw-strength');
+  if(fill) fill.style.width = (met/5*100) + '%';
+  let color='#D46A6A', txt='Débil';
+  if(met>=5){ color='#3F9D6A'; txt='Fuerte'; }
+  else if(met>=3){ color='#E8A13C'; txt='Media'; }
+  if(fill) fill.style.background = p ? color : 'var(--border)';
+  if(lbl){ lbl.textContent = p ? ('Seguridad: '+txt) : 'Seguridad de la contraseña'; lbl.style.color = p ? color : 'var(--text-soft)'; }
+  pwMatch();
+  return met===5;
+}
+function pwMatch(){
+  const p=document.getElementById('e-pass').value, c=document.getElementById('e-pass2').value;
+  const el=document.getElementById('pw-match'); if(!el) return;
+  if(!c){ el.textContent=''; el.className='pw-match'; return; }
+  if(p===c){ el.textContent='Las contraseñas coinciden'; el.className='pw-match ok'; }
+  else { el.textContent='Las contraseñas no coinciden'; el.className='pw-match no'; }
+}
+function pwToggle(id,btn){ const i=document.getElementById(id); i.type = i.type==='password' ? 'text' : 'password'; }
+document.getElementById('e-pass').addEventListener('input', pwEval);
+document.getElementById('e-pass2').addEventListener('input', pwMatch);
+
+async function crearEmpresa(){
+  const err=document.getElementById('e-err');
+  const btn=document.getElementById('wz-next'); btn.disabled=true; btn.textContent='Creando…';
+  const code=document.getElementById('e-code').textContent.trim();
+  const datos={
+    nombre:val('e-nombre'), tiposNegocio:wzTipos, rubro:rubroFinal(), rubros:rubrosFinales(), descripcion:val('e-desc'),
+    pais:val('e-pais'), ciudad:val('e-ciudad'),
+    telefono: val('e-tel') ? (code+' '+val('e-tel')) : '', logo:wzLogo,
+    dueno:val('e-dueno'), correo:val('e-correo'), password:val('e-pass'),
+    web:val('wz-web'), ts:_cargaTs
+  };
+  try{
+    const r=await fetch(API_BASE+'/api/empresas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||('Error '+r.status));
+    document.getElementById('wz-form').style.display='none';
+    document.getElementById('wz-ok-mail').textContent=datos.correo;
+    const devBox=document.getElementById('wz-ok-dev');
+    if(j.devLink){
+      const a=document.getElementById('wz-ok-devlink'); a.href=j.devLink; a.textContent=j.devLink;
+      devBox.style.display='block';
+    } else devBox.style.display='none';
+    document.getElementById('wz-ok').style.display='block';
+    wzEsperarConfirmacion(datos.correo);
+  }catch(e){
+    err.textContent = e.message || 'No se pudo crear la empresa.';
+    btn.disabled=false; btn.textContent='Crear empresa';
+  }
+}
+
+/* ── Espera de confirmación: sondea el estado del registro y, apenas se
+   confirma el correo (en esta pestaña o desde otra, ej. Gmail), redirige
+   directo a la tienda recién creada — sin dejar al usuario varado en el
+   modal ni mandarlo de vuelta al inicio sin explicación. ── */
+let wzEsperaTimer=null;
+function wzEsperarConfirmacion(correo){
+  wzDetenerEspera();
+  wzEsperaTimer = setInterval(async ()=>{
+    try{
+      const r = await fetch(API_BASE+'/api/empresas/estado?correo='+encodeURIComponent(correo));
+      if(!r.ok) return;
+      const j = await r.json();
+      if(j.estado==='activa' && j.slug){
+        wzDetenerEspera();
+        const espera=document.getElementById('wz-ok-wait');
+        if(espera) espera.innerHTML='<span class="wz-spin"></span> Empresa activada. Preparando tu panel…';
+        setTimeout(()=>{ location.href='admin.html?e='+encodeURIComponent(j.slug)+'&activated=1'; },1400);
+      }
+    }catch(e){ /* red caída: se reintenta en el próximo ciclo */ }
+  }, 4000);
+}
+function wzDetenerEspera(){ if(wzEsperaTimer){ clearInterval(wzEsperaTimer); wzEsperaTimer=null; } }
+
+initPaises();
+
+/* Enlace directo a "crear empresa" desde otra página (ej. descubrir.html) */
+if(new URLSearchParams(location.search).get('crear')) abrirCrear();
+
+/* Animación de entrada al hacer scroll (hero ya se ve; el resto entra suave) */
+(function(){
+  const els = document.querySelectorAll('.path, .footer');
+  if(!('IntersectionObserver' in window) || !els.length) return;
+  els.forEach(el=>el.classList.add('reveal'));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('reveal-in'); io.unobserve(en.target); } });
+  }, { threshold:.15 });
+  els.forEach(el=>io.observe(el));
+})();
+
+/* Aviso al volver del enlace de verificación del correo */
+(function(){
+  const v = new URLSearchParams(location.search).get('verify');
+  if(!v) return;
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);display:flex;align-items:center;gap:14px;';
+  if(v==='ok'){
+    b.style.background='#EAF6EE'; b.style.color='#2C7A4E';
+    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="admin.html?login=1&amp;v=20260813.12" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
+  } else {
+    b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.';
+  }
+  document.body.appendChild(b);
+  if(v!=='ok') setTimeout(()=>b.remove(), 7000);
+})();
+</script>
+</body>
+</html>

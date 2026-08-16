@@ -21,43 +21,25 @@ window.imgFbT=imgFbT;
 
 let clienteActivo = null;
 let carrito = [];
+/* Anti-bot: momento en que cargó la página. Un registro que llega en menos
+   de 2s desde que se abrió el sitio es prácticamente imposible que lo haya
+   llenado una persona (nadie lee+escribe nombre+correo+contraseña tan
+   rápido) — casi siempre es un bot con el formulario ya rellenado por script. */
+const _cargaTs = Date.now();
+/* Favoritos: la clave es "empresaId:productoId", nunca solo el id del
+   producto — los ids de producto solo son únicos DENTRO de una tienda
+   (clave compuesta empresa_id+id en el esquema), así que dos tiendas
+   distintas pueden tener cada una un producto con id=1. Guardar solo el
+   id numérico hacía que favoritar algo en una tienda marcara como
+   favorito (con el corazón lleno, y aparecía bajo "Favoritos") a
+   cualquier producto con el mismo id en OTRA tienda. */
 let favs = new Set(JSON.parse(localStorage.getItem('bs_favs')||'[]'));
+function favKey(id){ return `${DB.empresa_id}:${id}`; }
 let detalleProdId = null;
 let chatPedidoId = null;
+let chatEmpresaId = null;
 let _chatPoll = null;
-let comprobanteData = null;
 
-/* ── Comprimir imagen del comprobante (convierte HEIC de iPhone) ── */
-async function comprimirImagenT(file, maxDim=1100, calidad=0.72){
-  let fuente=file;
-  const esHeic = /image\/hei(c|f)/i.test(file.type||'') || /\.(heic|heif)$/i.test(file.name||'');
-  if(esHeic){
-    if(typeof heic2any==='function'){
-      try{ const conv=await heic2any({blob:file,toType:'image/jpeg',quality:0.9}); fuente=Array.isArray(conv)?conv[0]:conv; }
-      catch(e){ throw {tipo:'heic'}; }
-    } else { throw {tipo:'heic'}; }
-  }
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onload=()=>{
-      const img=new Image();
-      img.onload=()=>{
-        let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
-        if(w>=h && w>maxDim){ h=Math.round(h*maxDim/w); w=maxDim; }
-        else if(h>w && h>maxDim){ w=Math.round(w*maxDim/h); h=maxDim; }
-        try{
-          const c=document.createElement('canvas'); c.width=w; c.height=h;
-          c.getContext('2d').drawImage(img,0,0,w,h);
-          resolve(c.toDataURL('image/jpeg',calidad));
-        }catch(err){ resolve(r.result); }
-      };
-      img.onerror=()=>reject({tipo:'decode'});
-      img.src=r.result;
-    };
-    r.onerror=()=>reject({tipo:'read'});
-    r.readAsDataURL(fuente);
-  });
-}
 
 /* ── Visor de imagen (lightbox) ── */
 function verImagenT(src){
@@ -92,6 +74,7 @@ function swTab(name){
   ['t-reg-error','t-login-error'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.textContent='';
   });
+  setTimeout(()=>document.getElementById(name==='registro'?'t-reg-nombre':'t-login-nombre')?.focus(),60);
 }
 
 function swTogglePass(inputId, btn){
@@ -104,13 +87,84 @@ function swTogglePass(inputId, btn){
 }
 
 let intentoCheckout=false;
+let authSolicitudEnCurso=false;
+
+function setAuthLoading(btnId, cargando, textoEspera, textoNormal){
+  const btn=document.getElementById(btnId);
+  if(!btn) return;
+  btn.disabled=Boolean(cargando);
+  btn.setAttribute('aria-busy', cargando?'true':'false');
+  btn.textContent=cargando?textoEspera:textoNormal;
+}
+
+function mensajeErrorAuth(error, accion){
+  if(error?.status===409) return 'Este correo ya tiene una cuenta SIWEPE. Usa la opción Ingresar.';
+  if(error?.status===401) return 'El correo o la contraseña no son correctos.';
+  if(error?.status===429) return 'Has realizado varios intentos. Espera un momento y vuelve a probar.';
+  if(error?.message==='Failed to fetch') return 'No pudimos conectar con SIWEPE. Revisa tu conexión e inténtalo nuevamente.';
+  return error?.message||`No se pudo ${accion}. Inténtalo nuevamente.`;
+}
+
+/* Footer propio de cada empresa. Solo usa datos que el administrador decidió
+   publicar; el correo de acceso nunca forma parte del catálogo público. */
+function renderFooterEmpresa(){
+  const footer=$t('#t-company-footer');
+  if(!footer||!DB) return;
+  const empresa=DB.empresa||{};
+  const nombre=empresa.nombre||DB.config.nombre||'Tienda SIWEPE';
+  const logo=empresa.logo||DB.config.logo||'';
+  const rubro=empresa.rubro||((empresa.tiposNegocio||[]).join(' · '))||'Emprendimiento local';
+  const descripcion=empresa.descripcion||'Comprá directamente a este emprendimiento desde SIWEPE.';
+  const telefono=String(empresa.telefono||'').trim();
+  const contacto=String(empresa.contactoPublico||'').trim();
+  const correo=String(empresa.correoPublico||'').trim();
+  const ubicacion=[empresa.ciudad,empresa.pais].filter(Boolean).join(', ');
+  const telHref=telefono.replace(/[^\d+]/g,'');
+  const dato=(icon,titulo,valor,href='')=>valor?`<div class="t-company-contact-row"><span>${icon}</span><div><small>${escT(titulo)}</small>${href?`<a href="${href}">${escT(valor)}</a>`:`<strong>${escT(valor)}</strong>`}</div></div>`:'';
+  const iconPhone='<svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c1 .4 1.9.6 2.9.7a2 2 0 0 1 1.6 1.9Z"/></svg>';
+  const iconMail='<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>';
+  const iconPin='<svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+  const iconUser='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+  footer.innerHTML=`
+    <div class="t-company-footer-main">
+      <div class="t-company-brand">
+        <div class="t-company-logo">${logo?`<img src="${escT(logo)}" alt="">`:`<span>${escT(nombre.charAt(0).toUpperCase())}</span>`}</div>
+        <div><span class="t-company-kicker">${escT(rubro)}</span><h2>${escT(nombre)}</h2><p>${escT(descripcion)}</p></div>
+      </div>
+      <div class="t-company-contact">
+        <span class="t-company-footer-title">Contacto del negocio</span>
+        ${dato(iconUser,'Atención',contacto)}
+        ${dato(iconPhone,'Teléfono / WhatsApp',telefono,telHref?`tel:${telHref}`:'')}
+        ${dato(iconMail,'Correo',correo,correo?`mailto:${encodeURIComponent(correo)}`:'')}
+        ${dato(iconPin,'Ubicación',ubicacion)}
+        ${(!contacto&&!telefono&&!correo&&!ubicacion)?'<p class="t-company-empty">Este negocio aún no ha publicado datos de contacto.</p>':''}
+      </div>
+      <nav class="t-company-links" aria-label="Enlaces de la tienda">
+        <span class="t-company-footer-title">Explorá</span>
+        <button type="button" data-footer-page="inicio">Inicio <span>→</span></button>
+        <button type="button" data-footer-page="catalogo">Catálogo <span>→</span></button>
+        <button type="button" data-footer-page="galeria">Galería <span>→</span></button>
+        <button type="button" data-footer-page="cuenta">Mi cuenta <span>→</span></button>
+      </nav>
+    </div>
+    <div class="t-company-footer-bottom">
+      <span>© ${new Date().getFullYear()} ${escT(nombre)} · Información proporcionada por el negocio.</span>
+      <div><a href="terminos.html">Términos y privacidad</a><a href="index.html" class="t-company-powered"><img src="../assets/img/siwepe-mark.png" alt="">Impulsado por <strong>SIWEPE</strong></a></div>
+    </div>`;
+  footer.querySelectorAll('[data-footer-page]').forEach(btn=>btn.addEventListener('click',()=>{
+    goToT(btn.dataset.footerPage);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+}
 
 /* Marca de la tienda (logo + nombre) en el header */
 function aplicarMarcaTienda(){
   const logoEl=document.getElementById('t-logo-mark');
   if(logoEl) logoEl.innerHTML=DB.config.logo?`<img src="${DB.config.logo}" alt="">`:(DB.config.nombre||'S')[0].toUpperCase();
   const n=document.getElementById('t-tienda-nombre'); if(n) n.textContent=DB.config.nombre;
+  const gn=document.getElementById('t-galeria-empresa'); if(gn) gn.textContent=DB.config.nombre;
   document.title=`${DB.config.nombre} · Tienda`;
+  renderFooterEmpresa();
 }
 
 /* Alterna el header entre invitado ("Iniciar sesión") y con sesión (pill + salir) */
@@ -143,6 +197,8 @@ function mostrarBienvenida(){
 /* Abrir / cerrar el panel de acceso (modal) */
 function abrirLogin(tab){
   const ap=document.getElementById('t-auth-page'); if(ap) ap.style.display='flex';
+  const contexto=document.getElementById('sw-tienda-contexto');
+  if(contexto) contexto.textContent=DB.config.nombre||'una tienda SIWEPE';
   swTab(tab||'cliente');
 }
 function cerrarLogin(){
@@ -153,40 +209,61 @@ window.abrirLogin=abrirLogin; window.cerrarLogin=cerrarLogin;
 
 /* ── REGISTRO ── */
 async function submitRegistro(){
+  if(authSolicitudEnCurso) return;
   const nombre=(document.getElementById('t-reg-nombre')?.value||'').trim();
   const tel=(document.getElementById('t-reg-tel')?.value||'').trim();
-  const correo=(document.getElementById('t-reg-correo')?.value||'').trim();
+  const correo=(document.getElementById('t-reg-correo')?.value||'').trim().toLowerCase();
   const dir=(document.getElementById('t-reg-dir')?.value||'').trim();
-  const password=(document.getElementById('t-reg-pin')?.value||'');
-  const password2=(document.getElementById('t-reg-pin2')?.value||'');
+  const pin=document.getElementById('t-reg-pin')?.value||'';
+  const pin2=document.getElementById('t-reg-pin2')?.value||'';
+  const web=(document.getElementById('t-reg-web')?.value||'').trim();
   const errEl=document.getElementById('t-reg-error');
   if(!nombre){ errEl.textContent='El nombre es obligatorio.'; return; }
-  if(!correo){ errEl.textContent='El correo es obligatorio (con él iniciás sesión).'; return; }
-  if(!password||password.length<8){ errEl.textContent='La contraseña debe tener al menos 8 caracteres.'; return; }
-  if(password!==password2){ errEl.textContent='Las contraseñas no coinciden.'; return; }
+  if(!/^\S+@\S+\.\S+$/.test(correo)){ errEl.textContent='Escribe un correo electrónico válido.'; return; }
+  if(!pin||pin.length<8){ errEl.textContent='La contraseña debe tener al menos 8 caracteres.'; return; }
+  if(pin!==pin2){ errEl.textContent='Las contraseñas no coinciden.'; return; }
+  authSolicitudEnCurso=true;
+  setAuthLoading('btn-registrar',true,'Creando tu cuenta…','Crear mi cuenta');
   try{
-    const {token,user}=await apiPost('/api/auth/register',{nombre,correo,password,telefono:tel,direccion:dir});
+    const {token,user}=await apiPost('/api/auth/register',{nombre,correo,password:pin,telefono:tel,direccion:dir,web,ts:_cargaTs});
     guardarSesionToken(token,'cliente',user.nombre);
     errEl.textContent='';
-    await bootstrapDB({checkEmpresa:true});   // recargar la vitrina de la tienda elegida
+    await bootstrapDB();               // recargar estado con el cliente nuevo
     toastT('¡Cuenta creada!');
-    entrarComoCliente(user);
-  }catch(e){ errEl.textContent=e.message||'No se pudo crear la cuenta.'; }
+    entrarComoCliente(DB.clientes.find(c=>Number(c.id)===Number(user.id))||user);
+  }catch(e){ errEl.textContent=mensajeErrorAuth(e,'crear la cuenta'); }
+  finally{
+    authSolicitudEnCurso=false;
+    setAuthLoading('btn-registrar',false,'Creando tu cuenta…','Crear mi cuenta');
+  }
 }
 
-/* ── LOGIN CLIENTE (cuenta GLOBAL de SIWEPE: correo + contraseña) ── */
+/* ── LOGIN CLIENTE ── */
 async function submitLoginT(){
-  const email=(document.getElementById('t-login-correo')?.value||'').trim();
-  const password=(document.getElementById('t-login-pin')?.value||'');
+  if(authSolicitudEnCurso) return;
+  const correo=(document.getElementById('t-login-nombre')?.value||'').trim().toLowerCase();
+  const pin=document.getElementById('t-login-pin')?.value||'';
   const errEl=document.getElementById('t-login-error');
-  if(!email||!password){ if(errEl) errEl.textContent='Escribí tu correo y contraseña.'; return; }
+  if(!/^\S+@\S+\.\S+$/.test(correo)){ errEl.textContent='Escribe un correo electrónico válido.'; return; }
+  if(!pin){ errEl.textContent='Escribe tu contraseña.'; return; }
+  authSolicitudEnCurso=true;
+  setAuthLoading('btn-login-t',true,'Ingresando…','Ingresar a SIWEPE');
   try{
-    const {token,user}=await apiPost('/api/auth/login',{email,password});
-    if(user.role!=='cliente'){ if(errEl) errEl.textContent='Esta cuenta es de un negocio. Ingresá desde el panel de administración.'; return; }
-    guardarSesionToken(token,'cliente',user.nombre);
-    await bootstrapDB({checkEmpresa:true});   // recargar la vitrina de la tienda elegida
-    entrarComoCliente(user);
-  }catch(e){ if(errEl) errEl.textContent=e.message||'Correo o contraseña incorrectos.'; }
+    const {token,user}=await apiPost('/api/auth/login',{email:correo,password:pin,portal:'compras'});
+    if(!['cliente','admin'].includes(user.role)){
+      const errorCredenciales=new Error('El correo o la contraseña no son correctos.');
+      errorCredenciales.status=401;
+      throw errorCredenciales;
+    }
+    guardarSesionToken(token,user.role,user.nombre);
+    await bootstrapDB({asBuyer:true}); // catálogo + compras, nunca el panel de otra tienda
+    if(errEl) errEl.textContent='';
+    entrarComoCliente(DB.clientes.find(c=>Number(c.id)===Number(user.id))||user);
+  }catch(e){ if(errEl) errEl.textContent=mensajeErrorAuth(e,'iniciar sesión'); }
+  finally{
+    authSolicitudEnCurso=false;
+    setAuthLoading('btn-login-t',false,'Ingresando…','Ingresar a SIWEPE');
+  }
 }
 
 function entrarComoCliente(cli){
@@ -200,6 +277,12 @@ function entrarComoCliente(cli){
   iniciarPollChat();
   updateBadge();
   actualizarFavBadge();
+  const siguiente=(()=>{ try{return sessionStorage.getItem('siwepe_after_login')||'';}catch(e){return '';} })();
+  if(siguiente){
+    try{ sessionStorage.removeItem('siwepe_after_login'); }catch(e){}
+    location.href=siguiente;
+    return;
+  }
   /* Si venía intentando pagar como invitado, reabrir el carrito para completar */
   if(intentoCheckout && carrito.length){
     intentoCheckout=false;
@@ -210,75 +293,11 @@ function entrarComoCliente(cli){
   }
 }
 
-/* ── MI PERFIL (cliente) ── */
-async function abrirPerfilCliente(){
-  if(!clienteActivo) return;
-  const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.value=val||''; };
-  // Mostrar de una lo que ya tenemos en memoria…
-  set('perfil-cli-nombre', clienteActivo.nombre);
-  set('perfil-cli-correo', clienteActivo.correo);
-  set('perfil-cli-telefono', clienteActivo.telefono);
-  set('perfil-cli-whatsapp', clienteActivo.whatsapp);
-  set('perfil-cli-direccion', clienteActivo.direccion);
-  ['perfil-cli-pass-actual','perfil-cli-pass-nueva','perfil-cli-pass-conf'].forEach(id=>set(id,''));
-  const errEl=document.getElementById('perfil-cli-error'); if(errEl) errEl.textContent='';
-  const perr=document.getElementById('perfil-cli-pass-error'); if(perr) perr.textContent='';
-  document.getElementById('t-perfil-overlay')?.classList.add('open');
-  // …y refrescar con TODA la info guardada en el servidor (por si falta algo en memoria).
-  try{
-    const u=await apiGet('/api/mi-cuenta');
-    if(u){
-      clienteActivo.nombre=u.nombre; clienteActivo.correo=u.email;
-      clienteActivo.telefono=u.telefono; clienteActivo.whatsapp=u.whatsapp; clienteActivo.direccion=u.direccion;
-      set('perfil-cli-nombre', u.nombre); set('perfil-cli-correo', u.email);
-      set('perfil-cli-telefono', u.telefono); set('perfil-cli-whatsapp', u.whatsapp); set('perfil-cli-direccion', u.direccion);
-    }
-  }catch(e){ /* si falla, quedan los datos en memoria */ }
-}
-function cerrarPerfilCliente(){
-  document.getElementById('t-perfil-overlay')?.classList.remove('open');
-}
-async function guardarPerfilCliente(){
-  const nombre=(document.getElementById('perfil-cli-nombre')?.value||'').trim();
-  const telefono=(document.getElementById('perfil-cli-telefono')?.value||'').trim();
-  const whatsapp=(document.getElementById('perfil-cli-whatsapp')?.value||'').trim();
-  const correo=(document.getElementById('perfil-cli-correo')?.value||'').trim();
-  const direccion=(document.getElementById('perfil-cli-direccion')?.value||'').trim();
-  const errEl=document.getElementById('perfil-cli-error');
-  if(!nombre){ if(errEl) errEl.textContent='El nombre es obligatorio.'; return; }
-  try{
-    await apiPut('/api/clientes/mi',{nombre,telefono,whatsapp,correo,direccion});
-    clienteActivo.nombre=nombre; clienteActivo.telefono=telefono; clienteActivo.whatsapp=whatsapp; clienteActivo.correo=correo; clienteActivo.direccion=direccion;
-    actualizarHeaderSesion();
-    if(errEl) errEl.textContent='';
-    toastT('Perfil actualizado');
-  }catch(e){ if(errEl) errEl.textContent=e.message||'No se pudo guardar el perfil.'; }
-}
-async function cambiarPassCliente(){
-  const actual=(document.getElementById('perfil-cli-pass-actual')?.value||'');
-  const nueva=(document.getElementById('perfil-cli-pass-nueva')?.value||'');
-  const conf=(document.getElementById('perfil-cli-pass-conf')?.value||'');
-  const errEl=document.getElementById('perfil-cli-pass-error');
-  const set=t=>{ if(errEl) errEl.textContent=t; };
-  if(!actual||!nueva){ set('Completá tu contraseña actual y la nueva.'); return; }
-  if(nueva.length<8){ set('La nueva contraseña debe tener al menos 8 caracteres.'); return; }
-  if(nueva!==conf){ set('Las contraseñas nuevas no coinciden.'); return; }
-  try{
-    await apiPut('/api/mi-cuenta/password',{actual,nueva});
-    set('');
-    ['perfil-cli-pass-actual','perfil-cli-pass-nueva','perfil-cli-pass-conf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-    toastT('Contraseña actualizada');
-  }catch(e){ set(e.message||'No se pudo cambiar la contraseña.'); }
-}
-window.abrirPerfilCliente=abrirPerfilCliente;
-window.cerrarPerfilCliente=cerrarPerfilCliente;
-window.guardarPerfilCliente=guardarPerfilCliente;
-window.cambiarPassCliente=cambiarPassCliente;
 
 function salirTienda(){
   try{ localStorage.removeItem('bs_sesion_cli'); }catch(e){}
   limpiarSesionToken();
-  carrito=[]; comprobanteData=null; clienteActivo=null;
+  clienteActivo=null;
   if(_chatPoll){ clearInterval(_chatPoll); _chatPoll=null; }
   cerrarChat(); ocultarChatFab();
   mostrarBienvenida();
@@ -286,12 +305,18 @@ function salirTienda(){
 
 /* ── NAV ── */
 function goToT(page){
+  if(page==='pedidos') page='cuenta';
+  if(page==='cuenta'){
+    const ref=bsEmpresa()||DB?.empresa_id||'';
+    location.href=`perfil.html${ref?`?e=${encodeURIComponent(ref)}`:''}`;
+    return;
+  }
   $$t('.t-page').forEach(p=>p.classList.remove('active'));
   $$t('.t-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const el=$t('#tp-'+page); if(el) el.classList.add('active');
   if(page==='inicio')    renderInicio();
   if(page==='catalogo')  renderCatalogo();
-  if(page==='pedidos')   renderMisPedidos();
+  if(page==='galeria')   renderGaleriaTienda();
   window.scrollTo({top:0});
 }
 
@@ -308,7 +333,18 @@ function renderHero(){
     return;
   }
   bg.classList.remove('t-hero-empty');
-  bg.innerHTML=imgs.map((src,i)=>`<div class="t-hero-slide${i===0?' active':''}" style="background-image:url('${String(src).replace(/'/g,"%27")}')"></div>`).join('');
+  /* Cada slide trae dos capas con la MISMA foto: un fondo borroso a pantalla
+     completa (para que nunca quede un hueco vacío ni un corte duro cuando la
+     foto no llena el hero) y la foto nítida encima en tamaño "contain" (para
+     que nunca se recorte). Así se ve como una composición con diseño, no
+     como una imagen pegada tal cual. */
+  bg.innerHTML=imgs.map((raw,i)=>{
+    const src=String(raw).replace(/'/g,"%27");
+    return `<div class="t-hero-slide${i===0?' active':''}">
+      <div class="t-hero-slide-blur" style="background-image:url('${src}')"></div>
+      <div class="t-hero-slide-img" style="background-image:url('${src}')"></div>
+    </div>`;
+  }).join('');
   if(dots) dots.innerHTML = imgs.length>1 ? imgs.map((_,i)=>`<span class="t-hero-dot${i===0?' active':''}"></span>`).join('') : '';
   if(imgs.length>1){
     const slides=bg.querySelectorAll('.t-hero-slide');
@@ -326,7 +362,10 @@ function renderHero(){
 const TIPOS_PIEL_T=['Grasa','Seca','Mixta','Sensible','Normal'];
 let filtros={cat:'',tipos:new Set(),marcas:new Set(),pmin:0,pmax:null,favOnly:false};
 
-function _activosT(){ return DB.productos.filter(p=>p.estado==='activo'); }
+/* Catálogo visible al público: activo Y con existencia. Un producto agotado
+   no debe aparecer en grillas/destacados/filtros — no tiene sentido mostrarlo
+   deshabilitado si no se puede comprar, simplemente no está. */
+function _activosT(){ return DB.productos.filter(p=>p.estado==='activo'&&p.stock>0); }
 function _marcasT(){ return [...new Set(_activosT().map(p=>(p.marca||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 function _tiposT(){ const s=new Set(); _activosT().forEach(p=>(p.tipoPiel||[]).forEach(t=>s.add(t))); return TIPOS_PIEL_T.filter(t=>s.has(t)); }
 function _maxPrecioT(){ const ps=_activosT().map(p=>p.precio_venta||0); const m=ps.length?Math.max(...ps):1000; return Math.max(100,Math.ceil(m/100)*100); }
@@ -410,9 +449,24 @@ function renderInicio(){
   const cats=DB.categorias.filter(c=>c.estado==='activo');
   const catsEl=$t('#inicio-cats');
   if(catsEl) catsEl.innerHTML=cats.map(c=>{
-    const n=DB.productos.filter(p=>p.categoria_id===c.id&&p.estado==='activo').length;
+    const n=_activosT().filter(p=>p.categoria_id===c.id).length;
     return `<div class="t-col-card" onclick="setCatFiltro('${c.id}')"><div class="t-col-ic">${escT(c.nombre[0]||'·').toUpperCase()}</div><h4>${escT(c.nombre)}</h4><span>${n} producto${n!==1?'s':''}</span></div>`;
   }).join('');
+  renderGaleriaTienda();
+}
+
+function renderGaleriaTienda(){
+  const sec=$t('#t-galeria-sec'), grid=$t('#t-galeria-grid'), pageGrid=$t('#t-galeria-page-grid');
+  const gal=(DB.config.galeria||[]).filter(g=>g&&(typeof g==='string'?g:g.imagen));
+  if(sec) sec.style.display=gal.length?'block':'none';
+  if(!gal.length){
+    if(grid) grid.innerHTML='';
+    if(pageGrid) pageGrid.innerHTML=`<div class="t-gallery-public-empty"><span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg></span><h2>Muy pronto habrá nuevas historias</h2><p>Este emprendimiento todavía está preparando las fotografías de su galería.</p><button type="button" onclick="goToT('catalogo')">Explorar el catálogo</button></div>`;
+    return;
+  }
+  const html=gal.map((raw,i)=>{ const g=typeof raw==='string'?{imagen:raw}:raw; return `<article class="t-gallery-item ${i===0?'t-gallery-featured':''}" onclick="verImagenT('${g.imagen}')"><img src="${g.imagen}" alt="${escT(g.titulo||`Galería ${i+1}`)}" loading="lazy"><div class="t-gallery-copy">${g.titulo?`<strong>${escT(g.titulo)}</strong>`:''}${g.descripcion?`<span>${escT(g.descripcion)}</span>`:''}</div></article>`; }).join('');
+  if(grid) grid.innerHTML=html;
+  if(pageGrid) pageGrid.innerHTML=html;
 }
 
 /* ── CATÁLOGO ── */
@@ -425,7 +479,7 @@ function _filtrarProductos(){
   const q=($t('#t-search-inp')?.value||'').trim().toLowerCase();
   const orden=$t('#t-filtro-orden')?.value||'';
   let prods=_activosT();
-  if(filtros.favOnly) prods=prods.filter(p=>favs.has(p.id));
+  if(filtros.favOnly) prods=prods.filter(p=>favs.has(favKey(p.id)));
   if(filtros.cat) prods=prods.filter(p=>p.categoria_id===+filtros.cat);
   if(filtros.tipos.size) prods=prods.filter(p=>(p.tipoPiel||[]).some(t=>filtros.tipos.has(t)));
   if(filtros.marcas.size) prods=prods.filter(p=>filtros.marcas.has((p.marca||'').trim()));
@@ -460,24 +514,26 @@ function renderGridCatalogo(){
 }
 
 function prodCardHtml(p){
+  // Solo se llama con productos de _activosT() (activos y con stock>0) — un
+  // producto agotado nunca llega aquí, desaparece de raíz en vez de mostrarse
+  // deshabilitado/borroso.
   const cat=catPor(p.categoria_id);
-  const agotado=p.stock<=0;
   const enCar=carrito.find(i=>i.producto_id===p.id);
-  const isFav=favs.has(p.id);
+  const isFav=favs.has(favKey(p.id));
   const GRADS=['linear-gradient(135deg,#F3F4F6,#E5E7EB)','linear-gradient(135deg,#EEF0F2,#DDE1E6)','linear-gradient(135deg,#F4F4F5,#E4E4E7)','linear-gradient(135deg,#F1F3F5,#E2E6EA)','linear-gradient(135deg,#F5F5F4,#E7E5E4)','linear-gradient(135deg,#EDEFF2,#DCE0E5)'];
   let h=0; for(let i=0;i<p.nombre.length;i++) h=(h*31+p.nombre.charCodeAt(i))&0xFFFFFF;
   const g=GRADS[h%GRADS.length];
   const sub=(p.marca||'').trim()||(cat?cat.nombre:'');
-  const addBtn=agotado
-    ?`<button class="tpc-add-btn sold" disabled>Agotado</button>`
-    :enCar
-      ?`<div class="tpc-qty-ctrl"><button onclick="event.stopPropagation();cambiarCantT(${p.id},-1)">−</button><span>${enCar.cantidad}</span><button onclick="event.stopPropagation();cambiarCantT(${p.id},1)">+</button></div>`
-      :`<button class="tpc-add-btn" onclick="event.stopPropagation();agregarT(${p.id})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg> Agregar al carrito</button>`;
+  const addBtn=enCar
+    ?`<div class="tpc-qty-ctrl"><button onclick="event.stopPropagation();cambiarCantT(${p.id},-1)">−</button><span>${enCar.cantidad}</span><button onclick="event.stopPropagation();cambiarCantT(${p.id},1)">+</button></div>`
+    :`<button class="tpc-add-btn" onclick="event.stopPropagation();agregarT(${p.id})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg> Agregar al carrito</button>`;
+  const fotos=imagenesProducto(p);
+  const portada=fotos[0]||'';
   return `
-  <div class="t-prod-card ${agotado?'soldout':''}" onclick="abrirDetalle(${p.id})">
+  <div class="t-prod-card" onclick="abrirDetalle(${p.id})">
     <div class="tpc-img">
-      ${p.imagen?`<img src="${p.imagen}" alt="${escT(p.nombre)}" data-ph="tpc" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpc-placeholder" style="background:${g}"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
-      ${agotado?`<div class="tpc-soldout-veil">Agotado</div>`:''}
+      ${portada?`<img src="${portada}" alt="${escT(p.nombre)}" data-ph="tpc" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpc-placeholder" style="background:${g}"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
+      ${fotos.length>1?`<span class="tpc-photo-count">${fotos.length} fotos</span>`:''}
       <button class="tpc-fav ${isFav?'faved':''}" onclick="event.stopPropagation();toggleFav(${p.id})" title="Favorito">
         <svg width="16" height="16" fill="${isFav?'var(--rose)':'none'}" stroke="var(--rose)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-corazon"/></svg>
       </button>
@@ -492,6 +548,7 @@ function prodCardHtml(p){
 }
 
 /* ── DETALLE ── */
+function imagenesProducto(p){ const imgs=Array.isArray(p&&p.imagenes)?p.imagenes.filter(Boolean):[]; if(p&&p.imagen&&!imgs.includes(p.imagen)) imgs.unshift(p.imagen); return imgs; }
 function abrirDetalle(id){
   detalleProdId=id;
   const p=prodPor(id); if(!p) return;
@@ -500,11 +557,15 @@ function abrirDetalle(id){
   const GRADS=['linear-gradient(135deg,#F3F4F6,#E5E7EB)','linear-gradient(135deg,#EEF0F2,#DDE1E6)','linear-gradient(135deg,#F4F4F5,#E4E4E7)','linear-gradient(135deg,#F1F3F5,#E2E6EA)'];
   let h=0; for(let i=0;i<p.nombre.length;i++) h=(h*31+p.nombre.charCodeAt(i))&0xFFFFFF;
   const g=GRADS[h%GRADS.length];
+  const fotos=imagenesProducto(p), portada=fotos[0]||'';
   const el=$t('#t-detail');
   el.innerHTML=`
-    <div class="tpd-img" style="${!p.imagen?'background:'+g:''}">
-      ${p.imagen?`<img src="${p.imagen}" alt="${escT(p.nombre)}" data-ph="tpd" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpd-placeholder"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
+    <div class="tpd-media">
+    <div class="tpd-img" style="${!portada?'background:'+g:''}">
+      ${portada?`<img id="tpd-main-img" src="${portada}" alt="${escT(p.nombre)}" data-ph="tpd" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpd-placeholder"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
       <button class="tpd-close" onclick="cerrarDetalle()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    ${fotos.length>1?`<div class="tpd-thumbs">${fotos.map((src,i)=>`<button class="tpd-thumb ${i===0?'active':''}" onclick="cambiarImagenDetalle(${i})"><img src="${src}" alt="Vista ${i+1}"></button>`).join('')}</div>`:''}
     </div>
     <div class="tpd-body">
       <div class="tpd-cat">${escT(cat?cat.nombre:'')}</div>
@@ -518,16 +579,19 @@ function abrirDetalle(id){
     </div>`;
   $t('#t-detail-overlay').classList.add('open');
 }
+function cambiarImagenDetalle(i){ const p=prodPor(detalleProdId), fotos=imagenesProducto(p), img=$t('#tpd-main-img'); if(!img||!fotos[i]) return; img.src=fotos[i]; $$t('.tpd-thumb').forEach((b,j)=>b.classList.toggle('active',i===j)); }
+window.cambiarImagenDetalle=cambiarImagenDetalle;
 function cerrarDetalle(){ $t('#t-detail-overlay').classList.remove('open'); }
 
 /* ── FAVORITOS ── */
 function toggleFav(id){
-  if(favs.has(id)) favs.delete(id); else favs.add(id);
+  const clave=favKey(id);
+  if(favs.has(clave)) favs.delete(clave); else favs.add(clave);
   localStorage.setItem('bs_favs',JSON.stringify([...favs]));
   refrescarVista(); actualizarFavBadge();
 }
 function actualizarFavBadge(){
-  const n=[...favs].filter(id=>{ const p=prodPor(id); return p&&p.estado==='activo'; }).length;
+  const n=[...favs].filter(clave=>clave.startsWith(`${DB.empresa_id}:`)).filter(clave=>{ const p=prodPor(+clave.split(':')[1]); return p&&p.estado==='activo'; }).length;
   const b=$t('#t-fav-badge'); if(b){ b.textContent=n||''; b.style.display=n?'flex':'none'; }
 }
 window.actualizarFavBadge=actualizarFavBadge;
@@ -545,11 +609,21 @@ function refrescarVista(){
 }
 
 /* ── CARRITO ── */
+function refEmpresaCart(){ return DB?.empresa_id||bsEmpresa(); }
+function cargarCarritoTienda(){
+  carrito=siwepeCart.deEmpresa(refEmpresaCart());
+  return carrito;
+}
+function guardarCarritoTienda(){
+  const todos=siwepeCart.get().filter(x=>Number(x.empresa_id)!==Number(DB.empresa_id));
+  siwepeCart.set([...todos,...carrito]);
+}
 function agregarT(prodId){
   const p=prodPor(prodId); if(!p||p.stock<=0) return;
   const exist=carrito.find(i=>i.producto_id===prodId);
   if(exist){ if(exist.cantidad>=p.stock){ toastT('No hay más stock','warn'); return; } exist.cantidad++; }
-  else carrito.push({producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:1,imagen:p.imagen});
+  else carrito.push({empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:1,imagen:p.imagen,stock:p.stock});
+  guardarCarritoTienda();
   updateBadge(); refrescarVista();
   toastT(`${p.nombre} agregado al carrito`);
 }
@@ -560,6 +634,7 @@ function cambiarCantT(prodId,delta){
   carrito[idx].cantidad+=delta;
   if(carrito[idx].cantidad<=0) carrito.splice(idx,1);
   else{ const p=prodPor(prodId); if(p&&carrito[idx].cantidad>p.stock){ carrito[idx].cantidad=p.stock; toastT('Máximo disponible','warn'); } }
+  guardarCarritoTienda();
   updateBadge();
   const panelOpen=$t('#t-cart-overlay')?.classList.contains('open');
   if(panelOpen) renderCartPanel();
@@ -573,12 +648,19 @@ function updateBadge(){
 
 function abrirCarrito(){ $t('#t-cart-overlay').classList.add('open'); renderCartPanel(); }
 function cerrarCarrito(){ $t('#t-cart-overlay').classList.remove('open'); }
-
-/* Buscar pedido pendiente del cliente activo */
-function pedidoPendienteCliente(){
-  if(!clienteActivo) return null;
-  return DB.pedidos.find(p=>p.cliente_id===clienteActivo.id&&p.estado==='pendiente')||null;
+function urlCompraT(archivo){ const ref=DB?.empresa?.slug||bsEmpresa()||DB?.empresa_id||''; return `${archivo}?e=${encodeURIComponent(ref)}`; }
+function irACarritoT(){ location.href=urlCompraT('carrito.html'); }
+function irACheckoutT(){
+  if(!clienteActivo){
+    intentoCheckout=true;
+    try{ sessionStorage.setItem('siwepe_after_login',urlCompraT('checkout.html')); }catch(e){}
+    cerrarCarrito(); abrirLogin('cliente');
+    toastT('Inicia sesión para continuar con la compra','warn');
+    return;
+  }
+  location.href=urlCompraT('checkout.html');
 }
+window.irACarritoT=irACarritoT; window.irACheckoutT=irACheckoutT;
 
 function renderCartPanel(){
   const cont=$t('#t-cart-items');
@@ -586,16 +668,7 @@ function renderCartPanel(){
   const bannerEl=$t('#t-cart-pedido-banner');
   if(!cont) return;
 
-  // Banner pedido pendiente
-  const pedPend=pedidoPendienteCliente();
-  if(bannerEl){
-    if(pedPend&&carrito.length>0){
-      bannerEl.innerHTML=`<div class="t-pedido-pendiente-banner">
-        <p>Tienes el pedido <strong>#${pedPend.id}</strong> pendiente. ¿Sumar estos productos a ese pedido?</p>
-        <button onclick="agregarAPedidoPendiente()">Sumar al pedido #${pedPend.id}</button>
-      </div>`;
-    } else { bannerEl.innerHTML=''; }
-  }
+  if(bannerEl) bannerEl.innerHTML='';
 
   if(!carrito.length){
     cont.innerHTML=`<div class="t-cart-empty"><svg width="60" height="60" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".25"><use href="#icon-bolsa"/></svg><p>Tu carrito está vacío</p><button class="t-btn t-btn-primary" onclick="cerrarCarrito();goToT('catalogo')">Ver catálogo</button></div>`;
@@ -618,177 +691,19 @@ function renderCartPanel(){
     </div>`).join('');
   const tv=$t('#t-cart-total'); if(tv) tv.textContent=dinero(subtotal);
   if(footer) footer.style.display='block';
-  renderPagoTransferencia();
+  const botones=$t('#t-cart-actions'); if(botones) botones.style.display='grid';
 }
 
-/* ── Datos bancarios + comprobante ── */
-function renderPagoTransferencia(){
-  const datosEl=$t('#t-pago-datos');
-  if(datosEl){
-    const pago=(DB.config&&DB.config.pago)||{};
-    const filas=[];
-    if(pago.banco)   filas.push(['Banco',pago.banco,false]);
-    if(pago.cuenta)  filas.push(['Cuenta',pago.cuenta,true]);
-    if(pago.titular) filas.push(['Titular',pago.titular,false]);
-    if(pago.tipo)    filas.push(['Tipo',pago.tipo,false]);
-    if(!filas.length){
-      datosEl.innerHTML=`<p class="t-pago-vacio">Solicita los datos de la cuenta a la tienda por el chat del pedido y sube tu comprobante aquí.</p>`;
-    } else {
-      const copyBtn=v=>`<button class="t-pago-copy" title="Copiar" onclick="copiarTextoT('${String(v).replace(/'/g,"\\'")}',this)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>`;
-      datosEl.innerHTML=filas.map(([k,v,copiable])=>`<div class="t-pago-row"><span class="t-pago-k">${escT(k)}</span><span class="t-pago-v">${escT(v)}${copiable?copyBtn(v):''}</span></div>`).join('')
-        +(pago.nota?`<div class="t-pago-nota">${escT(pago.nota)}</div>`:'');
-    }
-  }
-  renderComprobanteZona();
-}
-
-function renderComprobanteZona(){
-  const zona=$t('#t-comprobante-zona'); if(!zona) return;
-  if(comprobanteData){
-    zona.innerHTML=`<div class="t-comprobante-prev">
-      <button class="t-comprobante-del" title="Quitar" onclick="quitarComprobante()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      <img src="${comprobanteData}" alt="Comprobante" onclick="verImagenT('${comprobanteData}')">
-      <div class="t-comprobante-ok"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg> Comprobante listo</div>
-    </div>`;
-  } else {
-    zona.innerHTML=`<label class="t-comprobante-btn" for="t-comprobante-inp">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Subir foto del comprobante
-    </label>`;
-  }
-}
-
-function quitarComprobante(){
-  comprobanteData=null;
-  renderComprobanteZona();
-}
-window.quitarComprobante=quitarComprobante;
-
-function copiarTextoT(txt,btn){
-  const ok=()=>{ if(btn){ const o=btn.innerHTML; btn.innerHTML='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-check"/></svg>'; setTimeout(()=>btn.innerHTML=o,1200); } toastT('Copiado'); };
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok).catch(()=>ok()); }
-  else { try{ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }catch(e){} ok(); }
-}
-window.copiarTextoT=copiarTextoT;
-
-function onComprobanteSeleccion(e){
-  const f=e.target.files[0]; if(!f) return;
-  e.target.value='';
-  if(!f.type.startsWith('image/')&&!/\.(heic|heif)$/i.test(f.name||'')){ toastT('Selecciona una imagen','warn'); return; }
-  toastT('Procesando imagen…');
-  comprimirImagenT(f,1100,0.72).then(dataUrl=>{
-    comprobanteData=dataUrl;
-    renderComprobanteZona();
-    toastT('Comprobante cargado');
-  }).catch(err=>{
-    const m=err&&err.tipo==='heic'?'No se pudo convertir la foto HEIC. Intenta con otra.':'No se pudo leer la imagen.';
-    toastT(m,'error');
-  });
-}
-
-/* ── SUMAR AL PEDIDO PENDIENTE ── */
-function agregarAPedidoPendiente(){
-  const ped=pedidoPendienteCliente();
-  if(!ped||!carrito.length) return;
-  for(const it of carrito){
-    const exist=ped.items.find(i=>i.producto_id===it.producto_id);
-    if(exist){ exist.cantidad+=it.cantidad; exist.subtotal=+(exist.precio*exist.cantidad).toFixed(2); }
-    else ped.items.push({producto_id:it.producto_id,cantidad:it.cantidad,precio:it.precio,subtotal:+(it.precio*it.cantidad).toFixed(2)});
-  }
-  ped.total=ped.items.reduce((s,i)=>s+i.subtotal,0);
-  dbGuardar();
-  carrito=[];
-  updateBadge();
-  cerrarCarrito();
-  toastT(`Productos sumados al pedido #${ped.id}`);
-  setTimeout(()=>goToT('pedidos'),700);
-}
 
 /* ── CONFIRMAR PEDIDO NUEVO ── */
-function confirmarPedidoT(){
-  if(!carrito.length){ toastT('Tu carrito está vacío','warn'); return; }
-  if(!clienteActivo){
-    intentoCheckout=true;
-    cerrarCarrito();
-    abrirLogin('cliente');
-    toastT('Inicia sesión o crea tu cuenta para completar tu pedido','warn');
-    return;
-  }
-  if(!comprobanteData){ toastT('Sube la foto del comprobante de tu transferencia','warn'); return; }
-  const nota=($t('#t-pedido-nota')?.value||'').trim();
-  const items=carrito.map(it=>({producto_id:it.producto_id,cantidad:it.cantidad,precio:it.precio,subtotal:+(it.precio*it.cantidad).toFixed(2)}));
-  const total=items.reduce((s,i)=>s+i.subtotal,0);
-  const pedId=nuevoId('pedido');
-  DB.pedidos.push({id:pedId,cliente_id:clienteActivo.id,items,total,nota,fecha:hoy(),estado:'pendiente',metodoPago:'transferencia',comprobante:comprobanteData});
-  if(!dbGuardar()) return;
-  carrito=[]; comprobanteData=null; updateBadge(); cerrarCarrito();
-  const notaEl=$t('#t-pedido-nota'); if(notaEl) notaEl.value='';
-  toastT('¡Pedido enviado! Verificaremos tu pago pronto');
-  setTimeout(()=>{ goToT('pedidos'); }, 800);
+async function confirmarPedidoT(){
+  irACheckoutT();
 }
 
 /* ── MIS PEDIDOS ── */
 const ESTADO_LABELS={'pendiente':'Pendiente','aprobado':'Confirmado','entregado':'Entregado','cancelado':'Cancelado'};
+const pedidoPorEmpresa=(pedId,empresaId)=>(DB.pedidos||[]).find(p=>p.id===pedId&&(p.empresa?.id||DB.empresa_id)===empresaId);
 
-function pedidoStepHtml(ped){
-  if(ped.estado==='cancelado') return `<div style="text-align:center;padding:12px;background:var(--error-bg);border-radius:var(--r-sm);color:var(--error);font-size:13px;font-weight:600">Pedido cancelado</div>`;
-  const steps=['pendiente','aprobado','entregado'];
-  const stepLabels=['Enviado','Confirmado','Entregado'];
-  const stepIcons=['1','2','3'];
-  const idx=steps.indexOf(ped.estado);
-  return `<div class="t-ped-status-bar">${steps.map((s,i)=>{
-    const done=i<=idx,current=i===idx;
-    return `<div class="t-ped-step ${done?'done':''} ${current?'current':''}"><div class="t-ped-step-dot">${done?stepIcons[i]:'○'}</div><div class="t-ped-step-label">${stepLabels[i]}</div></div>`;
-  }).join('')}</div>`;
-}
-
-function renderMisPedidos(){
-  const el=$t('#t-mis-pedidos');
-  if(!el) return;
-  if(!clienteActivo){
-    el.innerHTML=`<div class="t-empty"><h3>Inicia sesión para ver tus pedidos</h3><p>Entra con tu nombre y contraseña, o crea tu cuenta, para ver el seguimiento de tus compras.</p><button class="t-btn t-btn-primary" onclick="abrirLogin('cliente')">Iniciar sesión</button></div>`;
-    return;
-  }
-  dbCargar();
-  const mios=[...DB.pedidos].filter(p=>p.cliente_id===clienteActivo.id).sort((a,b)=>b.id-a.id);
-  if(!mios.length){ el.innerHTML=`<div class="t-empty"><h3>Sin pedidos aún</h3><p>Cuando hagas tu primer pedido aparecerá aquí.</p><button class="t-btn t-btn-primary" onclick="goToT('catalogo')">Explorar productos</button></div>`; return; }
-  if(!mios.length){ el.innerHTML=`<div class="t-empty"><h3>Sin pedidos aún</h3><p>Cuando hagas tu primer pedido aparecerá aquí.</p><button class="t-btn t-btn-primary" onclick="goToT('catalogo')">Explorar productos</button></div>`; return; }
-
-  el.innerHTML=mios.map(p=>{
-    const bc=p.estado==='pendiente'?'tb-warn':p.estado==='aprobado'?'tb-rose':p.estado==='entregado'?'tb-ok':'tb-muted';
-    const itemRows=p.items.map(it=>{ const prod=prodPor(it.producto_id); return `<div class="t-ped-item-row"><span class="t-ped-item-nombre">${escT(prod?prod.nombre:'Producto eliminado')}</span><span class="t-ped-item-cant">×${it.cantidad}</span><span class="t-ped-item-sub">${dinero(it.subtotal)}</span></div>`; }).join('');
-    const noLeidos=mensajesNoLeidos(p.id,'cliente');
-    const chatActivo=p.estado!=='cancelado';
-    const chatBtnHtml=chatActivo?`<button class="t-ped-chat-btn" onclick="abrirChatPedido(${p.id})">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-chat"/></svg>
-      Chat del pedido ${noLeidos?`<span class="badge-unread">${noLeidos}</span>`:''}
-    </button>`:'';
-    const cancelBtnHtml=p.estado==='pendiente'?`<button class="t-ped-cancel-btn" onclick="cancelarPedidoCliente(${p.id})">Cancelar pedido</button>`:'';
-    return `
-    <div class="t-ped-card">
-      <div class="t-ped-top">
-        <div><div class="t-ped-num">Pedido #${p.id}</div><div class="t-ped-fecha">${fechaCorta(p.fecha)}</div></div>
-        <div style="text-align:right"><span class="t-badge ${bc}">${ESTADO_LABELS[p.estado]||p.estado}</span><div class="t-ped-total">${dinero(p.total)}</div></div>
-      </div>
-      <div class="t-ped-items-list">${itemRows}</div>
-      ${p.comprobante?`<div class="t-ped-comprobante" onclick="verImagenT('${p.comprobante}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><use href="#icon-check"/></svg> Comprobante de transferencia enviado · ver</div>`:''}
-      ${p.nota?`<div class="t-ped-nota"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><use href="#icon-chat"/></svg> ${escT(p.nota)}</div>`:''}
-      ${pedidoStepHtml(p)}
-      <div class="t-ped-actions">${chatBtnHtml}${cancelBtnHtml}</div>
-    </div>`;
-  }).join('');
-}
-
-function cancelarPedidoCliente(pedId){
-  const ped=pedPor(pedId);
-  if(!ped||ped.estado!=='pendiente'){ toastT('Este pedido ya no se puede cancelar','warn'); return; }
-  if(!confirm(`¿Seguro que quieres cancelar el pedido #${pedId}?`)) return;
-  ped.estado='cancelado';
-  dbGuardar();
-  toastT(`Pedido #${pedId} cancelado`);
-  renderMisPedidos();
-}
-window.cancelarPedidoCliente=cancelarPedidoCliente;
 
 /* ── CHAT ── */
 function mostrarChatFab(){
@@ -802,7 +717,7 @@ function actualizarBadgeFab(){
   if(!clienteActivo) return;
   dbCargar();
   const misPeds=DB.pedidos.filter(p=>p.cliente_id===clienteActivo.id&&p.estado!=='cancelado');
-  const total=misPeds.reduce((s,p)=>s+mensajesNoLeidos(p.id,'cliente'),0);
+  const total=misPeds.reduce((s,p)=>s+(DB.mensajes||[]).filter(m=>m.empresa_id===(p.empresa?.id||DB.empresa_id)&&m.pedido_id===p.id&&m.autor!=='cliente'&&!m.leido).length,0);
   const badge=$t('#t-chat-fab-badge');
   if(badge){ badge.textContent=total||''; badge.style.display=total?'flex':'none'; }
 }
@@ -811,23 +726,37 @@ function iniciarPollChat(){
   if(_chatPoll) clearInterval(_chatPoll);
   _chatPoll=setInterval(async ()=>{
     if(!clienteActivo) return;
-    await refrescarEstado();               // trae pedidos/mensajes nuevos del backend
+    await refrescarEstado({asBuyer:true});  // trae pedidos/mensajes nuevos del backend
+    if($t('#t-chat-overlay')?.classList.contains('open')&&chatPedidoId&&chatEmpresaId){
+      try{
+        const r=await apiGet(`/api/pedidos/${chatEmpresaId}/${chatPedidoId}/mensajes`);
+        DB.mensajes=(DB.mensajes||[]).filter(m=>!(m.empresa_id===chatEmpresaId&&m.pedido_id===chatPedidoId));
+        DB.mensajes.push(...(r.mensajes||[]).map(m=>({...m,empresa_id:chatEmpresaId})));
+      }catch(e){}
+    }
     actualizarBadgeFab();
     if($t('#t-chat-overlay')?.classList.contains('open')&&chatPedidoId){
       renderChatMsgs(chatPedidoId);
     }
     // Si el cliente está viendo "Mis pedidos", refrescar el estado de sus pedidos en vivo
-    if($t('#tp-pedidos')?.classList.contains('active')) renderMisPedidos();
+    if($t('#tp-cuenta')?.classList.contains('active')) renderCuenta();
   },3000);
 }
 
-function abrirChatPedido(pedId){
+async function abrirChatPedido(pedId,empresaId){
   chatPedidoId=pedId;
+  chatEmpresaId=empresaId||DB.empresa_id;
   const overlay=$t('#t-chat-overlay'); if(!overlay) return;
+  try{
+    const r=await apiGet(`/api/pedidos/${chatEmpresaId}/${pedId}/mensajes`);
+    DB.mensajes=(DB.mensajes||[]).filter(m=>!(m.empresa_id===chatEmpresaId&&m.pedido_id===pedId));
+    DB.mensajes.push(...(r.mensajes||[]).map(m=>({...m,empresa_id:chatEmpresaId})));
+  }catch(e){ toastT(e.message||'No se pudo cargar el chat','error'); return; }
   // Cargar selector de pedidos
   poblarSelectorPedidos(pedId);
   renderChatMsgs(pedId);
-  marcarLeidosMensajes(pedId,'cliente');
+  await apiPatch(`/api/pedidos/${chatEmpresaId}/${pedId}/mensajes/leidos`,{}).catch(()=>{});
+  (DB.mensajes||[]).filter(m=>m.empresa_id===chatEmpresaId&&m.pedido_id===pedId&&m.autor!=='cliente').forEach(m=>m.leido=true);
   actualizarBadgeFab();
   overlay.classList.add('open');
 }
@@ -841,19 +770,20 @@ function abrirChat(){
     toastT('No tienes pedidos activos con chat disponible','warn');
     return;
   }
-  abrirChatPedido(miosPeds[0].id);
+  abrirChatPedido(miosPeds[0].id,miosPeds[0].empresa?.id||DB.empresa_id);
 }
 
 function cerrarChat(){
   $t('#t-chat-overlay')?.classList.remove('open');
   chatPedidoId=null;
+  chatEmpresaId=null;
 }
 
 function poblarSelectorPedidos(selectedId){
   const sel=$t('#t-chat-pedido-select'); if(!sel) return;
   const mios=DB.pedidos.filter(p=>p.cliente_id===clienteActivo.id&&p.estado!=='cancelado').sort((a,b)=>b.id-a.id);
-  sel.innerHTML=mios.map(p=>`<option value="${p.id}" ${p.id===selectedId?'selected':''}>#${p.id} · ${ESTADO_LABELS[p.estado]||p.estado} · ${dinero(p.total)}</option>`).join('');
-  sel.onchange=()=>{ chatPedidoId=+sel.value; renderChatMsgs(chatPedidoId); marcarLeidosMensajes(chatPedidoId,'cliente'); actualizarBadgeFab(); };
+  sel.innerHTML=mios.map(p=>`<option value="${p.empresa?.id||DB.empresa_id}:${p.id}" ${(p.empresa?.id||DB.empresa_id)===chatEmpresaId&&p.id===selectedId?'selected':''}>${escT(p.empresa?.nombre||DB.config.nombre)} · #${p.id} · ${ESTADO_LABELS[p.estado]||p.estado}</option>`).join('');
+  sel.onchange=()=>{ const [e,p]=sel.value.split(':').map(Number); abrirChatPedido(p,e); };
   // Nombre tienda en header chat
   const hnom=$t('#t-chat-nombre-tienda'); if(hnom) hnom.textContent=DB.config.nombre;
   const hav=$t('#t-chat-av'); if(hav) hav.textContent=(DB.config.nombre||'S')[0].toUpperCase();
@@ -861,9 +791,9 @@ function poblarSelectorPedidos(selectedId){
 
 function renderChatMsgs(pedId){
   const cont=$t('#t-chat-msgs'); if(!cont) return;
-  const ped=pedPor(pedId); if(!ped) return;
+  const ped=pedidoPorEmpresa(pedId,chatEmpresaId); if(!ped) return;
   const cerrado=ped.estado==='cancelado';
-  const msgs=msgsDePedido(pedId);
+  const msgs=(DB.mensajes||[]).filter(m=>m.empresa_id===chatEmpresaId&&m.pedido_id===pedId).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
 
   const wrap=$t('#t-chat-input-wrap');
   const closedMsg=$t('#t-chat-closed-msg');
@@ -891,15 +821,17 @@ function renderChatMsgs(pedId){
   cont.scrollTop=cont.scrollHeight;
 }
 
-function enviarMensajeCliente(){
+async function enviarMensajeCliente(){
   const inp=$t('#t-chat-input'); if(!inp||!chatPedidoId) return;
   const texto=inp.value.trim(); if(!texto) return;
-  const ped=pedPor(chatPedidoId); if(!ped||ped.estado==='cancelado') return;
-  enviarMensaje(chatPedidoId,'cliente',texto);
-  inp.value='';
-  renderChatMsgs(chatPedidoId);
-  marcarLeidosMensajes(chatPedidoId,'cliente');
-  actualizarBadgeFab();
+  const ped=pedidoPorEmpresa(chatPedidoId,chatEmpresaId); if(!ped||ped.estado==='cancelado') return;
+  inp.disabled=true;
+  try{
+    const r=await apiPostAuth(`/api/pedidos/${chatEmpresaId}/${chatPedidoId}/mensajes`,{texto});
+    DB.mensajes.push({...r.mensaje,empresa_id:chatEmpresaId});
+    inp.value=''; renderChatMsgs(chatPedidoId); actualizarBadgeFab();
+  }catch(e){ toastT(e.message||'No se pudo enviar el mensaje','error'); }
+  finally{ inp.disabled=false; inp.focus(); }
 }
 
 /* ── INICIALIZAR ── */
@@ -912,19 +844,24 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return;
   }
   try{
-    await bootstrapDB({checkEmpresa:true});
+    await bootstrapDB({checkEmpresa:true,asBuyer:true});
   }catch(e){
     // El token guardado ya no sirve (vencido/revocado): bootstrapDB ya cerró
     // la sesión localmente; se reintenta como invitada para esta tienda.
-    await bootstrapDB({checkEmpresa:true});
+    await bootstrapDB({checkEmpresa:true,asBuyer:true});
   }
+  cargarCarritoTienda();
+  /* Reconciliar el carrito con el catálogo actual: corrige precio, portada y
+     stock, y elimina productos que ya no existen en esta tienda. */
+  carrito=carrito.map(it=>{
+    const p=prodPor(it.producto_id); if(!p||p.estado!=='activo'||p.stock<=0) return null;
+    return {...it,empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||it.empresa_nombre,nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||it.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(it.cantidad)||1),Number(p.stock)||1)};
+  }).filter(Boolean);
+  guardarCarritoTienda();
   /* Configurar marca */
   const nombre=DB.config.nombre||'Siwepe';
-  const logo=DB.config.logo;
-  const swLogo=document.getElementById('sw-logo');
-  if(swLogo) swLogo.innerHTML=logo?`<img src="${logo}" alt="">`:(nombre||'S')[0].toUpperCase();
-  const swNombre=document.getElementById('sw-nombre-marca');
-  if(swNombre) swNombre.textContent=nombre;
+  const contexto=document.getElementById('sw-tienda-contexto');
+  if(contexto) contexto.textContent=nombre;
   document.title=`${nombre} · Tienda`;
 
   /* Enter en campos de login */
@@ -937,12 +874,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $t('#t-cart-close')?.addEventListener('click',cerrarCarrito);
   $t('#t-cart-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-cart-overlay') cerrarCarrito(); });
   $t('#t-detail-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-detail-overlay') cerrarDetalle(); });
-  $t('#t-perfil-close')?.addEventListener('click',cerrarPerfilCliente);
-  $t('#t-perfil-overlay')?.addEventListener('click',e=>{ if(e.target.id==='t-perfil-overlay') cerrarPerfilCliente(); });
-  $t('#btn-guardar-perfil-cli')?.addEventListener('click',guardarPerfilCliente);
-  $t('#btn-cambiar-pass-cli')?.addEventListener('click',cambiarPassCliente);
   $t('#btn-confirmar-ped')?.addEventListener('click',confirmarPedidoT);
-  $t('#t-comprobante-inp')?.addEventListener('change',onComprobanteSeleccion);
 
   /* Búsqueda */
   $t('#t-search-inp')?.addEventListener('input',()=>{
@@ -962,12 +894,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   iniciarFondoAnimado();
 
-  /* Restaurar sesión del cliente si refrescó la página */
+  /* Restaurar la identidad compradora. Una cuenta administradora conserva su
+     rol, pero dentro de la tienda usa catálogo, perfil y pedidos; jamás el
+     estado administrativo de la tienda que está visitando. */
   let _idGuardado=null;
   try{ _idGuardado=+localStorage.getItem('bs_sesion_cli')||null; }catch(e){}
-  const _cliGuardado=_idGuardado?DB.clientes.find(c=>c.id===_idGuardado):null;
+  const puedeComprar=bsToken()&&['cliente','admin'].includes(bsRole());
+  const _cliGuardado=puedeComprar?(DB.clientes.find(c=>Number(c.id)===Number(_idGuardado))||DB.clientes[0]||null):null;
   if(_cliGuardado) entrarComoCliente(_cliGuardado);
-  else mostrarBienvenida();
+  else {
+    mostrarBienvenida();
+    if(new URLSearchParams(location.search).get('login')) setTimeout(()=>abrirLogin('cliente'),80);
+  }
 });
 
 /* ── FONDO ANIMADO ── */
