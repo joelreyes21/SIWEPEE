@@ -8,7 +8,11 @@ const tipos = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=ut
 
 http.createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, `http://${req.headers.host}`).pathname);
-  const destino = path.resolve(root, '.' + (pathname === '/' ? '/pages/index.html' : pathname));
+  /* Redirección real (no solo servir el archivo): si se sirviera pages/index.html
+     con la URL todavía en "/", los links relativos entre páginas (p. ej. href="descubrir.html")
+     resolverían contra "/" en vez de "/pages/" y darían 404. */
+  if (pathname === '/') { res.writeHead(302, { Location: '/pages/index.html' }); return res.end(); }
+  const destino = path.resolve(root, '.' + pathname);
   if (!destino.startsWith(root + path.sep)) { res.writeHead(403); return res.end('Forbidden'); }
   fs.readFile(destino, (err, data) => {
     if (err) { res.writeHead(err.code === 'ENOENT' ? 404 : 500); return res.end('Not found'); }
