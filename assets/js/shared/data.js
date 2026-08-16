@@ -5,13 +5,9 @@
 */
 const BS_CLAVE = 'siwepe_pro_v1';
 
-/* Base del API:
-   - En local (localhost / 127.0.0.1) usa el servidor Node local en :3000.
-   - En cualquier otro lado (siwepe.shop, etc.) usa el backend en Railway. */
-const API_BASE = (typeof location !== 'undefined'
-    && (location.hostname === 'localhost' || location.hostname === '127.0.0.1'))
-  ? 'http://localhost:3000'
-  : 'https://backendsiwepe-production.up.railway.app';
+/* Base del API: el backend vive en Railway. Un solo lugar para cambiar la URL
+   si el proyecto de Railway cambia de nombre/dominio. */
+const API_BASE = 'https://backendsiwepe-production.up.railway.app';
 
 function bsToken(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
 function bsRole(){ try{ return localStorage.getItem('bs_role')||''; }catch(e){ return ''; } }

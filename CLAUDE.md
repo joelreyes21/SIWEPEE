@@ -2,11 +2,11 @@
 
 ## Proyecto
 
-Frontend estático multiempresa de SIWEPE. El API Express/MySQL vive en `../Backend_SIWEPE-main`. Para desarrollo local se puede ejecutar `node serve-local.js` y abrir `http://127.0.0.1:5500` con el API en `http://localhost:3000`.
+Frontend estático multiempresa de SIWEPE, sin build ni servidor propio. El API Express/MySQL vive en `../Backend_SIWEPE-main`, desplegado en Railway, y `assets/js/shared/data.js` (`API_BASE`) apunta ahí siempre — no hay modo "local" ni detección de host. Este sitio se sube tal cual a cualquier hosting estático (Vercel, Netlify, GitHub Pages, etc.): no necesita build step ni variables de entorno propias.
 
 ## Páginas
 
-Todo el HTML vive en `pages/` (assets se mantiene en la raíz, un nivel arriba — por eso cada página referencia `../assets/...`). `serve-local.js` sirve `pages/index.html` como raíz (`/`).
+Todo el HTML vive en `pages/` (assets se mantiene en la raíz, un nivel arriba — por eso cada página referencia `../assets/...`). El hosting estático debe servir `pages/index.html` como raíz (`/`) — ver `README.md` para la configuración exacta según el proveedor.
 
 - `pages/index.html`: portada y registro verificado de empresas.
 - `pages/descubrir.html`: marketplace global de tiendas y productos.
