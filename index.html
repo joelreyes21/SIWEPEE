@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIWEPE · Crea y descubre tiendas</title>
-<link rel="icon" type="image/png" href="../assets/img/siwepe-mark.png">
+<link rel="icon" type="image/png" href="assets/img/siwepe-mark.png">
 <meta name="theme-color" content="#4F86C6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -167,7 +167,7 @@ button{font-family:inherit;cursor:pointer;}
 @media(max-width:640px){.hero{padding-top:48px}.home-proof{grid-template-columns:1fr 1fr;margin-bottom:54px}.proof-lead{grid-column:1/-1}.home-section-head{align-items:flex-start;flex-direction:column;gap:10px}.home-category-grid{grid-template-columns:1fr 1fr}.home-discovery{padding:58px 16px}.mega-footer{padding-inline:18px}.mega-footer-top{grid-template-columns:1fr 1fr;gap:32px 22px}.mega-footer-brand{grid-column:1/-1}.mega-footer-cta{align-items:flex-start;flex-direction:column}.mega-footer-cta button{width:100%}.mega-footer-bottom{flex-direction:column}}
 @media(max-width:420px){.home-category-grid{grid-template-columns:1fr}.home-proof{grid-template-columns:1fr}.proof-lead{grid-column:auto}.mega-footer-top{grid-template-columns:1fr}.mega-footer-col:last-child{display:block}}
 </style>
-<link rel="stylesheet" href="../assets/css/platform.css?v=20260813.5">
+<link rel="stylesheet" href="assets/css/platform.css?v=20260813.5">
 </head>
 <body>
 
@@ -177,12 +177,12 @@ button{font-family:inherit;cursor:pointer;}
 <header class="nav">
   <div class="nav-in">
     <a class="brand" href="index.html">
-      <div class="brand-mark"><img src="../assets/img/siwepe-mark.png" alt=""></div>
+      <div class="brand-mark"><img src="assets/img/siwepe-mark.png" alt=""></div>
       <span class="brand-name">SIWEPE</span>
     </a>
     <div class="nav-links">
-      <a class="nav-btn ghost" href="descubrir.html">Descubrir</a>
-      <a class="nav-btn subtle" href="admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
+      <a class="nav-btn ghost" href="pages/descubrir.html">Descubrir</a>
+      <a class="nav-btn subtle" href="pages/admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
   </div>
@@ -214,7 +214,7 @@ button{font-family:inherit;cursor:pointer;}
       </div>
       <h3>Descubrir productos</h3>
       <p>Explora lo que venden las tiendas de SIWEPE y compra directo. Sin cuenta para navegar; solo al momento de pagar.</p>
-      <a class="path-cta" href="descubrir.html" style="display:inline-flex">Ver productos →</a>
+      <a class="path-cta" href="pages/descubrir.html" style="display:inline-flex">Ver productos →</a>
     </div>
   </section>
   <section class="home-proof" aria-label="Ventajas de SIWEPE">
@@ -229,14 +229,14 @@ button{font-family:inherit;cursor:pointer;}
   <div class="home-discovery-in">
     <div class="home-section-head"><div><span>Explora por categoría</span><h2 id="categorias-siwepe">Encuentra negocios que sí están cerca de lo que buscas</h2></div><p>Estas son algunas de las categorías más consultadas. En SIWEPE cada emprendimiento conserva su propia identidad.</p></div>
     <div class="home-category-grid">
-      <a class="home-category" href="descubrir.html?categoria=ropa"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 4-5 3 3 5 2-1v9h8v-9l2 1 3-5-5-3c-.5 1.2-1.9 2-4 2S8.5 5.2 8 4Z"/></svg></div><h3>Ropa y calzado</h3><p>Moda, accesorios y productos para todas las edades.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=alimentos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h16v9H4zM7 11V8a5 5 0 0 1 10 0v3"/></svg></div><h3>Comida y bebidas</h3><p>Restaurantes, panaderías, cafés y alimentos preparados.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=belleza"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8v4H8zM6 7h12v14H6zM9 12h6"/></svg></div><h3>Belleza y cuidado</h3><p>Cosméticos, cuidado personal, fragancias y bienestar.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=tecnologia"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Tecnología</h3><p>Electrónica, informática, accesorios y equipos.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=hogar"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg></div><h3>Hogar y decoración</h3><p>Muebles, decoración y artículos que transforman espacios.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=ferreteria"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6 4-4 4 4-4 4M16 8 5 19l-2-2L14 6"/></svg></div><h3>Ferretería</h3><p>Herramientas, materiales y suministros para construcción.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html?categoria=regalos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18v12H3zM12 9v12M2 5h20v4H2z"/><path d="M12 5c-3-5-7-2-5 0h5Zm0 0c3-5 7-2 5 0h-5Z"/></svg></div><h3>Regalos y detalles</h3><p>Artesanías, obsequios y detalles para cada ocasión.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
-      <a class="home-category" href="descubrir.html"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg></div><h3>Ver todo SIWEPE</h3><p>Descubre todas las tiendas, productos y categorías disponibles.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=ropa"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 4-5 3 3 5 2-1v9h8v-9l2 1 3-5-5-3c-.5 1.2-1.9 2-4 2S8.5 5.2 8 4Z"/></svg></div><h3>Ropa y calzado</h3><p>Moda, accesorios y productos para todas las edades.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=alimentos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h16v9H4zM7 11V8a5 5 0 0 1 10 0v3"/></svg></div><h3>Comida y bebidas</h3><p>Restaurantes, panaderías, cafés y alimentos preparados.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=belleza"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8v4H8zM6 7h12v14H6zM9 12h6"/></svg></div><h3>Belleza y cuidado</h3><p>Cosméticos, cuidado personal, fragancias y bienestar.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=tecnologia"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Tecnología</h3><p>Electrónica, informática, accesorios y equipos.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=hogar"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 11 9-8 9 8M5 10v10h14V10M9 20v-6h6v6"/></svg></div><h3>Hogar y decoración</h3><p>Muebles, decoración y artículos que transforman espacios.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=ferreteria"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 6 4-4 4 4-4 4M16 8 5 19l-2-2L14 6"/></svg></div><h3>Ferretería</h3><p>Herramientas, materiales y suministros para construcción.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html?categoria=regalos"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18v12H3zM12 9v12M2 5h20v4H2z"/><path d="M12 5c-3-5-7-2-5 0h5Zm0 0c3-5 7-2 5 0h-5Z"/></svg></div><h3>Regalos y detalles</h3><p>Artesanías, obsequios y detalles para cada ocasión.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
+      <a class="home-category" href="pages/descubrir.html"><div class="home-category-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg></div><h3>Ver todo SIWEPE</h3><p>Descubre todas las tiendas, productos y categorías disponibles.</p><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg></a>
     </div>
   </div>
 </section>
@@ -244,13 +244,13 @@ button{font-family:inherit;cursor:pointer;}
 <footer class="mega-footer footer">
   <div class="mega-footer-in">
     <div class="mega-footer-top">
-      <div class="mega-footer-brand"><img src="../assets/img/siwepe-mark.png" alt="SIWEPE"><h2>Negocios que avanzan.</h2><p>Una plataforma para crear tiendas, controlar inventario y descubrir emprendimientos desde una experiencia clara y conectada.</p></div>
-      <div class="mega-footer-col"><strong>Descubrir</strong><a href="descubrir.html">Todas las tiendas</a><a href="descubrir.html?categoria=ropa">Ropa y calzado</a><a href="descubrir.html?categoria=alimentos">Comida y bebidas</a><a href="descubrir.html?categoria=tecnologia">Tecnología</a></div>
-      <div class="mega-footer-col"><strong>Para negocios</strong><a href="#" onclick="abrirCrear();return false">Crear mi empresa</a><a href="admin.html?login=1&amp;v=20260813.12">Iniciar sesión</a><a href="terminos.html">Términos para empresas</a></div>
-      <div class="mega-footer-col"><strong>SIWEPE</strong><a href="terminos.html#privacidad">Privacidad</a><a href="terminos.html#cookies">Cookies</a><a href="terminos.html">Aviso legal</a></div>
+      <div class="mega-footer-brand"><img src="assets/img/siwepe-mark.png" alt="SIWEPE"><h2>Negocios que avanzan.</h2><p>Una plataforma para crear tiendas, controlar inventario y descubrir emprendimientos desde una experiencia clara y conectada.</p></div>
+      <div class="mega-footer-col"><strong>Descubrir</strong><a href="pages/descubrir.html">Todas las tiendas</a><a href="pages/descubrir.html?categoria=ropa">Ropa y calzado</a><a href="pages/descubrir.html?categoria=alimentos">Comida y bebidas</a><a href="pages/descubrir.html?categoria=tecnologia">Tecnología</a></div>
+      <div class="mega-footer-col"><strong>Para negocios</strong><a href="#" onclick="abrirCrear();return false">Crear mi empresa</a><a href="pages/admin.html?login=1&amp;v=20260813.12">Iniciar sesión</a><a href="pages/terminos.html">Términos para empresas</a></div>
+      <div class="mega-footer-col"><strong>SIWEPE</strong><a href="pages/terminos.html#privacidad">Privacidad</a><a href="pages/terminos.html#cookies">Cookies</a><a href="pages/terminos.html">Aviso legal</a></div>
     </div>
     <div class="mega-footer-cta"><div><strong>¿Listo para ordenar y hacer crecer tu negocio?</strong><span>Crea tu espacio en SIWEPE y empieza con una base profesional.</span></div><button onclick="abrirCrear()">Crear mi empresa →</button></div>
-    <div class="mega-footer-bottom"><span>© <span id="anio"></span> SIWEPE · Todos los derechos reservados</span><span><a href="terminos.html">Términos, privacidad y cookies</a></span></div>
+    <div class="mega-footer-bottom"><span>© <span id="anio"></span> SIWEPE · Todos los derechos reservados</span><span><a href="pages/terminos.html">Términos, privacidad y cookies</a></span></div>
   </div>
 </footer>
 
@@ -449,7 +449,7 @@ button{font-family:inherit;cursor:pointer;}
         <div class="wz-title">Revisá y confirmá</div>
         <div class="wz-sub">Verificá que todo esté bien</div>
         <div class="wz-resumen" id="wz-resumen"></div>
-        <label class="wz-terms"><input type="checkbox" id="e-terminos"> Acepto los <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y confirmo que la información es verdadera.</label>
+        <label class="wz-terms"><input type="checkbox" id="e-terminos"> Acepto los <a href="pages/terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y confirmo que la información es verdadera.</label>
       </div>
 
       <div class="modal-err" id="e-err" style="padding:0 28px"></div>
@@ -888,7 +888,7 @@ if(new URLSearchParams(location.search).get('crear')) abrirCrear();
   b.style.cssText='position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:300;padding:14px 24px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 32px rgba(30,40,55,.18);display:flex;align-items:center;gap:14px;';
   if(v==='ok'){
     b.style.background='#EAF6EE'; b.style.color='#2C7A4E';
-    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="admin.html?login=1&amp;v=20260813.12" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
+    b.innerHTML='<span>¡Empresa verificada! Ya podés iniciar sesión en tu panel.</span><a href="pages/admin.html?login=1&amp;v=20260813.12" style="background:#2C7A4E;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;white-space:nowrap">Iniciar sesión →</a>';
   } else {
     b.style.background='#FCEEEE'; b.style.color='#B85151'; b.textContent='El enlace de verificación no es válido o ya fue usado.';
   }

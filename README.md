@@ -5,11 +5,12 @@ Frontend estático (HTML/CSS/JS, sin frameworks ni build) del marketplace multie
 ## Estructura
 
 ```
-pages/     Las 8 páginas del sitio (index, tienda, admin, etc.)
+index.html   Portada — vive en la raíz a propósito, no en pages/
+pages/       Las otras 7 páginas del sitio (tienda, admin, etc.)
 assets/
-  css/     Un archivo por área (admin, tienda, platform, ...)
-  js/      Un archivo/carpeta por área (admin, tienda, perfil, commerce, shared)
-  img/     Logos e imágenes propias del sitio
+  css/       Un archivo por área (admin, tienda, platform, ...)
+  js/        Un archivo/carpeta por área (admin, tienda, perfil, commerce, shared)
+  img/       Logos e imágenes propias del sitio
 ```
 
 ## Configuración
@@ -18,16 +19,8 @@ No hay `.env`: la única configuración es la URL del backend, fija en `assets/j
 
 ## Despliegue
 
-Es un sitio 100% estático: cualquier hosting que sirva archivos alcanza. No hay comando de build — se sube la carpeta tal cual.
-
-Lo único que hay que configurar en el proveedor de hosting:
-1. **Raíz del sitio → `pages/index.html`** (la carpeta `assets/` queda un nivel arriba de `pages/`, tal cual está en el repo).
-2. **Todas las rutas desconocidas → `pages/index.html`** (fallback SPA-like), para que refrescar una página con `?e=slug` o similar no dé 404.
-
-Ejemplos según proveedor:
-- **Vercel / Netlify**: configurar `pages` como carpeta de publicación (o dejar la raíz del repo y usar un rewrite `/ -> /pages/index.html`, `/* -> /pages/:splat`).
-- **GitHub Pages**: no soporta rewrites; hay que servir directamente desde `pages/` como raíz (o publicar solo esa carpeta).
+Es un sitio 100% estático: cualquier hosting que sirva archivos alcanza. No hay comando de build ni configuración especial — se sube el repo tal cual y `index.html` en la raíz ya es lo que la mayoría de hostings estáticos sirve por defecto en `/`. Las demás páginas se acceden como `/pages/tienda.html`, `/pages/admin.html`, etc.
 
 ## Desarrollo
 
-No hay servidor local propio: abrí cualquier archivo de `pages/` con la extensión "Live Server" de tu editor (o cualquier servidor estático genérico) apuntando a la raíz del repo, para que las rutas relativas `../assets/...` resuelvan igual que en producción.
+No hay servidor local propio: abrí `index.html` (o cualquier archivo de `pages/`) con la extensión "Live Server" de tu editor, o cualquier servidor estático genérico, apuntando a la raíz del repo — así las rutas relativas resuelven igual que en producción.
