@@ -11,6 +11,14 @@ const numPos   = v => v !== '' && !isNaN(v) && Number(v) >= 0 && !/e/i.test(v);
 const numVacioCero = v => v.trim() === '' || numPos(v);
 const entPos   = v => /^\d+$/.test(v) && Number(v) > 0;
 const correoOk = v => v.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+// Nombre de PERSONA (cliente/dueño): solo letras, sin números ni signos raros.
+const soloLetras = v => { const n=String(v||'').trim(); return n.length>=2 && !/[0-9]/.test(n) && /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ'’\- ]+$/.test(n); };
+// Nombre de NEGOCIO/PRODUCTO: flexible (permite números/signos, pero no basura).
+const nombreOk = v => { const n=String(v||'').trim(); const l=(n.match(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g)||[]).length; return l>=2 && (n.match(/[0-9]/g)||[]).length<=4 && (n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length<=3; };
+// Teléfono Honduras: 8 dígitos, celular (empieza 3/7/8/9). Vacío permitido.
+const telOk = v => { const d=String(v||'').replace(/\D/g,''); if(!d) return true; return d.length===8 && /^[3789]/.test(d); };
+// Dirección: formato razonable, sin caracteres raros. Vacío permitido.
+const dirOk = v => { const d=String(v||'').trim(); if(!d) return true; const l=(d.match(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g)||[]).length; return d.length>=5 && l>=3 && /^[0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ .,#/°ºª()'’\-]+$/.test(d); };
 
 const THUMB_COLORS=['#6B7280','#8A8F98','#9AA1AC','#7C8390','#B0B6BE','#A0A6AE','#545B66'];
 const GRADS=['linear-gradient(135deg,#EEF0F2,#D6DBE0)','linear-gradient(135deg,#F1F1F3,#D9D9DE)','linear-gradient(135deg,#EDEFF1,#D3D9DE)','linear-gradient(135deg,#F2F1EF,#DAD7D3)','linear-gradient(135deg,#EBEEF1,#CFD6DD)','linear-gradient(135deg,#F0F0EE,#D8D5D0)'];
@@ -806,7 +814,7 @@ function saveProducto(id){
   const p=id?prodPor(id):null;
   const totalExistencias=p?(+p.stock||0)+(+p.stock_inventario||0):0;
   const stockVal=+($('#fp-stock').value||0);
-  const ok=validar([['fp-nombre',noVacio,'Escribe el nombre'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numVacioCero,'Precio inválido'],['fp-pventa',numVacioCero,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v)&&Number(v)<=totalExistencias,`Máximo ${totalExistencias} unidades`],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
+  const ok=validar([['fp-nombre',noVacio,'Escribe el nombre'],['fp-nombre',nombreOk,'Nombre inválido: evitá solo números o símbolos'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numVacioCero,'Precio inválido'],['fp-pventa',numVacioCero,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v)&&Number(v)<=totalExistencias,`Máximo ${totalExistencias} unidades`],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
   if(!ok) return;
   const cod=($('#fp-codigo').value||'').trim().toUpperCase();  // generado automáticamente
   const imagenes=window.__fpImgs?window.__fpImgs().filter(Boolean).slice(0,6):[];
@@ -997,7 +1005,7 @@ function openFormProv(id=null){
 }
 
 function saveProv(id){
-  if(!validar([['fprov-nombre',noVacio,'Escribe el nombre'],['fprov-correo',correoOk,'Correo inválido']])) return;
+  if(!validar([['fprov-nombre',noVacio,'Escribe el nombre'],['fprov-correo',correoOk,'Correo inválido'],['fprov-tel',telOk,'Celular inválido (8 dígitos, empieza con 3, 7, 8 o 9)'],['fprov-wa',telOk,'WhatsApp inválido (8 dígitos)'],['fprov-dir',dirOk,'Dirección inválida']])) return;
   const datos={nombre:$('#fprov-nombre').value.trim(),empresa:$('#fprov-empresa').value.trim(),telefono:$('#fprov-tel').value.trim(),correo:$('#fprov-correo').value.trim(),direccion:$('#fprov-dir').value.trim(),whatsapp:$('#fprov-wa').value.trim().replace(/[^0-9]/g,''),estado:$('#fprov-estado').value,origen:$('#fprov-origen').value};
   if(id){ Object.assign(provPor(id),datos); toast('Proveedor actualizado'); }
   else{ DB.proveedores.push({id:nuevoId('proveedor'),...datos}); toast('Proveedor creado'); }
@@ -1047,7 +1055,7 @@ function openFormClienteManual(manualId=null){
 }
 
 async function guardarClienteManual(manualId){
-  if(!validar([['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-correo',correoOk,'Correo inválido']])) return;
+  if(!validar([['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-nombre',soloLetras,'El nombre solo puede tener letras'],['fcli-correo',correoOk,'Correo inválido'],['fcli-telefono',telOk,'Celular inválido (8 dígitos, empieza con 3, 7, 8 o 9)'],['fcli-whatsapp',telOk,'WhatsApp inválido (8 dígitos)'],['fcli-direccion',dirOk,'Dirección inválida']])) return;
   const btn=$('#btn-guardar-cliente'); if(btn){btn.disabled=true;btn.textContent='Guardando…';}
   const datos={nombre:$('#fcli-nombre').value.trim(),telefono:$('#fcli-telefono').value.trim(),correo:$('#fcli-correo').value.trim(),whatsapp:$('#fcli-whatsapp').value.trim(),direccion:$('#fcli-direccion').value.trim()};
   try{

@@ -768,7 +768,7 @@ function wzValidar(){
   }
   if(wzPaso===4){
     if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
-    { const m=nombreValido(val('e-dueno')); if(m){ err.textContent=m; return false; } }
+    { const m=nombrePersonaValido(val('e-dueno')); if(m){ err.textContent=m; return false; } }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('e-correo'))){ err.textContent='Correo inválido.'; return false; }
     if(!pwEval()){ err.textContent='La contraseña debe cumplir todos los requisitos.'; return false; }
     if(val('e-pass')!==val('e-pass2')){ err.textContent='Las contraseñas no coinciden.'; return false; }
@@ -794,6 +794,14 @@ function nombreValido(nombre){
   if(n.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g,'').length<2) return 'El nombre debe tener letras, no solo números o símbolos.';
   if((n.match(/[0-9]/g)||[]).length>4) return 'El nombre no puede tener más de 4 números.';
   if((n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length>3) return 'El nombre no puede tener más de 3 signos.';
+  return '';
+}
+// Nombre de PERSONA (dueño): solo letras, sin números ni caracteres especiales.
+function nombrePersonaValido(nombre){
+  const n=String(nombre||'').trim();
+  if(n.length<2) return 'El nombre es muy corto.';
+  if(/[0-9]/.test(n)) return 'El nombre no puede tener números.';
+  if(!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ'’\- ]+$/.test(n)) return 'El nombre solo puede tener letras (sin caracteres especiales).';
   return '';
 }
 const TEL_LEN={'Honduras':{len:8,movil:/^[3789]/},'Guatemala':{len:8},'El Salvador':{len:8},'Nicaragua':{len:8},'Costa Rica':{len:8},'Panamá':{len:8},'México':{len:10},'Colombia':{len:10},'Estados Unidos':{len:10},'España':{len:9}};
