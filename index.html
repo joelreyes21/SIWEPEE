@@ -182,7 +182,7 @@ button{font-family:inherit;cursor:pointer;}
     </a>
     <div class="nav-links">
       <a class="nav-btn ghost" href="pages/descubrir.html">Descubrir</a>
-      <a class="nav-btn ghost" href="#quienes-somos">Quiénes somos</a>
+      <a class="nav-btn ghost" href="pages/quienes-somos.html">Quiénes somos</a>
       <a class="nav-btn subtle" href="pages/admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
       <button class="nav-btn solid" onclick="abrirCrear()">Crear tu empresa</button>
     </div>
@@ -242,67 +242,6 @@ button{font-family:inherit;cursor:pointer;}
   </div>
 </section>
 
-<style>
-.qs-sec{background:var(--cream-dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 0;}
-.qs-in{max-width:1080px;margin:0 auto;padding:0 28px;}
-.qs-head{text-align:center;max-width:720px;margin:0 auto 44px;}
-.qs-eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose-dark);background:var(--rose-light);padding:7px 15px;border-radius:999px;margin-bottom:16px;}
-.qs-head h2{font-family:'Fraunces',serif;font-size:clamp(26px,3.4vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text-dark);margin-bottom:14px;}
-.qs-head p{font-size:16px;color:var(--text-mid);line-height:1.7;}
-.qs-block{margin-top:40px;}
-.qs-block h3{font-family:'Fraunces',serif;font-size:23px;color:var(--text-dark);margin-bottom:20px;text-align:center;}
-.qs-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-.qs-step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 18px;box-shadow:var(--shadow-sm);}
-.qs-num{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--rose);color:#fff;font-weight:700;font-size:17px;margin-bottom:12px;}
-.qs-step b{display:block;font-size:15.5px;color:var(--text-dark);margin-bottom:5px;}
-.qs-step p{font-size:13.5px;color:var(--text-mid);line-height:1.55;}
-.qs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-.qs-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s;}
-.qs-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
-.qs-card .qi{width:46px;height:46px;border-radius:13px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
-.qs-card h4{font-size:16px;color:var(--text-dark);margin-bottom:6px;}
-.qs-card p{font-size:13.5px;color:var(--text-mid);line-height:1.6;}
-.qs-cta{margin-top:44px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:var(--shadow-sm);}
-.qs-cta b{font-family:'Fraunces',serif;font-size:21px;color:var(--text-dark);display:block;}
-.qs-cta span{font-size:14px;color:var(--text-soft);}
-@media(max-width:860px){ .qs-steps{grid-template-columns:1fr 1fr;} .qs-grid{grid-template-columns:1fr;} }
-</style>
-<section id="quienes-somos" class="qs-sec">
-  <div class="qs-in">
-    <div class="qs-head">
-      <span class="qs-eyebrow">Quiénes somos</span>
-      <h2>SIWEPE nació para que cualquier emprendedor pueda vender en línea</h2>
-      <p>Somos una plataforma hondureña que le da a cada negocio su propia tienda en internet y un panel para administrarlo todo —productos, inventario, ventas y pedidos— sin necesidad de programar ni contratar a nadie. Conectamos a los emprendedores con clientes que quieren comprar local, en un solo lugar.</p>
-    </div>
-
-    <div class="qs-block">
-      <h3>Cómo funcionamos</h3>
-      <div class="qs-steps">
-        <div class="qs-step"><span class="qs-num">1</span><b>Creás tu tienda</b><p>Te registrás, confirmás tu correo y tu tienda queda lista con su nombre, logo y colores propios.</p></div>
-        <div class="qs-step"><span class="qs-num">2</span><b>Cargás tus productos</b><p>Subís tu catálogo con precios, fotos y stock desde tu panel de administración.</p></div>
-        <div class="qs-step"><span class="qs-num">3</span><b>Recibís pedidos</b><p>Tus clientes compran en línea y se comunican con vos por el chat de cada pedido.</p></div>
-        <div class="qs-step"><span class="qs-num">4</span><b>Hacés crecer tu negocio</b><p>Controlás inventario, ventas y reportes en un solo lugar, desde cualquier dispositivo.</p></div>
-      </div>
-    </div>
-
-    <div class="qs-block">
-      <h3>Qué te brindamos</h3>
-      <div class="qs-grid">
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M5 9v11h14V9"/><path d="M3 9h18"/></svg></div><h4>Tu tienda en línea</h4><p>Una vitrina propia con tu marca, tu catálogo y tu enlace para compartir.</p></div>
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div><h4>Panel de administración</h4><p>Gestioná todo tu negocio desde un panel claro y fácil de usar.</p></div>
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div><h4>Control de inventario</h4><p>Entradas, salidas y ajustes con el stock siempre al día.</p></div>
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg></div><h4>Marketplace</h4><p>Aparecés donde los clientes descubren y comparan tiendas locales.</p></div>
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg></div><h4>Pedidos y chat</h4><p>Recibí pedidos y hablá directo con cada cliente para coordinar la entrega.</p></div>
-        <div class="qs-card"><div class="qi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></div><h4>Pagos por transferencia</h4><p>El cliente sube su comprobante y vos lo validás con total control.</p></div>
-      </div>
-    </div>
-
-    <div class="qs-cta">
-      <div><b>¿Listo para empezar?</b><span>Creá tu tienda gratis en minutos, sin conocimientos técnicos.</span></div>
-      <button class="path-cta" onclick="abrirCrear()">Crear mi tienda →</button>
-    </div>
-  </div>
-</section>
 
 <footer class="mega-footer footer">
   <div class="mega-footer-in">

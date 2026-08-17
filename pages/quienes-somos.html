@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- SIWEPE · © 2026 Joel Reyes. Todos los derechos reservados. · Prohibida su reproduccion o distribucion sin autorizacion. -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIWEPE · Quiénes somos</title>
+<meta name="theme-color" content="#4F86C6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F6F9FC; --cream-dark:#F0F5FB;
+  --rose:#4F86C6; --rose-light:#EAF2FB; --rose-mid:#A9CBEC; --rose-dark:#3A6DA8;
+  --text-dark:#21303D; --text-mid:#5A6B78; --text-soft:#9AAAB6;
+  --surface:#FFFFFF; --border:#E2EBF3;
+  --shadow-sm:0 2px 10px rgba(40,80,140,.07);
+  --shadow-md:0 8px 28px rgba(40,80,140,.10);
+  --shadow-lg:0 20px 56px rgba(40,80,140,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Manrope',sans-serif;background:var(--cream);color:var(--text-dark);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(246,249,252,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{max-width:1180px;margin:0 auto;height:70px;display:flex;align-items:center;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand-mark{width:40px;height:40px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.brand-mark img{width:100%;height:100%;object-fit:contain;}
+.brand-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.01em;}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:600;border:1.5px solid transparent;transition:all .18s;}
+.nav-btn.ghost{color:var(--text-mid);}
+.nav-btn.ghost:hover{color:var(--rose-dark);background:var(--rose-light);}
+.nav-btn.ghost.active{color:var(--rose-dark);background:var(--rose-light);}
+.nav-btn.solid{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.32);}
+.nav-btn.solid:hover{background:var(--rose-dark);transform:translateY(-1px);}
+.nav-btn.subtle{padding:8px 6px;font-weight:500;font-size:13px;color:var(--text-soft);}
+.nav-btn.subtle:hover{color:var(--rose-dark);}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--rose-dark);background:var(--rose-light);padding:8px 16px;border-radius:999px;}
+
+/* HERO */
+.qs-hero{position:relative;text-align:center;padding:84px 0 64px;overflow:hidden;}
+.qs-hero .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;z-index:0;animation:float 9s ease-in-out infinite;}
+.qs-hero .o1{width:360px;height:360px;background:var(--rose-light);top:-120px;left:-60px;}
+.qs-hero .o2{width:300px;height:300px;background:var(--rose-mid);bottom:-120px;right:-40px;opacity:.35;animation-delay:1.5s;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+.qs-hero-in{position:relative;z-index:1;max-width:760px;margin:0 auto;}
+.qs-hero h1{font-family:'Fraunces',serif;font-size:clamp(34px,5.2vw,58px);line-height:1.08;letter-spacing:-.02em;margin:20px 0 16px;}
+.qs-hero h1 em{font-style:italic;color:var(--rose-dark);}
+.qs-hero p{font-size:clamp(16px,2vw,19px);color:var(--text-mid);line-height:1.7;max-width:600px;margin:0 auto 28px;}
+.qs-cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:13px;font-size:15px;font-weight:600;border:none;transition:all .2s;}
+.btn.prim{background:var(--rose);color:#fff;box-shadow:0 10px 24px rgba(79,134,198,.34);}
+.btn.prim:hover{background:var(--rose-dark);transform:translateY(-2px);}
+.btn.ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text-dark);}
+.btn.ghost:hover{border-color:var(--rose-mid);background:var(--rose-light);}
+
+/* MISIÓN */
+.qs-mision{background:var(--rose-dark);color:#fff;padding:56px 0;text-align:center;}
+.qs-mision .eyebrow{background:rgba(255,255,255,.15);color:#fff;}
+.qs-mision h2{font-family:'Fraunces',serif;font-size:clamp(24px,3.2vw,34px);line-height:1.25;letter-spacing:-.01em;max-width:820px;margin:18px auto 0;font-weight:500;}
+
+/* SECCIONES */
+.sec{padding:66px 0;}
+.sec.alt{background:var(--cream-dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 44px;}
+.sec-head h2{font-family:'Fraunces',serif;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.02em;margin:14px 0 12px;}
+.sec-head p{font-size:16px;color:var(--text-mid);line-height:1.65;}
+
+/* PASOS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px 20px;box-shadow:var(--shadow-sm);transition:transform .25s,box-shadow .25s;}
+.step:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);}
+.step .num{width:44px;height:44px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:14px;}
+.step h4{font-size:16.5px;margin-bottom:6px;}
+.step p{font-size:14px;color:var(--text-mid);line-height:1.6;}
+
+/* FEATURES */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.feat{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px 24px;box-shadow:var(--shadow-sm);transition:transform .25s,box-shadow .25s,border-color .25s;}
+.feat:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
+.feat .fi{width:50px;height:50px;border-radius:14px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.feat h4{font-size:17px;margin-bottom:7px;}
+.feat p{font-size:14px;color:var(--text-mid);line-height:1.6;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:820px;margin:0 auto;text-align:center;}
+.stat .n{font-family:'Fraunces',serif;font-size:clamp(38px,6vw,56px);color:var(--rose-dark);letter-spacing:-.02em;line-height:1;}
+.stat .t{font-size:15px;color:var(--text-mid);margin-top:8px;}
+
+/* CTA FINAL */
+.qs-final{text-align:center;padding:72px 28px;}
+.qs-final h2{font-family:'Fraunces',serif;font-size:clamp(26px,3.6vw,40px);letter-spacing:-.02em;margin-bottom:12px;}
+.qs-final p{font-size:16.5px;color:var(--text-mid);margin-bottom:26px;}
+
+/* FOOTER */
+.footer{background:var(--surface);border-top:1px solid var(--border);text-align:center;padding:34px 20px;color:var(--text-soft);font-size:13px;}
+.footer a{color:inherit;text-decoration:underline;}
+
+/* ANIMACIÓN DE ENTRADA / SCROLL */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}.qs-hero .orb{animation:none;}}
+
+@media(max-width:860px){
+  .steps{grid-template-columns:1fr 1fr;}
+  .feats{grid-template-columns:1fr;}
+  .stats{grid-template-columns:1fr;gap:34px;}
+  .nav-links .subtle{display:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="../index.html">
+      <div class="brand-mark"><img src="../assets/img/siwepe-mark.png" alt=""></div>
+      <span class="brand-name">SIWEPE</span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn ghost" href="../index.html">Inicio</a>
+      <a class="nav-btn ghost" href="descubrir.html">Descubrir</a>
+      <a class="nav-btn ghost active" href="quienes-somos.html">Quiénes somos</a>
+      <a class="nav-btn subtle" href="admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
+      <a class="nav-btn solid" href="../index.html?crear=1">Crear tu empresa</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="qs-hero">
+  <span class="orb o1"></span><span class="orb o2"></span>
+  <div class="wrap">
+    <div class="qs-hero-in reveal">
+      <span class="eyebrow">Quiénes somos</span>
+      <h1>Creemos que todo emprendedor merece <em>vender en línea</em></h1>
+      <p>SIWEPE es la plataforma hondureña que le da a cada negocio su propia tienda en internet y las herramientas para administrarlo todo, sin necesidad de programar ni contratar a nadie.</p>
+      <div class="qs-cta-row">
+        <a class="btn prim" href="../index.html?crear=1">Crear tu empresa →</a>
+        <a class="btn ghost" href="descubrir.html">Descubrir tiendas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISIÓN -->
+<section class="qs-mision">
+  <div class="wrap reveal">
+    <span class="eyebrow">Nuestra misión</span>
+    <h2>Impulsar a los emprendedores de Honduras con tecnología simple, profesional y accesible para vender más y crecer.</h2>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONAMOS -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Cómo funcionamos</span>
+      <h2>De la idea a tu tienda en línea, en cuatro pasos</h2>
+      <p>Sin complicaciones técnicas. Vos te concentrás en tu negocio; nosotros ponemos la plataforma.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="num">1</div><h4>Creás tu tienda</h4><p>Te registrás, confirmás tu correo y tu tienda queda lista con su nombre, logo y colores propios.</p></div>
+      <div class="step reveal"><div class="num">2</div><h4>Cargás tus productos</h4><p>Subís tu catálogo con precios, fotos y stock desde tu panel de administración.</p></div>
+      <div class="step reveal"><div class="num">3</div><h4>Recibís pedidos</h4><p>Tus clientes compran en línea y se comunican con vos por el chat de cada pedido.</p></div>
+      <div class="step reveal"><div class="num">4</div><h4>Hacés crecer tu negocio</h4><p>Controlás inventario, ventas y reportes en un solo lugar, desde cualquier dispositivo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUÉ BRINDAMOS -->
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Qué te brindamos</span>
+      <h2>Todo lo que necesitás para vender, en un solo lugar</h2>
+    </div>
+    <div class="feats">
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M5 9v11h14V9"/><path d="M3 9h18"/></svg></div><h4>Tu tienda en línea</h4><p>Una vitrina propia con tu marca, tu catálogo y tu enlace para compartir con tus clientes.</p></div>
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div><h4>Panel de administración</h4><p>Gestioná productos, categorías, proveedores y ventas desde un panel claro y fácil de usar.</p></div>
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div><h4>Control de inventario</h4><p>Entradas, salidas y ajustes con el stock siempre al día y sin errores.</p></div>
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg></div><h4>Marketplace</h4><p>Aparecés donde miles de clientes descubren y comparan tiendas locales.</p></div>
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg></div><h4>Pedidos y chat</h4><p>Recibí pedidos y hablá directo con cada cliente para coordinar la entrega.</p></div>
+      <div class="feat reveal"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></div><h4>Pagos por transferencia</h4><p>El cliente sube su comprobante y vos lo validás con total control de tus cobros.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Hecho en Honduras</span>
+      <h2>Una comunidad de emprendedores que crece</h2>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><div class="n" data-count="25" id="st-tiendas">0</div><div class="t">Tiendas activas</div></div>
+      <div class="stat"><div class="n" data-count="500" data-suffix="+">0</div><div class="t">Productos publicados</div></div>
+      <div class="stat"><div class="n" data-count="1000" data-suffix="+">0</div><div class="t">Clientes satisfechos</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="sec alt">
+  <div class="qs-final wrap reveal">
+    <h2>¿Listo para llevar tu negocio en línea?</h2>
+    <p>Creá tu tienda gratis en minutos, sin conocimientos técnicos.</p>
+    <a class="btn prim" href="../index.html?crear=1">Crear mi tienda gratis →</a>
+  </div>
+</section>
+
+<footer class="footer">
+  © <span id="anio"></span> SIWEPE · Plataforma de tiendas en línea · Todos los derechos reservados
+  · <a href="terminos.html">Términos, privacidad y cookies</a>
+</footer>
+
+<script>
+const API_BASE = (location.hostname==='localhost'||location.hostname==='127.0.0.1') ? 'http://localhost:3000' : 'https://backendsiwepe-production.up.railway.app';
+document.getElementById('anio').textContent = new Date().getFullYear();
+
+/* Animación de entrada + al hacer scroll */
+(function(){
+  const els = Array.from(document.querySelectorAll('.reveal'));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        const grp = en.target.parentElement;
+        const hermanos = grp ? Array.from(grp.querySelectorAll(':scope > .reveal')) : [en.target];
+        const i = Math.max(0, hermanos.indexOf(en.target));
+        en.target.style.transitionDelay = (i*90)+'ms';
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold:0.14 });
+  els.forEach(el=>io.observe(el));
+  requestAnimationFrame(()=>document.querySelector('.qs-hero-in')?.classList.add('in'));
+})();
+
+/* Conteo animado de las estadísticas (la de tiendas usa el número real) */
+(function(){
+  async function realTiendas(){
+    try{ const r=await fetch(API_BASE+'/api/empresas'); if(r.ok){ const e=await r.json(); if(Array.isArray(e)&&e.length) return e.length; } }catch(_){}
+    return 25;
+  }
+  function animar(el,destino,suf){
+    const dur=1200, t0=performance.now();
+    function paso(t){
+      const p=Math.min(1,(t-t0)/dur), val=Math.round(destino*(1-Math.pow(1-p,3)));
+      el.textContent = val.toLocaleString('es-HN') + (suf||'');
+      if(p<1) requestAnimationFrame(paso);
+    }
+    requestAnimationFrame(paso);
+  }
+  const box=document.querySelector('.stats');
+  const io=new IntersectionObserver(async (ents)=>{
+    for(const en of ents){ if(!en.isIntersecting) continue; io.disconnect();
+      const nT=await realTiendas();
+      const nodos=box.querySelectorAll('.n');
+      if(nodos[0]) animar(nodos[0], nT, '+');
+      nodos.forEach((n,i)=>{ if(i===0) return; animar(n, +n.dataset.count||0, n.dataset.suffix||''); });
+    }
+  }, { threshold:0.4 });
+  if(box) io.observe(box);
+})();
+</script>
+</body>
+</html>
