@@ -762,10 +762,13 @@ function wzValidar(){
   }
   if(wzPaso===3){
     if(!val('e-nombre')){ err.textContent='Escribí el nombre de la empresa.'; return false; }
+    { const m=nombreValido(val('e-nombre')); if(m){ err.textContent=m; return false; } }
     if(!val('e-pais')){ err.textContent='Elegí tu país.'; return false; }
+    { const m=telValido(val('e-tel'), val('e-pais')); if(m){ err.textContent=m; return false; } }
   }
   if(wzPaso===4){
     if(!val('e-dueno')){ err.textContent='Escribí tu nombre.'; return false; }
+    { const m=nombreValido(val('e-dueno')); if(m){ err.textContent=m; return false; } }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val('e-correo'))){ err.textContent='Correo inválido.'; return false; }
     if(!pwEval()){ err.textContent='La contraseña debe cumplir todos los requisitos.'; return false; }
     if(val('e-pass')!==val('e-pass2')){ err.textContent='Las contraseñas no coinciden.'; return false; }
@@ -785,6 +788,24 @@ document.getElementById('e-logo').addEventListener('change', e=>{
   rd.onload=()=>{ wzLogo=rd.result; document.getElementById('e-logo-prev').innerHTML=`<img src="${wzLogo}" alt="">`; };
   rd.readAsDataURL(f);
 });
+/* Validación de nombre y teléfono (mismo criterio que el backend) */
+function nombreValido(nombre){
+  const n=String(nombre||'').trim();
+  if(n.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g,'').length<2) return 'El nombre debe tener letras, no solo números o símbolos.';
+  if((n.match(/[0-9]/g)||[]).length>4) return 'El nombre no puede tener más de 4 números.';
+  if((n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length>3) return 'El nombre no puede tener más de 3 signos.';
+  return '';
+}
+const TEL_LEN={'Honduras':{len:8,movil:/^[3789]/},'Guatemala':{len:8},'El Salvador':{len:8},'Nicaragua':{len:8},'Costa Rica':{len:8},'Panamá':{len:8},'México':{len:10},'Colombia':{len:10},'Estados Unidos':{len:10},'España':{len:9}};
+function telValido(raw,pais){
+  const d=String(raw||'').replace(/\D/g,'');
+  if(!d) return '';
+  const info=TEL_LEN[pais]||TEL_LEN['Honduras'];
+  if(d.length!==info.len) return `El teléfono debe tener ${info.len} dígitos.`;
+  if(info.movil&&!info.movil.test(d)) return 'Ingresá un número de celular válido (debe empezar con 3, 7, 8 o 9).';
+  return '';
+}
+document.getElementById('e-tel')?.addEventListener('input', e=>{ e.target.value=e.target.value.replace(/\D/g,''); });
 
 /* ── Contraseña: requisitos + medidor en vivo ── */
 const PW_REGLAS = { len:p=>p.length>=8, up:p=>/[A-Z]/.test(p), low:p=>/[a-z]/.test(p), num:p=>/[0-9]/.test(p), sym:p=>/[^A-Za-z0-9]/.test(p) };
