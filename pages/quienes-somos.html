@@ -108,7 +108,56 @@ button{font-family:inherit;cursor:pointer;}
 .reveal.in{opacity:1;transform:none;}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}.qs-hero .orb{animation:none;}}
 
+/* HERO 2 columnas + foto */
+.qs-hero{text-align:left;}
+.qs-hero-in{display:grid;grid-template-columns:1.02fr .98fr;gap:48px;align-items:center;max-width:1100px;margin:0 auto;text-align:left;}
+.qs-hero h1{margin:16px 0 16px;}
+.qs-hero p{margin:0 0 26px;max-width:520px;}
+.qs-cta-row{justify-content:flex-start;}
+.qs-hero-visual{position:relative;}
+.qs-hero-visual>img{width:100%;height:auto;display:block;filter:drop-shadow(0 22px 44px rgba(40,80,140,.18));}
+.float-card{position:absolute;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);padding:10px 14px;display:flex;align-items:center;gap:10px;animation:float 6s ease-in-out infinite;}
+.float-card .fc-ic{width:36px;height:36px;border-radius:10px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.float-card b{font-size:13px;display:block;color:var(--text-dark);}
+.float-card span{font-size:11px;color:var(--text-soft);}
+
+/* SHOWCASE con maquetas */
+.showcase{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:center;margin-bottom:52px;}
+.showcase:last-child{margin-bottom:0;}
+.showcase.rev .sc-text{order:2;}
+.sc-text h3{font-family:'Fraunces',serif;font-size:clamp(22px,2.6vw,30px);letter-spacing:-.01em;margin:12px 0 12px;}
+.sc-text p{font-size:15.5px;color:var(--text-mid);line-height:1.7;margin-bottom:16px;}
+.sc-list{list-style:none;display:grid;gap:10px;}
+.sc-list li{display:flex;align-items:center;gap:11px;font-size:14.5px;color:var(--text-dark);}
+.sc-list .ck{width:22px;height:22px;border-radius:50%;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* maqueta celular */
+.mock-phone{width:262px;margin:0 auto;background:#fff;border:9px solid #1F2937;border-radius:34px;box-shadow:var(--shadow-lg);overflow:hidden;}
+.mp-top{height:132px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));position:relative;}
+.mp-store{position:absolute;left:16px;bottom:12px;color:#fff;}
+.mp-store b{font-size:15px;} .mp-store span{font-size:11px;opacity:.85;}
+.mp-body{padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--cream);}
+.mp-prod{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.mp-ph{height:52px;background:var(--rose-light);}
+.mp-info{padding:8px 9px;} .mp-info .l{height:7px;width:82%;background:#E2EBF3;border-radius:4px;} .mp-info .pr{margin-top:7px;font-size:11px;color:var(--rose-dark);font-weight:600;}
+/* maqueta navegador (panel) */
+.mock-browser{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden;max-width:440px;margin:0 auto;}
+.mb-bar{height:34px;background:var(--cream-dark);display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--border);}
+.mb-bar i{width:10px;height:10px;border-radius:50%;background:#D6DEE8;}
+.mb-body{display:grid;grid-template-columns:80px 1fr;min-height:224px;}
+.mb-side{background:var(--rose-dark);padding:14px 10px;display:grid;gap:9px;align-content:start;}
+.mb-side .s{height:9px;border-radius:5px;background:rgba(255,255,255,.25);}
+.mb-side .s.on{background:#fff;}
+.mb-main{padding:14px;background:var(--cream);}
+.mb-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.mb-kpi{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 10px;}
+.mb-kpi .n{font-size:15px;font-weight:700;color:var(--text-dark);} .mb-kpi .t{font-size:9px;color:var(--text-soft);}
+.mb-chart{background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;align-items:flex-end;gap:7px;height:98px;}
+.mb-chart span{flex:1;background:var(--rose-mid);border-radius:4px 4px 0 0;}
+
 @media(max-width:860px){
+  .qs-hero-in{grid-template-columns:1fr;text-align:center;} .qs-hero p{margin-left:auto;margin-right:auto;} .qs-cta-row{justify-content:center;}
+  .qs-hero-visual{max-width:400px;margin:0 auto;}
+  .showcase{grid-template-columns:1fr;gap:28px;} .showcase.rev .sc-text{order:0;}
   .steps{grid-template-columns:1fr 1fr;}
   .feats{grid-template-columns:1fr;}
   .stats{grid-template-columns:1fr;gap:34px;}
@@ -138,13 +187,20 @@ button{font-family:inherit;cursor:pointer;}
 <section class="qs-hero">
   <span class="orb o1"></span><span class="orb o2"></span>
   <div class="wrap">
-    <div class="qs-hero-in reveal">
-      <span class="eyebrow">Quiénes somos</span>
-      <h1>Creemos que todo emprendedor merece <em>vender en línea</em></h1>
-      <p>SIWEPE es la plataforma hondureña que le da a cada negocio su propia tienda en internet y las herramientas para administrarlo todo, sin necesidad de programar ni contratar a nadie.</p>
-      <div class="qs-cta-row">
-        <a class="btn prim" href="../index.html?crear=1">Crear tu empresa →</a>
-        <a class="btn ghost" href="descubrir.html">Descubrir tiendas</a>
+    <div class="qs-hero-in">
+      <div class="qs-hero-text reveal">
+        <span class="eyebrow">Quiénes somos</span>
+        <h1>Creemos que todo emprendedor merece <em>vender en línea</em></h1>
+        <p>SIWEPE es la plataforma hondureña que le da a cada negocio su propia tienda en internet y las herramientas para administrarlo todo, sin necesidad de programar ni contratar a nadie.</p>
+        <div class="qs-cta-row">
+          <a class="btn prim" href="../index.html?crear=1">Crear tu empresa →</a>
+          <a class="btn ghost" href="descubrir.html">Descubrir tiendas</a>
+        </div>
+      </div>
+      <div class="qs-hero-visual reveal">
+        <img src="../assets/img/hero.webp" alt="Emprendedora vendiendo en línea con SIWEPE">
+        <div class="float-card" style="top:16px;left:-12px"><div class="fc-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></div><div><b>Tiendas verificadas</b><span>compra con confianza</span></div></div>
+        <div class="float-card" style="bottom:20px;right:-12px;animation-delay:1.2s"><div class="fc-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div><div><b>Más productos</b><span>de emprendedores</span></div></div>
       </div>
     </div>
   </div>
@@ -171,6 +227,70 @@ button{font-family:inherit;cursor:pointer;}
       <div class="step reveal"><div class="num">2</div><h4>Cargás tus productos</h4><p>Subís tu catálogo con precios, fotos y stock desde tu panel de administración.</p></div>
       <div class="step reveal"><div class="num">3</div><h4>Recibís pedidos</h4><p>Tus clientes compran en línea y se comunican con vos por el chat de cada pedido.</p></div>
       <div class="step reveal"><div class="num">4</div><h4>Hacés crecer tu negocio</h4><p>Controlás inventario, ventas y reportes en un solo lugar, desde cualquier dispositivo.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ASÍ FUNCIONA (visual) -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Así funciona</span>
+      <h2>Mirá cómo se ve y cómo se administra</h2>
+      <p>Tus clientes ven una tienda profesional; vos la controlás desde un panel simple.</p>
+    </div>
+
+    <div class="showcase">
+      <div class="sc-text reveal">
+        <span class="eyebrow">Para tus clientes</span>
+        <h3>Tu tienda, lista para vender</h3>
+        <p>Cada negocio tiene su vitrina propia: catálogo con fotos, precios y un carrito para comprar desde el celular, sin descargar nada.</p>
+        <ul class="sc-list">
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Catálogo con fotos y precios</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Carrito y pedidos en línea</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Se ve perfecto en cualquier pantalla</li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <div class="mock-phone">
+          <div class="mp-top"><div class="mp-store"><b>Mi Tienda</b><span>Tegucigalpa, HN</span></div></div>
+          <div class="mp-body">
+            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 120</div></div></div>
+            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 350</div></div></div>
+            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 90</div></div></div>
+            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 480</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase rev" style="margin-top:56px">
+      <div class="sc-text reveal">
+        <span class="eyebrow">Para vos</span>
+        <h3>Administralo todo desde un panel</h3>
+        <p>Productos, inventario, ventas, pedidos y reportes en un solo lugar, claro y fácil de usar, desde la compu o el celular.</p>
+        <ul class="sc-list">
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Inventario y stock siempre al día</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Ventas y reportes claros</li>
+          <li><span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 10 17l-5-5"/></svg></span> Pedidos y chat con tus clientes</li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <div class="mock-browser">
+          <div class="mb-bar"><i></i><i></i><i></i></div>
+          <div class="mb-body">
+            <div class="mb-side"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+            <div class="mb-main">
+              <div class="mb-kpis">
+                <div class="mb-kpi"><div class="n">L 12k</div><div class="t">Ventas del mes</div></div>
+                <div class="mb-kpi"><div class="n">48</div><div class="t">Productos</div></div>
+                <div class="mb-kpi"><div class="n">7</div><div class="t">Pedidos</div></div>
+              </div>
+              <div class="mb-chart"><span style="height:44%"></span><span style="height:68%"></span><span style="height:52%"></span><span style="height:84%"></span><span style="height:60%"></span><span style="height:92%"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -242,7 +362,7 @@ document.getElementById('anio').textContent = new Date().getFullYear();
     });
   }, { threshold:0.14 });
   els.forEach(el=>io.observe(el));
-  requestAnimationFrame(()=>document.querySelector('.qs-hero-in')?.classList.add('in'));
+  requestAnimationFrame(()=>document.querySelectorAll('.qs-hero .reveal').forEach(e=>e.classList.add('in')));
 })();
 
 /* Conteo animado de las estadísticas (la de tiendas usa el número real) */
