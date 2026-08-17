@@ -131,29 +131,49 @@ button{font-family:inherit;cursor:pointer;}
 .sc-list{list-style:none;display:grid;gap:10px;}
 .sc-list li{display:flex;align-items:center;gap:11px;font-size:14.5px;color:var(--text-dark);}
 .sc-list .ck{width:22px;height:22px;border-radius:50%;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-/* maqueta celular */
-.mock-phone{width:262px;margin:0 auto;background:#fff;border:9px solid #1F2937;border-radius:34px;box-shadow:var(--shadow-lg);overflow:hidden;}
-.mp-top{height:132px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));position:relative;}
-.mp-store{position:absolute;left:16px;bottom:12px;color:#fff;}
-.mp-store b{font-size:15px;} .mp-store span{font-size:11px;opacity:.85;}
-.mp-body{padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--cream);}
-.mp-prod{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.mp-ph{height:52px;background:var(--rose-light);}
-.mp-info{padding:8px 9px;} .mp-info .l{height:7px;width:82%;background:#E2EBF3;border-radius:4px;} .mp-info .pr{margin-top:7px;font-size:11px;color:var(--rose-dark);font-weight:600;}
-/* maqueta navegador (panel) */
-.mock-browser{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);overflow:hidden;max-width:440px;margin:0 auto;}
-.mb-bar{height:34px;background:var(--cream-dark);display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--border);}
-.mb-bar i{width:10px;height:10px;border-radius:50%;background:#D6DEE8;}
-.mb-body{display:grid;grid-template-columns:80px 1fr;min-height:224px;}
-.mb-side{background:var(--rose-dark);padding:14px 10px;display:grid;gap:9px;align-content:start;}
-.mb-side .s{height:9px;border-radius:5px;background:rgba(255,255,255,.25);}
-.mb-side .s.on{background:#fff;}
+/* maqueta celular (realista) */
+.mock-phone{width:266px;margin:0 auto;background:#0F1720;border-radius:40px;padding:9px;box-shadow:var(--shadow-lg);}
+.mp-screen{background:var(--cream);border-radius:32px;overflow:hidden;position:relative;}
+.mp-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:96px;height:19px;background:#0F1720;border-radius:0 0 13px 13px;z-index:3;}
+.mp-status{display:flex;justify-content:space-between;align-items:center;padding:9px 18px 4px;font-size:11px;font-weight:700;color:var(--text-dark);}
+.mp-status .dt{display:flex;gap:3px;align-items:center;} .mp-status .dt i{width:5px;height:5px;border-radius:50%;background:var(--text-mid);}
+.mp-top{background:linear-gradient(140deg,var(--rose),var(--rose-dark));padding:6px 14px 14px;color:#fff;}
+.mp-head{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.mp-logo{width:32px;height:32px;border-radius:9px;background:#fff;color:var(--rose-dark);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:16px;flex-shrink:0;}
+.mp-head b{font-size:13.5px;display:block;line-height:1.15;} .mp-head span{font-size:10.5px;opacity:.9;}
+.mp-search{background:rgba(255,255,255,.92);border-radius:9px;height:28px;display:flex;align-items:center;gap:7px;padding:0 11px;font-size:11px;color:var(--text-soft);}
+.mp-body{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mp-prod{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(40,80,140,.05);}
+.mp-ph{height:54px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.92);}
+.mp-info{padding:7px 9px 9px;}
+.mp-info .nm{font-size:10.5px;color:var(--text-dark);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mp-info .rw{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.mp-info .pr{font-size:11px;color:var(--rose-dark);font-weight:700;}
+.mp-add{width:20px;height:20px;border-radius:6px;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;}
+.mp-nav{display:flex;justify-content:space-around;padding:9px 0 11px;border-top:1px solid var(--border);background:#fff;color:var(--text-soft);}
+.mp-nav .on{color:var(--rose-dark);}
+/* maqueta navegador / panel (realista) */
+.mock-browser{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;max-width:470px;margin:0 auto;}
+.mb-bar{height:36px;background:var(--cream-dark);display:flex;align-items:center;gap:7px;padding:0 13px;border-bottom:1px solid var(--border);}
+.mb-bar i{width:10px;height:10px;border-radius:50%;}
+.mb-bar i.r{background:#F0A9A0;} .mb-bar i.y{background:#F2CE86;} .mb-bar i.g{background:#A6D6AE;}
+.mb-url{margin-left:8px;flex:1;height:20px;background:#fff;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:10px;color:var(--text-soft);}
+.mb-body{display:grid;grid-template-columns:106px 1fr;min-height:238px;}
+.mb-side{background:var(--rose-dark);padding:13px 9px;display:grid;gap:3px;align-content:start;}
+.mb-brand{display:flex;align-items:center;gap:8px;color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:13px;margin-bottom:10px;padding:0 5px;}
+.mb-brand .bd{width:22px;height:22px;border-radius:7px;background:#fff;color:var(--rose-dark);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.mb-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:10.5px;color:rgba(255,255,255,.72);}
+.mb-item.on{background:rgba(255,255,255,.16);color:#fff;}
 .mb-main{padding:14px;background:var(--cream);}
+.mb-title{font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:11px;}
 .mb-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
-.mb-kpi{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 10px;}
-.mb-kpi .n{font-size:15px;font-weight:700;color:var(--text-dark);} .mb-kpi .t{font-size:9px;color:var(--text-soft);}
-.mb-chart{background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;align-items:flex-end;gap:7px;height:98px;}
-.mb-chart span{flex:1;background:var(--rose-mid);border-radius:4px 4px 0 0;}
+.mb-kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 10px;}
+.mb-kpi .ic{width:22px;height:22px;border-radius:6px;background:var(--rose-light);color:var(--rose-dark);display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
+.mb-kpi .n{font-size:15px;font-weight:700;color:var(--text-dark);line-height:1;} .mb-kpi .t{font-size:9px;color:var(--text-soft);margin-top:3px;}
+.mb-panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 12px;}
+.mb-panel .ph{font-size:10.5px;color:var(--text-mid);font-weight:600;margin-bottom:9px;}
+.mb-chart{display:flex;align-items:flex-end;gap:8px;height:76px;}
+.mb-chart span{flex:1;background:linear-gradient(180deg,var(--rose-mid),var(--rose));border-radius:4px 4px 0 0;}
 
 @media(max-width:860px){
   .qs-hero-in{grid-template-columns:1fr;text-align:center;} .qs-hero p{margin-left:auto;margin-right:auto;} .qs-cta-row{justify-content:center;}
@@ -254,12 +274,29 @@ button{font-family:inherit;cursor:pointer;}
       </div>
       <div class="reveal">
         <div class="mock-phone">
-          <div class="mp-top"><div class="mp-store"><b>Mi Tienda</b><span>Tegucigalpa, HN</span></div></div>
-          <div class="mp-body">
-            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 120</div></div></div>
-            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 350</div></div></div>
-            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 90</div></div></div>
-            <div class="mp-prod"><div class="mp-ph"></div><div class="mp-info"><div class="l"></div><div class="pr">L 480</div></div></div>
+          <div class="mp-screen">
+            <div class="mp-notch"></div>
+            <div class="mp-status"><span>9:41</span><span class="dt"><i></i><i></i><i></i></span></div>
+            <div class="mp-top">
+              <div class="mp-head">
+                <div class="mp-logo">M</div>
+                <div><b>Mi Tienda</b><span>Tegucigalpa, HN</span></div>
+              </div>
+              <div class="mp-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.2-4.2"/></svg> Buscar productos…</div>
+            </div>
+            <div class="mp-body">
+              <div class="mp-prod"><div class="mp-ph" style="background:#E6902F"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 4-5 3 3 5 2-1v9h8v-9l2 1 3-5-5-3c-.5 1.2-1.9 2-4 2S8.5 5.2 8 4Z"/></svg></div><div class="mp-info"><div class="nm">Camiseta básica</div><div class="rw"><span class="pr">L 250</span><span class="mp-add"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div>
+              <div class="mp-prod"><div class="mp-ph" style="background:#C77AA0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 9l8 12 8-12-8-6Z"/><path d="M4 9h16M9 3l3 6 3-6"/></svg></div><div class="mp-info"><div class="nm">Aretes dorados</div><div class="rw"><span class="pr">L 90</span><span class="mp-add"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div>
+              <div class="mp-prod"><div class="mp-ph" style="background:#5FA37E"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z"/><path d="M17 9h2a2 2 0 0 1 0 4h-2"/><path d="M7 3v2M11 2v3M15 3v2"/></svg></div><div class="mp-info"><div class="nm">Café molido 500g</div><div class="rw"><span class="pr">L 180</span><span class="mp-add"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div>
+              <div class="mp-prod"><div class="mp-ph" style="background:#4F86C6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="14" width="5" height="7" rx="1.5"/><rect x="17" y="14" width="5" height="7" rx="1.5"/></svg></div><div class="mp-info"><div class="nm">Audífonos</div><div class="rw"><span class="pr">L 480</span><span class="mp-add"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></div></div></div>
+            </div>
+            <div class="mp-nav">
+              <svg class="on" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.2-4.2"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15 3.5 9.2A4.7 4.7 0 0 1 12 6.4a4.7 4.7 0 0 1 8.5 2.8C20.5 15 12 20.5 12 20.5Z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -278,16 +315,27 @@ button{font-family:inherit;cursor:pointer;}
       </div>
       <div class="reveal">
         <div class="mock-browser">
-          <div class="mb-bar"><i></i><i></i><i></i></div>
+          <div class="mb-bar"><i class="r"></i><i class="y"></i><i class="g"></i><div class="mb-url">siwepe.shop/admin</div></div>
           <div class="mb-body">
-            <div class="mb-side"><div class="s on"></div><div class="s"></div><div class="s"></div><div class="s"></div><div class="s"></div></div>
+            <div class="mb-side">
+              <div class="mb-brand"><span class="bd">S</span> SIWEPE</div>
+              <div class="mb-item on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg> Inicio</div>
+              <div class="mb-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg> Productos</div>
+              <div class="mb-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg> Ventas</div>
+              <div class="mb-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg> Pedidos</div>
+              <div class="mb-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg> Reportes</div>
+            </div>
             <div class="mb-main">
+              <div class="mb-title">Panel · Mi Tienda</div>
               <div class="mb-kpis">
-                <div class="mb-kpi"><div class="n">L 12k</div><div class="t">Ventas del mes</div></div>
-                <div class="mb-kpi"><div class="n">48</div><div class="t">Productos</div></div>
-                <div class="mb-kpi"><div class="n">7</div><div class="t">Pedidos</div></div>
+                <div class="mb-kpi"><div class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></div><div class="n">L 12k</div><div class="t">Ventas del mes</div></div>
+                <div class="mb-kpi"><div class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div><div class="n">48</div><div class="t">Productos</div></div>
+                <div class="mb-kpi"><div class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></div><div class="n">7</div><div class="t">Pedidos</div></div>
               </div>
-              <div class="mb-chart"><span style="height:44%"></span><span style="height:68%"></span><span style="height:52%"></span><span style="height:84%"></span><span style="height:60%"></span><span style="height:92%"></span></div>
+              <div class="mb-panel">
+                <div class="ph">Ventas · últimos 6 meses</div>
+                <div class="mb-chart"><span style="height:42%"></span><span style="height:66%"></span><span style="height:50%"></span><span style="height:82%"></span><span style="height:60%"></span><span style="height:94%"></span></div>
+              </div>
             </div>
           </div>
         </div>
