@@ -147,14 +147,14 @@ button{font-family:inherit;cursor:pointer;}
 
 <header class="nav">
   <div class="nav-in">
-    <a class="brand" href="index.html">
+    <a class="brand" href="../index.html">
       <div class="brand-mark"><img src="../assets/img/siwepe-mark.png" alt=""></div>
       <span class="brand-name">SIWEPE</span>
     </a>
     <div class="nav-links">
-      <a class="nav-btn ghost" href="index.html">Inicio</a>
+      <a class="nav-btn ghost" href="../index.html">Inicio</a>
       <a class="nav-btn subtle" href="admin.html?login=1&amp;v=20260813.12" title="Acceso para dueños de tienda">¿Tenés tienda? Inicia sesión</a>
-      <a class="nav-btn solid" href="index.html?crear=1">Crear tu empresa</a>
+      <a class="nav-btn solid" href="../index.html?crear=1">Crear tu empresa</a>
     </div>
   </div>
 </header>
@@ -215,9 +215,7 @@ button{font-family:inherit;cursor:pointer;}
 </footer>
 
 <script>
-const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-  ? 'http://localhost:3000'
-  : 'https://backendsiwepe-production.up.railway.app';
+const API_BASE = 'https://backendsiwepe-production.up.railway.app';
 
 document.getElementById('anio').textContent = new Date().getFullYear();
 
@@ -262,7 +260,7 @@ function renderTiendas(lista, q){
   const grid = document.getElementById('tiendas-grid');
   const count = document.getElementById('tiendas-count');
   if(!EMPRESAS.length){
-    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Aún no hay tiendas</h3><p>Sé el primero en crear tu tienda en SIWEPE.</p><a class="es-btn" href="index.html?crear=1">Crear la primera empresa</a></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="es-ic"></div><h3>Aún no hay tiendas</h3><p>Sé el primero en crear tu tienda en SIWEPE.</p><a class="es-btn" href="../index.html?crear=1">Crear la primera empresa</a></div>`;
     count.textContent = '';
     return;
   }

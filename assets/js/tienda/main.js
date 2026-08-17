@@ -738,8 +738,6 @@ function iniciarPollChat(){
     if($t('#t-chat-overlay')?.classList.contains('open')&&chatPedidoId){
       renderChatMsgs(chatPedidoId);
     }
-    // Si el cliente está viendo "Mis pedidos", refrescar el estado de sus pedidos en vivo
-    if($t('#tp-cuenta')?.classList.contains('active')) renderCuenta();
   },3000);
 }
 
@@ -890,7 +888,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $t('#btn-chat-send')?.addEventListener('click',enviarMensajeCliente);
   $t('#t-chat-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviarMensajeCliente(); } });
 
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ cerrarCarrito(); cerrarDetalle(); cerrarChat(); cerrarPerfilCliente(); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ cerrarCarrito(); cerrarDetalle(); cerrarChat(); } });
 
   iniciarFondoAnimado();
 

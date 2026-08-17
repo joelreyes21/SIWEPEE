@@ -5,13 +5,9 @@
 */
 const BS_CLAVE = 'siwepe_pro_v1';
 
-/* Base del API:
-   - En local (localhost / 127.0.0.1) usa el servidor Node local en :3000.
-   - En cualquier otro lado (siwepe.shop, etc.) usa el backend en Railway. */
-const API_BASE = (typeof location !== 'undefined'
-    && (location.hostname === 'localhost' || location.hostname === '127.0.0.1'))
-  ? 'http://localhost:3000'
-  : 'https://backendsiwepe-production.up.railway.app';
+/* Base del API: el backend vive en Railway. Un solo lugar para cambiar la URL
+   si el proyecto de Railway cambia de nombre/dominio. */
+const API_BASE = 'https://backendsiwepe-production.up.railway.app';
 
 function bsToken(){ try{ return localStorage.getItem('bs_token')||''; }catch(e){ return ''; } }
 function bsRole(){ try{ return localStorage.getItem('bs_role')||''; }catch(e){ return ''; } }
@@ -432,5 +428,6 @@ const dinero  = n => `${DB.config.moneda} ${Number(n||0).toLocaleString('es-HN',
 const esc     = t => String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fechaCorta = f => { if(!f) return '—'; const [a,m,d]=f.split('-'); const M=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${+d} ${M[+m-1]} ${a}`; };
 
-/* Helper mensajes */
+/* Helper mensajes — usado por admin/main.js (badge de chat en Pedidos) */
+const mensajesNoLeidos = (pedId, autor) => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId&&m.autor!==autor&&!m.leido).length;
 const msgsDePedido = pedId => (DB.mensajes||[]).filter(m=>m.pedido_id===pedId).sort((a,b)=>a.id-b.id);
