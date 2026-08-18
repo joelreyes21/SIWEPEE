@@ -66,6 +66,8 @@ img{display:block;}
 .crumb b{color:var(--text-mid);font-weight:600;}
 .layout{display:grid;grid-template-columns:262px minmax(0,1fr);gap:28px;align-items:start;padding-bottom:30px;}
 .side-backdrop{display:none;}
+.sidebar{grid-column:1;grid-row:1;}
+.layout > main{grid-column:2;grid-row:1;min-width:0;}
 
 /* Sidebar */
 .side-title{font-family:'Fraunces',serif;font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px;}
@@ -160,6 +162,7 @@ img{display:block;}
 .mob-filter-btn{display:none;}
 @media(max-width:940px){
   .layout{grid-template-columns:1fr;}
+  .layout > main{grid-column:1;}
   .sidebar{position:fixed;inset:0 auto 0 0;width:300px;max-width:86vw;background:var(--cream);z-index:80;padding:22px 20px;overflow-y:auto;transform:translateX(-105%);transition:transform .28s;box-shadow:var(--shadow-lg);}
   .sidebar.open{transform:none;}
   .side-backdrop{display:none;position:fixed;inset:0;background:rgba(20,40,70,.35);z-index:75;}
