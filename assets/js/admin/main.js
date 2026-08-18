@@ -633,7 +633,7 @@ function renderDashboard(){
   requestAnimationFrame(()=>renderChartLinea(meses));
 
   /* Últimos movimientos */
-  const movs=[...DB.movimientos].sort((a,b)=>b.id-a.id).slice(0,7);
+  const movs=[...DB.movimientos].filter(m=>prodPor(m.producto_id)).sort((a,b)=>b.id-a.id).slice(0,7);
   $('#dash-movs').innerHTML=movs.map(m=>{
     const p=prodPor(m.producto_id);
     return `<div class="mov-row">
@@ -1144,6 +1144,7 @@ window.renderInventario=renderInventario; window.openTransferirInventario=openTr
 let comFiltros={desde:'',hasta:''};
 function renderCompras(){
   const lista=[...DB.compras]
+    .filter(c=>prodPor(c.producto_id))
     .filter(c=>(!comFiltros.desde||c.fecha>=comFiltros.desde)&&(!comFiltros.hasta||c.fecha<=comFiltros.hasta))
     .sort((a,b)=> b.fecha<a.fecha?-1 : b.fecha>a.fecha?1 : b.id-a.id);
   $('#tabla-compras').innerHTML=lista.map(c=>{
@@ -1236,6 +1237,7 @@ async function saveCompra(){
 let venFiltros={desde:'',hasta:''};
 function renderVentas(){
   const lista=DB.ventas.filter(ventaActiva)
+    .filter(v=>prodPor(v.producto_id))
     .filter(v=>(!venFiltros.desde||v.fecha>=venFiltros.desde)&&(!venFiltros.hasta||v.fecha<=venFiltros.hasta))
     .sort((a,b)=> b.fecha<a.fecha?-1 : b.fecha>a.fecha?1 : b.id-a.id);
   $('#tabla-ventas').innerHTML=lista.map(v=>{
@@ -1368,7 +1370,7 @@ function renderMovRank(lista){
 }
 
 function renderMovTabla(lista){
-  $('#tabla-movimientos').innerHTML=lista.slice(0,60).map(m=>{
+  $('#tabla-movimientos').innerHTML=lista.filter(m=>prodPor(m.producto_id)).slice(0,60).map(m=>{
     const p=prodPor(m.producto_id);
     let badge,signo,color;
     if(m.tipo==='entrada'){ badge='<span class="badge b-ok">Entrada</span>'; signo='+'; color='var(--ok)'; }
