@@ -1149,9 +1149,17 @@ function renderCompras(){
     .sort((a,b)=> b.fecha<a.fecha?-1 : b.fecha>a.fecha?1 : b.id-a.id);
   $('#tabla-compras').innerHTML=lista.map(c=>{
     const p=prodPor(c.producto_id),pr=provPor(c.proveedor_id);
-    return `<tr><td>${fechaCorta(c.fecha)}</td><td><div class="td-prod"><div class="td-prod-thumb">${p&&p.imagen?`<img src="${p.imagen}" alt="" data-l="${p.nombre[0].toUpperCase()}" onerror="imgFb(this)">`:(p?p.nombre[0].toUpperCase():'?')}</div><div class="td-prod-info"><strong>${esc(p?p.nombre:'(eliminado)')}</strong></div></div></td><td>${esc(pr?pr.nombre:'—')}</td><td><span class="badge b-ok">+${c.cantidad}</span></td><td>${dinero(c.precio)}</td><td><strong>${dinero(c.cantidad*c.precio)}</strong></td><td style="color:var(--text-muted)">${esc(c.obs)||'—'}</td></tr>`;
-  }).join('')||`<tr class="empty-row"><td colspan="7"><em>Sin compras</em></td></tr>`;
+    return `<tr><td>${fechaCorta(c.fecha)}</td><td><div class="td-prod"><div class="td-prod-thumb">${p&&p.imagen?`<img src="${p.imagen}" alt="" data-l="${p.nombre[0].toUpperCase()}" onerror="imgFb(this)">`:(p?p.nombre[0].toUpperCase():'?')}</div><div class="td-prod-info"><strong>${esc(p?p.nombre:'(eliminado)')}</strong></div></div></td><td>${esc(pr?pr.nombre:'—')}</td><td><span class="badge b-ok">+${c.cantidad}</span></td><td>${dinero(c.precio)}</td><td><strong>${dinero(c.cantidad*c.precio)}</strong></td><td style="color:var(--text-muted)">${esc(c.obs)||'—'}</td><td class="td-actions"><div class="td-actions-wrap"><button class="btn-icon danger" onclick="borrarCompra(${c.id})" title="Eliminar compra">${svgIcon('basura')}</button></div></td></tr>`;
+  }).join('')||`<tr class="empty-row"><td colspan="8"><em>Sin compras</em></td></tr>`;
 }
+function borrarCompra(id){
+  const c=DB.compras.find(x=>x.id===id); if(!c) return;
+  const p=prodPor(c.producto_id);
+  openConfirm(`Se eliminará esta compra${p?` de "${p.nombre}"`:''} (${c.cantidad} × ${dinero(c.precio)}). Solo borra el registro; no modifica el stock actual.`,()=>{
+    DB.compras=DB.compras.filter(x=>x.id!==id); dbGuardar(); renderCompras(); renderDashboard&&renderDashboard(); toast('Compra eliminada');
+  });
+}
+window.borrarCompra=borrarCompra;
 
 function openFormCompra(){
   const cats=DB.categorias.filter(c=>c.estado==='activo').map(c=>({value:c.id,label:c.nombre}));
