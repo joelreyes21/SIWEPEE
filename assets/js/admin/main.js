@@ -1799,7 +1799,7 @@ async function guardarPerfilEmpresa(){
   const datos={
     nombre: DB.config.nombre,
     logo: DB.config.logo||'',
-    tiposNegocio: $$('#perfil-tipos input[type="checkbox"]:checked').map(x=>x.value),
+    tiposNegocio: [...$$('#perfil-tipos input[type="checkbox"]:checked')].map(x=>x.value),
     rubro: ($('#perfil-rubro')?.value||'').trim(),
     telefono: ($('#perfil-telefono')?.value||'').trim(),
     contactoPublico: ($('#perfil-contacto')?.value||'').trim(),
