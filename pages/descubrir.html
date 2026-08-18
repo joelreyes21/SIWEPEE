@@ -114,6 +114,9 @@ img{display:block;}
 .store-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s,border-color .24s;display:flex;flex-direction:column;}
 .store-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
 .sc-cover{position:relative;height:118px;background:linear-gradient(135deg,var(--rose-mid),var(--rose-light) 60%,var(--cream-dark));overflow:hidden;}
+.sc-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .45s ease;z-index:0;}
+.store-card:hover .sc-cover-img{transform:scale(1.06);}
+.sc-cover-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(33,48,61,0) 45%,rgba(33,48,61,.22));pointer-events:none;}
 .sc-fav{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--text-mid);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:.16s;z-index:3;}
 .sc-fav:hover{color:#E8617D;transform:scale(1.08);}
 .sc-fav.on{color:#E8617D;}
@@ -422,12 +425,14 @@ function tarjeta(e){
   // falla al cargar (base64 dañado, url muerta), onerror lo quita y queda la
   // inicial — nunca se ve el ícono de imagen rota.
   const logoImg = e.logo ? `<img src="${esc(e.logo)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+  const coverImg = e.logo ? `<img class="sc-cover-img" src="${esc(e.logo)}" alt="" loading="lazy" onerror="this.remove()"><span class="sc-cover-shade"></span>` : '';
   const ubic=[e.ciudad,e.pais].filter(Boolean).join(', ');
   const nprod=CONTEO[key]||0;
   const url='tienda.html?e='+encodeURIComponent(key)+'&app=20260813.4';
   const fav=FAVS.has(String(key))?'on':'';
   return `<article class="store-card">
     <div class="sc-cover">
+      ${coverImg}
       <button class="sc-fav ${fav}" data-fav="${esc(String(key))}" title="Guardar tienda" aria-label="Favorita">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 21.5l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1Z"/></svg>
       </button>
