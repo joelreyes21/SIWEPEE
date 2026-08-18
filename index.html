@@ -385,7 +385,7 @@ button{font-family:inherit;cursor:pointer;}
         <div class="wz-title">Datos de la empresa</div>
         <div class="wz-sub">Ahora contanos cómo se llama y dónde está</div>
         <div class="modal-body" style="padding-top:6px">
-          <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Nombre de tu empresa" maxlength="120"></div>
+          <div class="fld"><label>Nombre de la empresa *</label><input id="e-nombre" placeholder="Nombre de tu empresa" maxlength="30"></div>
           <div class="fld-row">
             <div class="fld"><label>País *</label>
               <select id="e-pais" onchange="paisCambio()"><option value="">Selecciona…</option></select>
@@ -416,7 +416,7 @@ button{font-family:inherit;cursor:pointer;}
         <div class="wz-sub">Con esta cuenta vas a manejar tu tienda</div>
         <div class="modal-body" style="padding-top:6px">
           <div class="fld-row">
-            <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre" maxlength="120"></div>
+            <div class="fld"><label>Tu nombre *</label><input id="e-dueno" placeholder="Tu nombre" maxlength="30"></div>
             <div class="fld"><label>Correo *</label><input id="e-correo" type="email" placeholder="tu@correo.com" maxlength="160"></div>
           </div>
           <div class="fld">
@@ -792,6 +792,7 @@ document.getElementById('e-logo').addEventListener('change', e=>{
 function nombreValido(nombre){
   const n=String(nombre||'').trim();
   if(n.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g,'').length<2) return 'El nombre debe tener letras, no solo números o símbolos.';
+  if(n.length>30) return 'El nombre no puede pasar de 30 caracteres.';
   if((n.match(/[0-9]/g)||[]).length>4) return 'El nombre no puede tener más de 4 números.';
   if((n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length>3) return 'El nombre no puede tener más de 3 signos.';
   return '';
@@ -800,6 +801,7 @@ function nombreValido(nombre){
 function nombrePersonaValido(nombre){
   const n=String(nombre||'').trim();
   if(n.length<2) return 'El nombre es muy corto.';
+  if(n.length>30) return 'El nombre no puede pasar de 30 caracteres.';
   if(/[0-9]/.test(n)) return 'El nombre no puede tener números.';
   if(!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ'’\- ]+$/.test(n)) return 'El nombre solo puede tener letras (sin caracteres especiales).';
   return '';

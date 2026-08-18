@@ -113,16 +113,14 @@ img{display:block;}
 .stores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:20px;}
 .store-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm);transition:transform .24s,box-shadow .24s,border-color .24s;display:flex;flex-direction:column;}
 .store-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--rose-mid);}
-.sc-cover{position:relative;height:118px;background:linear-gradient(135deg,var(--rose-light),var(--cream-dark));overflow:hidden;}
-.sc-cover img{width:100%;height:100%;object-fit:cover;filter:saturate(1.02);}
-.sc-cover.noimg{background:linear-gradient(135deg,var(--rose-mid),var(--rose-light));}
+.sc-cover{position:relative;height:118px;background:linear-gradient(135deg,var(--rose-mid),var(--rose-light) 60%,var(--cream-dark));overflow:hidden;}
 .sc-fav{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--text-mid);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);transition:.16s;z-index:3;}
 .sc-fav:hover{color:#E8617D;transform:scale(1.08);}
 .sc-fav.on{color:#E8617D;}
 .sc-fav.on svg{fill:#E8617D;}
-.sc-logo{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:#fff;border:3px solid #fff;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:2;}
-.sc-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
-.sc-logo span{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--rose);}
+.sc-logo{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:var(--rose-light);border:3px solid #fff;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:2;}
+.sc-logo .sc-ini{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--rose);}
+.sc-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;background:#fff;}
 .sc-body{padding:38px 16px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;flex:1;}
 .sc-name{font-family:'Fraunces',serif;font-size:17px;font-weight:600;line-height:1.25;color:var(--text-dark);}
 .sc-cat{font-size:12px;color:var(--text-soft);font-weight:600;}
@@ -420,19 +418,20 @@ function construirUbicaciones(){
 function tarjeta(e){
   const ini=(e.nombre||'T')[0].toUpperCase();
   const key=e.slug||e.id;
-  const logo = e.logo ? `<img src="${e.logo}" alt="">` : `<span>${esc(ini)}</span>`;
-  const cover = e.logo ? `<img src="${e.logo}" alt="">` : '';
+  // La inicial va SIEMPRE de fondo; si hay logo se pone encima. Si el logo
+  // falla al cargar (base64 dañado, url muerta), onerror lo quita y queda la
+  // inicial — nunca se ve el ícono de imagen rota.
+  const logoImg = e.logo ? `<img src="${esc(e.logo)}" alt="" loading="lazy" onerror="this.remove()">` : '';
   const ubic=[e.ciudad,e.pais].filter(Boolean).join(', ');
   const nprod=CONTEO[key]||0;
   const url='tienda.html?e='+encodeURIComponent(key)+'&app=20260813.4';
   const fav=FAVS.has(String(key))?'on':'';
   return `<article class="store-card">
-    <div class="sc-cover ${e.logo?'':'noimg'}">
-      ${cover}
+    <div class="sc-cover">
       <button class="sc-fav ${fav}" data-fav="${esc(String(key))}" title="Guardar tienda" aria-label="Favorita">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 21.5l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1Z"/></svg>
       </button>
-      <div class="sc-logo">${logo}</div>
+      <div class="sc-logo"><span class="sc-ini">${esc(ini)}</span>${logoImg}</div>
     </div>
     <div class="sc-body">
       <div class="sc-name">${esc(e.nombre||'Tienda')}</div>
