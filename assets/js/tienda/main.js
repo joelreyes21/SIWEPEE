@@ -440,9 +440,68 @@ function verFavoritos(){ filtros.favOnly=true; goToT('catalogo'); }
 window.verFavoritos=verFavoritos;
 
 /* ── INICIO ── */
+/* ── CALIFICACIÓN DE LA TIENDA (estrellas) ── */
+let _miEstrellas=0;
+function _tiendaRef(){ return encodeURIComponent((DB.empresa&&DB.empresa.slug)||DB.empresa_id||''); }
+function _estrellasProm(rating){
+  const r=Math.round(rating||0); let s='';
+  for(let i=1;i<=5;i++) s+=`<svg class="t-star-av ${i<=r?'on':''}" viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17.8 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg>`;
+  return s;
+}
+function renderCalificacion(){
+  const cont=$t('#t-rating'); if(!cont) return;
+  const emp=DB.empresa||{};
+  const prom=emp.rating, total=emp.ratingCount||0;
+  const logueado=bsToken()&&['cliente','admin'].includes(bsRole());
+  const promTxt=prom!=null?Number(prom).toFixed(1):'—';
+  let widget;
+  if(logueado){
+    let btns='';
+    for(let i=1;i<=5;i++) btns+=`<button type="button" class="t-star-btn ${i<=_miEstrellas?'on':''}" data-star="${i}" aria-label="${i} estrella${i>1?'s':''}"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17.8 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3Z"/></svg></button>`;
+    widget=`<div class="t-rating-vote"><span>${_miEstrellas?'Tu calificación · tocá para cambiarla':'¿Cómo calificás esta tienda?'}</span><div class="t-star-row" id="t-star-row">${btns}</div></div>`;
+  }else{
+    widget=`<div class="t-rating-vote"><span>Iniciá sesión como cliente para calificar esta tienda</span><button type="button" class="t-btn t-btn-primary" onclick="abrirLogin()">Iniciar sesión</button></div>`;
+  }
+  cont.innerHTML=`<div class="t-rating-card">
+    <div class="t-rating-avg">
+      <strong>${promTxt}</strong>
+      <div class="t-stars-avg">${_estrellasProm(prom)}</div>
+      <small>${total} calificación${total===1?'':'es'}</small>
+    </div>
+    ${widget}
+  </div>`;
+  const row=$t('#t-star-row');
+  if(row) row.querySelectorAll('.t-star-btn').forEach(b=>{
+    b.addEventListener('click',()=>calificarTienda(+b.dataset.star));
+    b.addEventListener('mouseenter',()=>{ const n=+b.dataset.star; row.querySelectorAll('.t-star-btn').forEach((x,i)=>x.classList.toggle('hover',i<n)); });
+  });
+  if(row) row.addEventListener('mouseleave',()=>row.querySelectorAll('.t-star-btn').forEach(x=>x.classList.remove('hover')));
+}
+async function calificarTienda(n){
+  try{
+    const r=await apiPostAuth(`/api/tiendas/${_tiendaRef()}/calificar`,{estrellas:n});
+    _miEstrellas=r.miEstrellas||n;
+    if(DB.empresa){ DB.empresa.rating=r.promedio; DB.empresa.ratingCount=r.total; }
+    renderCalificacion();
+    toastT('¡Gracias por tu calificación!','ok');
+  }catch(e){ toastT(e.message||'No se pudo calificar','error'); }
+}
+async function cargarMiCalificacion(){
+  if(!(bsToken()&&['cliente','admin'].includes(bsRole()))) return;
+  try{
+    const r=await apiGet(`/api/tiendas/${_tiendaRef()}/mi-calificacion`);
+    _miEstrellas=r.miEstrellas||0;
+    if(DB.empresa){ if(r.promedio!=null) DB.empresa.rating=r.promedio; DB.empresa.ratingCount=r.total; }
+    renderCalificacion();
+  }catch(e){}
+}
+window.calificarTienda=calificarTienda;
+
 function renderInicio(){
   renderFiltros();
   renderHero();
+  renderCalificacion();
+  cargarMiCalificacion();
   const dest=_activosT().filter(p=>p.destacado).slice(0,8);
   const gridEl=$t('#inicio-destacados');
   if(gridEl) gridEl.innerHTML=dest.map(p=>prodCardHtml(p)).join('')||'<p style="color:var(--text-soft);grid-column:1/-1">Aún no hay productos destacados.</p>';
