@@ -16,7 +16,7 @@ const soloLetras = v => { const n=String(v||'').trim(); return n.length>=2 && !/
 // Nombre de NEGOCIO/PRODUCTO: flexible (permite números/signos, pero no basura).
 const nombreOk = v => { const n=String(v||'').trim(); const l=(n.match(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g)||[]).length; return l>=2 && (n.match(/[0-9]/g)||[]).length<=4 && (n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length<=3; };
 // Teléfono Honduras: 8 dígitos, celular (empieza 3/7/8/9). Vacío permitido.
-const telOk = v => { const d=String(v||'').replace(/\D/g,''); if(!d) return true; return d.length===8 && /^[3789]/.test(d); };
+const telOk = v => { const d=String(v||'').replace(/\D/g,''); if(!d) return true; return d.length>=8 && d.length<=15; };
 // Dirección: formato razonable, sin caracteres raros. Vacío permitido.
 const dirOk = v => { const d=String(v||'').trim(); if(!d) return true; const l=(d.match(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g)||[]).length; return d.length>=5 && l>=3 && /^[0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ .,#/°ºª()'’\-]+$/.test(d); };
 

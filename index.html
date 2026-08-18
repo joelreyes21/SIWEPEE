@@ -810,9 +810,8 @@ const TEL_LEN={'Honduras':{len:8,movil:/^[3789]/},'Guatemala':{len:8},'El Salvad
 function telValido(raw,pais){
   const d=String(raw||'').replace(/\D/g,'');
   if(!d) return '';
-  const info=TEL_LEN[pais]||TEL_LEN['Honduras'];
-  if(d.length!==info.len) return `El teléfono debe tener ${info.len} dígitos.`;
-  if(info.movil&&!info.movil.test(d)) return 'Ingresá un número de celular válido (debe empezar con 3, 7, 8 o 9).';
+  if(d.length<8) return 'El teléfono es muy corto (mínimo 8 dígitos).';
+  if(d.length>15) return 'El teléfono tiene demasiados dígitos.';
   return '';
 }
 document.getElementById('e-tel')?.addEventListener('input', e=>{ e.target.value=e.target.value.replace(/\D/g,''); });
