@@ -50,14 +50,19 @@ img{display:block;}
 .icon-badge.hidden{display:none;}
 
 /* ───── CATEGORY BAR ───── */
-.catbar{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:73px;z-index:55;}
-.catbar-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:0 26px;overflow-x:auto;scrollbar-width:none;}
+.catbar{background:rgba(255,255,255,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);position:sticky;top:73px;z-index:55;}
+.catbar-in{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:5px;padding:11px 26px;overflow-x:auto;scrollbar-width:none;}
 .catbar-in::-webkit-scrollbar{display:none;}
-.all-cats{display:flex;align-items:center;gap:9px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--text-dark);white-space:nowrap;}
-.catbar .tab{padding:15px 15px;font-size:14px;font-weight:600;color:var(--text-mid);white-space:nowrap;border-bottom:2.5px solid transparent;transition:.16s;display:flex;align-items:center;gap:7px;}
-.catbar .tab:hover{color:var(--rose-dark);}
-.catbar .tab.active{color:var(--rose);border-bottom-color:var(--rose);}
-.hot-pill{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#fff;background:#E8617D;padding:2px 6px;border-radius:5px;}
+.all-cats{display:flex;align-items:center;gap:9px;padding:10px 17px;font-size:13.5px;font-weight:700;color:var(--rose-dark);background:var(--rose-light);border-radius:999px;white-space:nowrap;margin-right:10px;cursor:pointer;transition:.18s;}
+.all-cats:hover{background:var(--rose);color:#fff;box-shadow:0 6px 16px rgba(79,134,198,.28);}
+.all-cats svg{transition:transform .25s;}
+.all-cats:hover svg{transform:rotate(90deg);}
+.catbar .tab{padding:10px 17px;font-size:14px;font-weight:600;color:var(--text-mid);white-space:nowrap;border-radius:999px;transition:.18s;display:flex;align-items:center;gap:7px;}
+.catbar .tab:hover{color:var(--rose-dark);background:var(--rose-light);}
+.catbar .tab.active{color:#fff;background:linear-gradient(135deg,var(--rose),var(--rose-dark));box-shadow:0 8px 18px rgba(79,134,198,.32);}
+.catbar .tab.active:hover{color:#fff;}
+.hot-pill{font-size:9px;font-weight:800;letter-spacing:.6px;color:#fff;background:linear-gradient(135deg,#F07A93,#E8617D);padding:3px 7px;border-radius:999px;box-shadow:0 3px 8px rgba(232,97,125,.35);}
+.catbar .tab.active .hot-pill{background:#fff;color:#E8617D;box-shadow:none;}
 
 /* ───── LAYOUT ───── */
 .shell{max-width:1500px;margin:0 auto;padding:0 26px;}
