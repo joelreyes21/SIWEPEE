@@ -283,7 +283,13 @@ const TEMAS = {
   indigo:  {ac:'#5B61D6',ah:'#4348B8',al:'#EEEFFC',am:'#B3B6EE',bg:'#F7F7FC',s2:'#F1F1FB',bd:'#E5E5F3',tp:'#272838',ts:'#5E5F75',tm:'#9C9DB8',sb:'#FDFDFE',sh:'#F1F1FB',sa:'#EEEFFC'},
   lavanda: {ac:'#8E6FC4',ah:'#6F52A6',al:'#F2ECFB',am:'#CBB6EC',bg:'#F8F6FC',s2:'#F3EEFB',bd:'#E8E0F3',tp:'#2E2738',ts:'#645A75',tm:'#A99CB8',sb:'#FDFCFE',sh:'#F3EEFB',sa:'#F2ECFB'},
   gris:    {ac:'#6B7280',ah:'#4B5563',al:'#F1F3F5',am:'#C3C9D0',bg:'#F7F8F9',s2:'#F2F4F6',bd:'#E4E7EB',tp:'#1F2430',ts:'#5A6270',tm:'#9AA1AC',sb:'#FDFDFE',sh:'#F2F4F6',sa:'#F1F3F5'},
-  byn:     {ac:'#1A1A1A',ah:'#000000',al:'#F2F2F2',am:'#C9C9C9',bg:'#FAFAFA',s2:'#F4F4F4',bd:'#E6E6E6',tp:'#141414',ts:'#555555',tm:'#999999',sb:'#FFFFFF',sh:'#F5F5F5',sa:'#F0F0F0'}
+  byn:     {ac:'#1A1A1A',ah:'#000000',al:'#F2F2F2',am:'#C9C9C9',bg:'#FAFAFA',s2:'#F4F4F4',bd:'#E6E6E6',tp:'#141414',ts:'#555555',tm:'#999999',sb:'#FFFFFF',sh:'#F5F5F5',sa:'#F0F0F0'},
+  rojo:     {ac:'#C0433F',ah:'#9E312D',al:'#FAE9E8',am:'#E8A19E',bg:'#FCF7F7',s2:'#FAEEED',bd:'#F2E1E0',tp:'#382827',ts:'#7A605E',tm:'#AC9391',sb:'#FFFCFC',sh:'#FBEFEE',sa:'#FAE9E8'},
+  esmeralda:{ac:'#1FA07A',ah:'#127E5F',al:'#E4F5EF',am:'#96D8C2',bg:'#F4FAF8',s2:'#ECF6F2',bd:'#DCEDE6',tp:'#213330',ts:'#546B65',tm:'#98AFA9',sb:'#FBFEFD',sh:'#ECF7F3',sa:'#E4F5EF'},
+  ambar:    {ac:'#CE9A22',ah:'#A87C12',al:'#FAF2DC',am:'#EACF86',bg:'#FCF9F0',s2:'#FAF4E4',bd:'#F0E9D6',tp:'#37301E',ts:'#786E54',tm:'#B0A88E',sb:'#FFFEFB',sh:'#FBF5E9',sa:'#FAF2DC'},
+  fucsia:   {ac:'#D0479A',ah:'#AE317E',al:'#FBEBF4',am:'#EDA4D0',bg:'#FCF7FA',s2:'#FAEFF6',bd:'#F2E2EC',tp:'#382935',ts:'#7C6274',tm:'#AD95A8',sb:'#FFFCFE',sh:'#FBF0F7',sa:'#FBEBF4'},
+  marino:   {ac:'#2E5AA6',ah:'#1F4382',al:'#E9EFF8',am:'#A6BCE0',bg:'#F6F8FC',s2:'#EFF3FA',bd:'#E1E8F2',tp:'#212A3A',ts:'#59647A',tm:'#9AA3B6',sb:'#FCFDFE',sh:'#EFF3FA',sa:'#E9EFF8'},
+  menta:    {ac:'#2BB39A',ah:'#1C8E7B',al:'#E4F6F2',am:'#98DCCF',bg:'#F4FBF9',s2:'#ECF7F4',bd:'#DCEDE9',tp:'#213331',ts:'#546B67',tm:'#98AFAB',sb:'#FBFEFD',sh:'#ECF7F4',sa:'#E4F6F2'}
 };
 
 function _hexRgb(h){ h=String(h).replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return `${(n>>16)&255},${(n>>8)&255},${n&255}`; }
