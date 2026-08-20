@@ -617,27 +617,46 @@ function abrirDetalle(id){
   let h=0; for(let i=0;i<p.nombre.length;i++) h=(h*31+p.nombre.charCodeAt(i))&0xFFFFFF;
   const g=GRADS[h%GRADS.length];
   const fotos=imagenesProducto(p), portada=fotos[0]||'';
+  const isFav=favs.has(favKey(p.id));
+  detalleQty=1;
   const el=$t('#t-detail');
   el.innerHTML=`
-    <div class="tpd-media">
+    <div class="tpd-thumbs">${(fotos.length?fotos:['']).map((src,i)=>`<button class="tpd-thumb ${i===0?'active':''}" ${src?`onclick="cambiarImagenDetalle(${i})"`:''}>${src?`<img src="${src}" alt="Vista ${i+1}" onerror="this.closest('.tpd-thumb').style.display='none'">`:`<span class="tpd-thumb-ph">${escT((p.nombre[0]||'?').toUpperCase())}</span>`}</button>`).join('')}</div>
     <div class="tpd-img" style="${!portada?'background:'+g:''}">
+      ${p.destacado?`<span class="tpd-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.7 4.8L18.5 8l-4.8 1.7L12 14l-1.7-4.3L5.5 8l4.8-1.2L12 2Z"/></svg>Nuevo</span>`:''}
       ${portada?`<img id="tpd-main-img" src="${portada}" alt="${escT(p.nombre)}" data-ph="tpd" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpd-placeholder"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
       <button class="tpd-close" onclick="cerrarDetalle()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
-    ${fotos.length>1?`<div class="tpd-thumbs">${fotos.map((src,i)=>`<button class="tpd-thumb ${i===0?'active':''}" onclick="cambiarImagenDetalle(${i})"><img src="${src}" alt="Vista ${i+1}"></button>`).join('')}</div>`:''}
-    </div>
     <div class="tpd-body">
-      <div class="tpd-cat">${escT(cat?cat.nombre:'')}</div>
+      <div class="tpd-cat">${escT(cat?cat.nombre:'Producto')}</div>
       <h2 class="tpd-name">${escT(p.nombre)}</h2>
-      <p class="tpd-desc">${escT(p.descripcion||'Sin descripción disponible.')}</p>
+      ${p.codigo?`<div class="tpd-sku">SKU: ${escT(p.codigo)}</div>`:''}
       <div class="tpd-price">${dinero(p.precio_venta)}</div>
-      <p class="tpd-stock">${agotado?'<span style="color:var(--error)">Agotado</span>':`${p.stock} unidades disponibles`}</p>
-      <button class="tpd-add-btn" ${agotado?'disabled style="opacity:.5;cursor:not-allowed"':''} onclick="agregarT(${p.id});cerrarDetalle()">
-        ${agotado?'Sin stock':'+ Agregar al carrito'}
-      </button>
+      <div class="tpd-stock">${agotado?`<span class="off">● Agotado</span>`:`<span class="on">●</span> ${p.stock} unidad${p.stock===1?'':'es'} disponible${p.stock===1?'':'s'}`}</div>
+      ${p.descripcion?`<p class="tpd-desc">${escT(p.descripcion)}</p>`:''}
+      ${agotado?'':`
+      <div class="tpd-qty-row">
+        <span class="tpd-lbl">Cantidad</span>
+        <div class="tpd-qty"><button type="button" onclick="detQty(-1)" aria-label="Menos">−</button><span id="tpd-qty">1</span><button type="button" onclick="detQty(1)" aria-label="Más">+</button></div>
+      </div>`}
+      <div class="tpd-actions">
+        <button class="tpd-add-btn" ${agotado?'disabled':''} onclick="agregarDesdeDetalle()">${agotado?'Sin stock':`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/><path d="M3 4h2l2.4 12h10l2-8H6"/></svg> Agregar al carrito`}</button>
+        <button class="tpd-fav-btn ${isFav?'on':''}" onclick="toggleFav(${p.id});this.classList.toggle('on')" aria-label="Favorito"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l1.7 1.7L12 21.5l7.1-7.1 1.7-1.7a5 5 0 0 0 0-7.1Z"/></svg></button>
+      </div>
+      ${agotado?'':`<button class="tpd-buy-btn" onclick="comprarAhoraT()">Comprar ahora</button>`}
+      <div class="tpd-benefits">
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>Envíos rápidos<small>A todo Honduras</small></div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Pago seguro<small>100% protegido</small></div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>Cambios fáciles<small>Sin complicaciones</small></div>
+      </div>
     </div>`;
   $t('#t-detail-overlay').classList.add('open');
 }
+let detalleQty=1;
+function detQty(d){ const p=prodPor(detalleProdId); if(!p) return; detalleQty=Math.max(1,Math.min(detalleQty+d, p.stock||1)); const s=$t('#tpd-qty'); if(s) s.textContent=detalleQty; }
+function agregarDesdeDetalle(){ agregarT(detalleProdId, detalleQty); cerrarDetalle(); }
+function comprarAhoraT(){ agregarT(detalleProdId, detalleQty); if(typeof irACheckoutT==='function') irACheckoutT(); else irACarritoT(); }
+window.detQty=detQty; window.agregarDesdeDetalle=agregarDesdeDetalle; window.comprarAhoraT=comprarAhoraT;
 function cambiarImagenDetalle(i){ const p=prodPor(detalleProdId), fotos=imagenesProducto(p), img=$t('#tpd-main-img'); if(!img||!fotos[i]) return; img.src=fotos[i]; $$t('.tpd-thumb').forEach((b,j)=>b.classList.toggle('active',i===j)); }
 window.cambiarImagenDetalle=cambiarImagenDetalle;
 function cerrarDetalle(){ $t('#t-detail-overlay').classList.remove('open'); }
@@ -677,14 +696,15 @@ function guardarCarritoTienda(){
   const todos=siwepeCart.get().filter(x=>Number(x.empresa_id)!==Number(DB.empresa_id));
   siwepeCart.set([...todos,...carrito]);
 }
-function agregarT(prodId){
+function agregarT(prodId, qty){
   const p=prodPor(prodId); if(!p||p.stock<=0) return;
+  const add=Math.max(1,Math.min(Number(qty)||1,p.stock));
   const exist=carrito.find(i=>i.producto_id===prodId);
-  if(exist){ if(exist.cantidad>=p.stock){ toastT('No hay más stock','warn'); return; } exist.cantidad++; }
-  else carrito.push({empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:1,imagen:p.imagen,stock:p.stock});
+  if(exist){ if(exist.cantidad>=p.stock){ toastT('No hay más stock','warn'); return; } exist.cantidad=Math.min(p.stock, exist.cantidad+add); }
+  else carrito.push({empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:add,imagen:p.imagen,stock:p.stock});
   guardarCarritoTienda();
   updateBadge(); refrescarVista();
-  toastT(`${p.nombre} agregado al carrito`);
+  toastT(add>1?`${add} × ${p.nombre} agregados al carrito`:`${p.nombre} agregado al carrito`);
 }
 
 function cambiarCantT(prodId,delta){
