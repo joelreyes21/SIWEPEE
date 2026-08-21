@@ -789,12 +789,15 @@ document.getElementById('e-logo').addEventListener('change', e=>{
   rd.readAsDataURL(f);
 });
 /* Validación de nombre y teléfono (mismo criterio que el backend) */
+// Detecta nombres aporreados al teclado (no un diccionario): deja pasar marcas.
+function pareceAleatorioW(v){ const s=String(v||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,''); if(s.length<4) return false; if(/(.)\1{4,}/.test(s)) return true; if(/^(..)\1{2,}$/.test(s)||/^(...)\1{1,}$/.test(s)) return true; const filas=['qwertyuiop','asdfghjkl','zxcvbnm','1234567890']; for(const f of filas){ for(let i=0;i<=f.length-4;i++){ const q=f.slice(i,i+4), r=q.split('').reverse().join(''); if(s.includes(q)||s.includes(r)) return true; } } return false; }
 function nombreValido(nombre){
   const n=String(nombre||'').trim();
   if(n.replace(/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g,'').length<2) return 'El nombre debe tener letras, no solo números o símbolos.';
   if(n.length>30) return 'El nombre no puede pasar de 30 caracteres.';
   if((n.match(/[0-9]/g)||[]).length>4) return 'El nombre no puede tener más de 4 números.';
   if((n.match(/[^0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/g)||[]).length>3) return 'El nombre no puede tener más de 3 signos.';
+  if(pareceAleatorioW(n)) return 'El nombre parece escrito al azar. Usá un nombre real.';
   return '';
 }
 // Nombre de PERSONA (dueño): solo letras, sin números ni caracteres especiales.
@@ -804,6 +807,7 @@ function nombrePersonaValido(nombre){
   if(n.length>30) return 'El nombre no puede pasar de 30 caracteres.';
   if(/[0-9]/.test(n)) return 'El nombre no puede tener números.';
   if(!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ'’\- ]+$/.test(n)) return 'El nombre solo puede tener letras (sin caracteres especiales).';
+  if(pareceAleatorioW(n)) return 'El nombre parece escrito al azar. Usá un nombre real.';
   return '';
 }
 const TEL_LEN={'Honduras':{len:8,movil:/^[3789]/},'Guatemala':{len:8},'El Salvador':{len:8},'Nicaragua':{len:8},'Costa Rica':{len:8},'Panamá':{len:8},'México':{len:10},'Colombia':{len:10},'Estados Unidos':{len:10},'España':{len:9}};

@@ -19,6 +19,10 @@ const nombreOk = v => { const n=String(v||'').trim(); const l=(n.match(/[a-zA-Z�
 const telOk = v => { const d=String(v||'').replace(/\D/g,''); if(!d) return true; return d.length>=8 && d.length<=15; };
 // Dirección: formato razonable, sin caracteres raros. Vacío permitido.
 const dirOk = v => { const d=String(v||'').trim(); if(!d) return true; const l=(d.match(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/g)||[]).length; return d.length>=5 && l>=3 && /^[0-9a-zA-ZáéíóúüñÁÉÍÓÚÜÑ .,#/°ºª()'’\-]+$/.test(d); };
+// Detecta nombres claramente aporreados al teclado (no un diccionario). Deja
+// pasar marcas estilizadas tipo "ESSNTLS", "ASTR0WRLD", "Youngdripstore".
+function pareceAleatorio(v){ const s=String(v||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,''); if(s.length<4) return false; if(/(.)\1{4,}/.test(s)) return true; if(/^(..)\1{2,}$/.test(s)||/^(...)\1{1,}$/.test(s)) return true; const filas=['qwertyuiop','asdfghjkl','zxcvbnm','1234567890']; for(const f of filas){ for(let i=0;i<=f.length-4;i++){ const q=f.slice(i,i+4), r=q.split('').reverse().join(''); if(s.includes(q)||s.includes(r)) return true; } } return false; }
+const noAleatorio = v => !pareceAleatorio(v);
 
 const THUMB_COLORS=['#6B7280','#8A8F98','#9AA1AC','#7C8390','#B0B6BE','#A0A6AE','#545B66'];
 const GRADS=['linear-gradient(135deg,#EEF0F2,#D6DBE0)','linear-gradient(135deg,#F1F1F3,#D9D9DE)','linear-gradient(135deg,#EDEFF1,#D3D9DE)','linear-gradient(135deg,#F2F1EF,#DAD7D3)','linear-gradient(135deg,#EBEEF1,#CFD6DD)','linear-gradient(135deg,#F0F0EE,#D8D5D0)'];
@@ -814,7 +818,7 @@ function saveProducto(id){
   const p=id?prodPor(id):null;
   const totalExistencias=p?(+p.stock||0)+(+p.stock_inventario||0):0;
   const stockVal=+($('#fp-stock').value||0);
-  const ok=validar([['fp-nombre',noVacio,'Escribe el nombre'],['fp-nombre',nombreOk,'Nombre inválido: evitá solo números o símbolos'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numVacioCero,'Precio inválido'],['fp-pventa',numVacioCero,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v)&&Number(v)<=totalExistencias,`Máximo ${totalExistencias} unidades`],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
+  const ok=validar([['fp-nombre',noVacio,'Escribe el nombre'],['fp-nombre',nombreOk,'Nombre inválido: evitá solo números o símbolos'],['fp-nombre',noAleatorio,'El nombre parece escrito al azar'],['fp-cat',noVacio,'Elige una categoría'],['fp-pcompra',numVacioCero,'Precio inválido'],['fp-pventa',numVacioCero,'Precio inválido'],['fp-stock',v=>/^\d+$/.test(v)&&Number(v)<=totalExistencias,`Máximo ${totalExistencias} unidades`],['fp-stockmin',v=>/^\d+$/.test(v),'Cantidad inválida']]);
   if(!ok) return;
   const cod=($('#fp-codigo').value||'').trim().toUpperCase();  // generado automáticamente
   const imagenes=window.__fpImgs?window.__fpImgs().filter(Boolean).slice(0,6):[];
@@ -889,7 +893,7 @@ function openFormCat(id=null){
 }
 
 function saveCat(id){
-  if(!validar([['fcat-nombre',noVacio,'Escribe el nombre']])) return;
+  if(!validar([['fcat-nombre',noVacio,'Escribe el nombre'],['fcat-nombre',noAleatorio,'El nombre parece escrito al azar']])) return;
   const datos={nombre:$('#fcat-nombre').value.trim(),descripcion:$('#fcat-desc').value.trim(),estado:$('#fcat-estado').value};
   if(id){ Object.assign(catPor(id),datos); toast('Categoría actualizada'); }
   else{ DB.categorias.push({id:nuevoId('categoria'),...datos}); toast('Categoría creada'); }
@@ -1055,7 +1059,7 @@ function openFormClienteManual(manualId=null){
 }
 
 async function guardarClienteManual(manualId){
-  if(!validar([['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-nombre',soloLetras,'El nombre solo puede tener letras'],['fcli-correo',correoOk,'Correo inválido'],['fcli-telefono',telOk,'Celular inválido (8 dígitos, empieza con 3, 7, 8 o 9)'],['fcli-whatsapp',telOk,'WhatsApp inválido (8 dígitos)'],['fcli-direccion',dirOk,'Dirección inválida']])) return;
+  if(!validar([['fcli-nombre',noVacio,'Escribe el nombre'],['fcli-nombre',soloLetras,'El nombre solo puede tener letras'],['fcli-nombre',noAleatorio,'El nombre parece escrito al azar'],['fcli-correo',correoOk,'Correo inválido'],['fcli-telefono',telOk,'Celular inválido (8 dígitos, empieza con 3, 7, 8 o 9)'],['fcli-whatsapp',telOk,'WhatsApp inválido (8 dígitos)'],['fcli-direccion',dirOk,'Dirección inválida']])) return;
   const btn=$('#btn-guardar-cliente'); if(btn){btn.disabled=true;btn.textContent='Guardando…';}
   const datos={nombre:$('#fcli-nombre').value.trim(),telefono:$('#fcli-telefono').value.trim(),correo:$('#fcli-correo').value.trim(),whatsapp:$('#fcli-whatsapp').value.trim(),direccion:$('#fcli-direccion').value.trim()};
   try{
