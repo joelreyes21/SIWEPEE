@@ -286,7 +286,7 @@ h1,h2,h3,h4{font-family:'Inter',sans-serif;letter-spacing:-.01em;}
 .t-prod-detail-overlay.open{opacity:1;pointer-events:auto;}
 .t-prod-detail{position:relative;background:#fff;border-radius:var(--r-xl);width:100%;max-width:940px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:88px minmax(0,1.05fr) minmax(0,1fr);transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 .t-prod-detail-overlay.open .t-prod-detail{transform:none;}
-.tpd-img{aspect-ratio:1/1;overflow:hidden;background:var(--cream-dark);position:relative;}
+.tpd-img{aspect-ratio:1/1;align-self:center;overflow:hidden;background:var(--cream-dark);position:relative;border-radius:16px;margin:18px 4px 18px 10px;}
 .tpd-img img{width:100%;height:100%;object-fit:cover;}
 .tpd-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:96px;font-weight:500;}
 .tpd-body{padding:36px 30px;display:flex;flex-direction:column;gap:14px;}
