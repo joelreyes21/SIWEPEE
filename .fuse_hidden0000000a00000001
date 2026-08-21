@@ -928,5 +928,6 @@ if(new URLSearchParams(location.search).get('crear')) abrirCrear();
   if(v!=='ok') setTimeout(()=>b.remove(), 7000);
 })();
 </script>
+  <script src="assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>

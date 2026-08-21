@@ -244,5 +244,6 @@ section.bloque strong{color:var(--text-dark);}
   © 2026 SIWEPE · <a href="../index.html">Inicio</a>
 </footer>
 
+  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>
