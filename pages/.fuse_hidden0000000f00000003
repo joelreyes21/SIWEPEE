@@ -22,5 +22,4 @@
   <section class="confirmation" id="confirmation" hidden></section><section class="checkout-gate" id="checkout-gate" hidden><img src="../assets/img/siwepe-mark.png" alt=""><span class="commerce-eyebrow">CUENTA SIWEPE</span><h1>Inicia sesión para terminar tu compra</h1><p>Tu carrito está guardado. Después de ingresar volverás directamente al checkout.</p><button class="commerce-primary" id="gate-login">Iniciar sesión</button><a id="gate-cart" href="carrito.html">Volver al carrito</a></section>
   <div class="commerce-toast" id="commerce-toast" role="status"></div>
   <script src="../assets/js/shared/data.js?v=20260820.1"></script><script src="../assets/js/commerce/checkout.js?v=20260813.1"></script>
-  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body></html>

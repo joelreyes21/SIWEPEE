@@ -153,6 +153,5 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../assets/js/shared/data.js?v=20260820.1"></script>
   <script src="../assets/js/perfil/main.js?v=20260813.3"></script>
-  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>

@@ -557,6 +557,5 @@
     const fn=$('#dash-fecha'); if(fn) fn.textContent=new Date().toLocaleDateString('es-HN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   });
 </script>
-  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>

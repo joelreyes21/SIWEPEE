@@ -342,6 +342,5 @@ $('t-body').addEventListener('click', async e=>{
   }catch(ex){ /* api ya cierra sesión si 401/403 */ }
 })();
 </script>
-  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>

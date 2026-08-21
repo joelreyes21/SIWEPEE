@@ -580,6 +580,5 @@ document.getElementById('side-backdrop').addEventListener('click', cerrarSidebar
 pintarBadge();
 cargarTodo();
 </script>
-  <script src="../assets/js/shared/noinspect.js?v=20260820.1"></script>
 </body>
 </html>
