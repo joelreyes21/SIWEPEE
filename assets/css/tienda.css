@@ -284,7 +284,7 @@ h1,h2,h3,h4{font-family:'Inter',sans-serif;letter-spacing:-.01em;}
 /* ── MODAL PRODUCTO DETALLE ── */
 .t-prod-detail-overlay{position:fixed;inset:0;background:rgba(58,47,51,.32);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;padding:20px;}
 .t-prod-detail-overlay.open{opacity:1;pointer-events:auto;}
-.t-prod-detail{background:#fff;border-radius:var(--r-xl);width:100%;max-width:940px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:88px minmax(0,1.05fr) minmax(0,1fr);transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.t-prod-detail{position:relative;background:#fff;border-radius:var(--r-xl);width:100%;max-width:940px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:88px minmax(0,1.05fr) minmax(0,1fr);transform:translateY(20px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 .t-prod-detail-overlay.open .t-prod-detail{transform:none;}
 .tpd-img{aspect-ratio:1/1;overflow:hidden;background:var(--cream-dark);position:relative;}
 .tpd-img img{width:100%;height:100%;object-fit:cover;}
@@ -320,9 +320,10 @@ h1,h2,h3,h4{font-family:'Inter',sans-serif;letter-spacing:-.01em;}
 .tpd-benefits>div{display:flex;flex-direction:column;gap:2px;font-size:11.5px;font-weight:700;color:var(--text-dark);}
 .tpd-benefits svg{color:var(--rose);margin-bottom:3px;}
 .tpd-benefits small{font-size:10px;color:var(--text-soft);font-weight:500;}
-.tpd-close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;backdrop-filter:blur(4px);box-shadow:var(--shadow-xs);}
-.tpd-close:hover{background:#fff;}
-.tpd-close svg{width:16px;height:16px;stroke:var(--text-mid);}
+.tpd-close{position:absolute;top:16px;right:16px;z-index:6;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-sm);}
+.tpd-close:hover{background:var(--rose-light);border-color:var(--rose-mid);transform:rotate(90deg);}
+.tpd-close svg{width:16px;height:16px;stroke:var(--text-mid);transition:stroke .2s;}
+.tpd-close:hover svg{stroke:var(--rose-dark);}
 .tpd-img{position:relative;}
 
 /* ── CARRITO LATERAL ── */

@@ -621,11 +621,11 @@ function abrirDetalle(id){
   detalleQty=1;
   const el=$t('#t-detail');
   el.innerHTML=`
+    <button class="tpd-close" onclick="cerrarDetalle()" aria-label="Cerrar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <div class="tpd-thumbs">${(fotos.length?fotos:['']).map((src,i)=>`<button class="tpd-thumb ${i===0?'active':''}" ${src?`onclick="cambiarImagenDetalle(${i})"`:''}>${src?`<img src="${src}" alt="Vista ${i+1}" onerror="this.closest('.tpd-thumb').style.display='none'">`:`<span class="tpd-thumb-ph">${escT((p.nombre[0]||'?').toUpperCase())}</span>`}</button>`).join('')}</div>
     <div class="tpd-img" style="${!portada?'background:'+g:''}">
       ${p.destacado?`<span class="tpd-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.7 4.8L18.5 8l-4.8 1.7L12 14l-1.7-4.3L5.5 8l4.8-1.2L12 2Z"/></svg>Nuevo</span>`:''}
       ${portada?`<img id="tpd-main-img" src="${portada}" alt="${escT(p.nombre)}" data-ph="tpd" data-l="${p.nombre[0].toUpperCase()}" data-bg="${g}" onerror="imgFbT(this)">`:`<div class="tpd-placeholder"><span style="color:var(--rose)">${p.nombre[0].toUpperCase()}</span></div>`}
-      <button class="tpd-close" onclick="cerrarDetalle()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="tpd-body">
       <div class="tpd-cat">${escT(cat?cat.nombre:'Producto')}</div>
