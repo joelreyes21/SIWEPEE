@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="../assets/img/siwepe-mark.png">
 <meta name="theme-color" content="#4B5563">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/admin.css?v=20260813.16">
+<link rel="stylesheet" href="../assets/css/admin.css?v=20260820.7">
 <link rel="stylesheet" href="../assets/css/platform.css?v=20260813.5">
 <style>/* Tipografía global: TODO en Manrope Light */
 *,*::before,*::after{font-family:'Manrope',sans-serif;}</style>
@@ -156,6 +156,7 @@
       <span class="sb-section">Personas</span>
       <button class="sb-item" data-page="proveedores"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-camion"/></svg></span><span class="sb-label">Proveedores</span></button>
       <button class="sb-item" data-page="clientes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-corazon"/></svg></span><span class="sb-label">Clientes</span></button>
+      <button class="sb-item" data-page="fiado"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-billete"/></svg></span><span class="sb-label">Fiado</span></button>
       <span class="sb-section">Sistema</span>
       <button class="sb-item" data-page="reportes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-reporte"/></svg></span><span class="sb-label">Reportes</span></button>
       <button class="sb-item" data-page="configuracion"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-ajustes"/></svg></span><span class="sb-label">Configuración</span></button>
@@ -417,6 +418,13 @@
         <div id="ped-contenedor"></div>
       </div>
 
+      <!-- FIADO / CUENTAS POR COBRAR -->
+      <div class="page" id="page-fiado">
+        <div class="page-header"><div><h2 class="page-title">Fiado · Cuentas por cobrar</h2><p class="page-subtitle">Llevá el control de lo que te deben tus clientes y registrá sus abonos</p></div><button class="btn btn-primary" onclick="openFormFiado()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Registrar fiado</button></div>
+        <div class="fiado-kpis" id="fiado-kpis"></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Concepto</th><th>Fecha</th><th>Vence</th><th>Monto</th><th>Abonado</th><th>Saldo</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-fiado"></tbody></table></div></div>
+      </div>
+
       <!-- REPORTES -->
       <div class="page" id="page-reportes">
         <div class="page-header"><div><h2 class="page-title">Reportes</h2><p class="page-subtitle">Analiza y exporta datos de tu negocio</p></div></div>
@@ -550,7 +558,7 @@
 <!-- Conversión automática de fotos HEIC (iPhone) a JPG -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="../assets/js/shared/data.js?v=20260820.1"></script>
-<script src="../assets/js/admin/main.js?v=20260820.6"></script>
+<script src="../assets/js/admin/main.js?v=20260820.7"></script>
 <script>
   /* Inicializar dashboard fecha y saludo */
   document.addEventListener('DOMContentLoaded',()=>{

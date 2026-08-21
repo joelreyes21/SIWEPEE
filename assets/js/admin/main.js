@@ -236,7 +236,7 @@ window.toggleInlineCategory=toggleInlineCategory; window.saveInlineCategory=save
 /* ── NAVEGACIÓN ── */
 const PAGE_TITLES = {
   dashboard:'Panel principal', productos:'Productos', categorias:'Categorías', galeria:'Galería',
-  proveedores:'Proveedores', clientes:'Clientes', administradores:'Administradores', inventario:'Inventario', compras:'Compras',
+  proveedores:'Proveedores', clientes:'Clientes', fiado:'Fiado', administradores:'Administradores', inventario:'Inventario', compras:'Compras',
   ventas:'Ventas', movimientos:'Movimientos', pedidos:'Pedidos',
   reportes:'Reportes', configuracion:'Configuración'
 };
@@ -254,6 +254,7 @@ function goTo(page){
   if(page==='galeria')     renderGaleriaAdmin();
   if(page==='inventario')  renderInventario();
   if(page==='reportes')    renderReporte();
+  if(page==='fiado')       renderFiado();
   window.scrollTo({top:0});
 }
 
@@ -1079,6 +1080,86 @@ function borrarClienteManual(manualId){
   });
 }
 window.openFormClienteManual=openFormClienteManual; window.guardarClienteManual=guardarClienteManual; window.borrarClienteManual=borrarClienteManual;
+
+/* ── FIADO / CUENTAS POR COBRAR ── (módulo REST dedicado, no pasa por dbGuardar) */
+let _fiadoCache=[];
+async function renderFiado(){
+  const tbody=$('#tabla-fiado'), kpis=$('#fiado-kpis'); if(!tbody) return;
+  const hoyStr=new Date().toISOString().slice(0,10);
+  try{
+    const r=await apiGet('/api/creditos');
+    _fiadoCache=r.creditos||[];
+    const pend=_fiadoCache.filter(c=>c.estado!=='pagado');
+    if(kpis) kpis.innerHTML=`
+      <div class="fiado-kpi big"><span>Total por cobrar</span><strong>${dinero(r.totalPorCobrar||0)}</strong></div>
+      <div class="fiado-kpi"><span>Fiados pendientes</span><strong>${pend.length}</strong></div>
+      <div class="fiado-kpi"><span>Clientes con deuda</span><strong>${new Set(pend.map(c=>c.clienteNombre.toLowerCase())).size}</strong></div>`;
+    tbody.innerHTML=_fiadoCache.map(c=>{
+      const pagado=c.estado==='pagado';
+      const vencido=!pagado && c.vence && c.vence<hoyStr;
+      const badge=pagado?'<span class="badge b-ok">Pagado</span>':(vencido?'<span class="badge b-error">Vencido</span>':'<span class="badge b-blue">Pendiente</span>');
+      return `<tr>
+        <td><strong>${esc(c.clienteNombre)}</strong></td>
+        <td style="color:var(--text-secondary)">${esc(c.concepto)||'—'}</td>
+        <td>${fechaCorta(c.fecha)}</td>
+        <td>${c.vence?fechaCorta(c.vence):'—'}</td>
+        <td>${dinero(c.monto)}</td>
+        <td style="color:var(--ok,#2FA36B)">${dinero(c.abonado)}</td>
+        <td><strong>${dinero(c.saldo)}</strong></td>
+        <td>${badge}</td>
+        <td class="td-actions"><div class="td-actions-wrap">
+          ${pagado?'':`<button class="btn-icon" title="Registrar abono" onclick="openAbonar(${c.id})">${svgIcon('billete')}</button>`}
+          <button class="btn-icon danger" title="Eliminar" onclick="borrarFiado(${c.id})">${svgIcon('basura')}</button>
+        </div></td>
+      </tr>`;
+    }).join('')||`<tr class="empty-row"><td colspan="9"><em>Aún no hay fiados. Registrá lo que te deben con "Registrar fiado".</em></td></tr>`;
+  }catch(e){ tbody.innerHTML=`<tr class="empty-row"><td colspan="9"><em>${esc(e.message||'No se pudo cargar')}</em></td></tr>`; }
+}
+function openFormFiado(){
+  openModal('Registrar fiado','Anotá lo que un cliente te queda debiendo.',`
+    <div class="form-grid">
+      <div class="field span2"><label>Cliente <span class="req">*</span></label><input id="ff-cliente" maxlength="120" placeholder="Nombre del cliente"><span class="ferr"></span></div>
+      <div class="field span2"><label>Concepto</label><input id="ff-concepto" maxlength="160" placeholder="Ej: 2 camisas, mercadería…"></div>
+      <div class="field"><label>Monto (L) <span class="req">*</span></label><input id="ff-monto" type="number" min="0" step="0.01" placeholder="0.00"><span class="ferr"></span></div>
+      <div class="field"><label>Fecha</label><input id="ff-fecha" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field span2"><label>Fecha de vencimiento (opcional)</label><input id="ff-vence" type="date"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="guardarFiado()">${svgIcon('check',14)} Registrar fiado</button></div>`);
+}
+async function guardarFiado(){
+  if(!validar([['ff-cliente',noVacio,'Escribe el nombre'],['ff-cliente',soloLetras,'El nombre solo puede tener letras'],['ff-monto',v=>Number(v)>0,'Ingresa un monto mayor que 0']])) return;
+  const datos={ clienteNombre:$('#ff-cliente').value.trim(), concepto:$('#ff-concepto').value.trim(), monto:Number($('#ff-monto').value), fecha:$('#ff-fecha').value, vence:$('#ff-vence').value||null };
+  try{ await apiPostAuth('/api/creditos',datos); closeModal(); renderFiado(); toast('Fiado registrado'); }
+  catch(e){ toast(e.message||'No se pudo registrar','error'); }
+}
+function openAbonar(id){
+  const c=_fiadoCache.find(x=>x.id===id); if(!c) return;
+  openModal('Registrar abono',`${esc(c.clienteNombre)} · saldo ${dinero(c.saldo)}`,`
+    <div class="form-grid">
+      <div class="field"><label>Monto del abono (L) <span class="req">*</span></label><input id="fa-monto" type="number" min="0" max="${c.saldo}" step="0.01" placeholder="0.00"><span class="ferr"></span></div>
+      <div class="field"><label>Método</label><select id="fa-metodo"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="otro">Otro</option></select></div>
+      <div class="field"><label>Fecha</label><input id="fa-fecha" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="field"><label>Nota</label><input id="fa-nota" maxlength="160" placeholder="Opcional"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="guardarAbono(${id})">${svgIcon('check',14)} Guardar abono</button></div>`);
+}
+async function guardarAbono(id){
+  const c=_fiadoCache.find(x=>x.id===id);
+  const monto=Number($('#fa-monto').value);
+  if(!(monto>0)){ toast('Ingresa un monto mayor que 0','error'); return; }
+  if(c && monto>c.saldo+0.001){ toast(`El abono no puede pasar del saldo (${dinero(c.saldo)})`,'error'); return; }
+  const datos={ monto, metodo:$('#fa-metodo').value, fecha:$('#fa-fecha').value, nota:$('#fa-nota').value.trim() };
+  try{ const r=await apiPostAuth(`/api/creditos/${id}/abonos`,datos); closeModal(); renderFiado(); toast(r.estado==='pagado'?'¡Fiado saldado por completo!':'Abono registrado'); }
+  catch(e){ toast(e.message||'No se pudo registrar el abono','error'); }
+}
+function borrarFiado(id){
+  const c=_fiadoCache.find(x=>x.id===id);
+  openConfirm(`Se eliminará este fiado${c?` de "${esc(c.clienteNombre)}"`:''} y sus abonos. No se puede deshacer.`,async()=>{
+    try{ await apiDelete(`/api/creditos/${id}`); renderFiado(); toast('Fiado eliminado'); }
+    catch(e){ toast(e.message||'No se pudo eliminar','error'); }
+  });
+}
+window.renderFiado=renderFiado; window.openFormFiado=openFormFiado; window.guardarFiado=guardarFiado; window.openAbonar=openAbonar; window.guardarAbono=guardarAbono; window.borrarFiado=borrarFiado;
 
 /* ── INVENTARIO CONECTADO ──
    `stock_inventario` representa las unidades físicas todavía guardadas y
