@@ -264,8 +264,10 @@ h1,h2,h3,h4{font-family:'Inter',sans-serif;letter-spacing:-.01em;}
 .tpc-tag.pocas{background:rgba(217,136,65,.92);color:#fff;}
 .tpc-tag.destacado{background:rgba(198,169,131,.94);color:#fff;}
 .tpc-fav{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;backdrop-filter:blur(4px);box-shadow:var(--shadow-xs);}
-.tpc-fav svg{width:16px;height:16px;stroke:var(--rose);fill:none;transition:fill .18s;}
-.tpc-fav.faved svg{fill:var(--rose);}
+.tpc-fav svg{width:16px;height:16px;stroke:var(--rose);fill:none;transition:fill .18s,stroke .18s;}
+.tpc-fav:hover{transform:scale(1.08);}
+.tpc-fav.faved svg{fill:var(--rose);stroke:var(--rose);animation:favPop .32s ease;}
+@keyframes favPop{0%{transform:scale(1)}35%{transform:scale(1.4)}70%{transform:scale(.92)}100%{transform:scale(1)}}
 .tpc-body{padding:18px 18px 18px;flex:1;display:flex;flex-direction:column;gap:6px;}
 .tpc-cat{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--rose);}
 .tpc-name{font-family:'Fraunces',serif;font-size:17px;font-weight:500;color:var(--text-dark);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -311,9 +313,9 @@ h1,h2,h3,h4{font-family:'Inter',sans-serif;letter-spacing:-.01em;}
 .tpd-qty span{min-width:48px;text-align:center;font-size:15px;font-weight:700;}
 .tpd-actions{display:flex;gap:10px;margin-top:8px;}
 .tpd-fav-btn{width:52px;flex:0 0 auto;border:1.5px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.16s;}
-.tpd-fav-btn:hover{border-color:#E8617D;color:#E8617D;}
-.tpd-fav-btn.on{color:#E8617D;border-color:#E8617D;}
-.tpd-fav-btn.on svg{fill:#E8617D;}
+.tpd-fav-btn:hover{border-color:var(--rose-mid);color:var(--rose-dark);}
+.tpd-fav-btn.on{color:var(--rose);border-color:var(--rose);}
+.tpd-fav-btn.on svg{fill:var(--rose);}
 .tpd-buy-btn{width:100%;margin-top:2px;padding:14px;border:1.5px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text-dark);font-size:14.5px;font-weight:700;cursor:pointer;transition:.16s;}
 .tpd-buy-btn:hover{border-color:var(--rose);color:var(--rose-dark);background:var(--rose-light);}
 .tpd-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;padding-top:16px;border-top:1px solid var(--border);}
