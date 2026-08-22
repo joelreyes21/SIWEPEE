@@ -7,7 +7,14 @@
   const money=n=>`${DB?.config?.moneda||'L'} ${Number(n||0).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
   function toast(msg,error=false){const e=$('#commerce-toast');e.textContent=msg;e.classList.toggle('error',error);e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2800)}
   function brand(){const name=DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',logo=DB.config.logo||DB.empresa?.logo||'';$('#store-name').textContent=name;$('#store-logo').innerHTML=logo?`<img src="${esc(logo)}" alt="">`:esc(name[0]);$('#store-link').href=url('tienda.html');$('#back-cart').href=url('carrito.html');$('#gate-cart').href=url('carrito.html');document.title=`Finalizar compra · ${name}`}
-  function loadItems(){items=siwepeCart.deEmpresa(DB.empresa_id).map(x=>{const p=(DB.productos||[]).find(y=>Number(y.id)===Number(x.producto_id));if(!p||p.estado!=='activo'||Number(p.stock)<=0)return null;return{...x,nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||x.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(x.cantidad)||1),Number(p.stock)||1)}}).filter(Boolean);const others=siwepeCart.get().filter(x=>Number(x.empresa_id)!==Number(DB.empresa_id));siwepeCart.set([...others,...items])}
+  function loadItems(){
+    const eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
+    const slug=String(DB.empresa?.slug||bsEmpresa()||'');
+    const clave=eid||slug;
+    if(!clave){items=[];return;}
+    items=siwepeCart.deEmpresa(clave).map(x=>{const p=(DB.productos||[]).find(y=>Number(y.id)===Number(x.producto_id));if(!p||p.estado!=='activo'||Number(p.stock)<=0)return null;return{...x,empresa_id:eid||Number(x.empresa_id)||0,empresa_slug:slug||x.empresa_slug||'',nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||x.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(x.cantidad)||1),Number(p.stock)||1)}}).filter(Boolean);
+    if((DB.productos||[]).length){const esMio=x=>(eid&&Number(x.empresa_id)===eid)||(slug&&x.empresa_slug===slug);const others=siwepeCart.get().filter(x=>!esMio(x));siwepeCart.set([...others,...items]);}
+  }
   function renderSummary(){const count=items.reduce((n,x)=>n+x.cantidad,0),total=items.reduce((n,x)=>n+x.precio*x.cantidad,0);$('#checkout-count').textContent=`${count} artículo${count!==1?'s':''}`;$('#checkout-subtotal').textContent=$('#checkout-total').textContent=money(total);$('#checkout-items').innerHTML=items.map(x=>`<div class="checkout-item">${x.imagen?`<img src="${esc(x.imagen)}" alt="">`:`<span>${esc(x.nombre[0])}</span>`}<div><h3>${esc(x.nombre)}</h3><p>${x.cantidad} × ${money(x.precio)}</p></div><strong>${money(x.precio*x.cantidad)}</strong></div>`).join('')}
   function fillAddress(d={}){$('#delivery-name').value=d.nombre||profile.nombre||'';$('#delivery-phone').value=d.telefono||profile.telefono||'';$('#delivery-address').value=d.direccion||profile.direccion||'';$('#delivery-city').value=d.ciudad||'';$('#delivery-state').value=d.departamento||''}
   function renderAddresses(){const dirs=profile.direcciones||[],sel=$('#delivery-saved');sel.innerHTML='<option value="">Escribir una dirección</option>'+dirs.map((d,i)=>`<option value="${i}">${esc(d.etiqueta||`Dirección ${i+1}`)}${d.principal?' · principal':''}</option>`).join('');const idx=dirs.findIndex(d=>d.principal);if(idx>=0){sel.value=String(idx);fillAddress(dirs[idx])}else fillAddress()}
@@ -50,7 +57,7 @@
       });
       const order=(data.pedidos||[])[0];
       if(!order) throw new Error('La tienda no devolvió la orden creada.');
-      siwepeCart.clearEmpresa(DB.empresa_id);confirmation(order);
+      siwepeCart.clearEmpresa(Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||String(DB.empresa?.slug||bsEmpresa()||''));confirmation(order);
     }catch(e){ toast(e.message||'No se pudo crear el pedido.',true); }
     finally{ busy=false;btn.disabled=false;btn.innerHTML='Confirmar pedido <span>→</span>'; }
   }

@@ -693,15 +693,24 @@ function cargarCarritoTienda(){
   return carrito;
 }
 function guardarCarritoTienda(){
-  const todos=siwepeCart.get().filter(x=>Number(x.empresa_id)!==Number(DB.empresa_id));
+  const eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
+  const slug=String(DB.empresa?.slug||bsEmpresa()||'');
+  // "Otros" = items que NO son de esta tienda (por id o por slug); así no se
+  // duplican ni se pisan los de otras tiendas aunque empresa_id venga en 0.
+  const esMio=x=>(eid&&Number(x.empresa_id)===eid)||(slug&&x.empresa_slug===slug);
+  const todos=siwepeCart.get().filter(x=>!esMio(x));
   siwepeCart.set([...todos,...carrito]);
 }
 function agregarT(prodId, qty){
   const p=prodPor(prodId); if(!p||p.stock<=0) return;
+  // Blindaje: si por alguna razón no tenemos el id de la tienda, NO guardamos un
+  // item roto (empresa_id=0 se filtraría y el carrito quedaría vacío). Avisamos.
+  const eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
+  if(!eid){ toastT('No se pudo identificar la tienda. Recargá la página e intentá de nuevo.','warn'); return; }
   const add=Math.max(1,Math.min(Number(qty)||1,p.stock));
   const exist=carrito.find(i=>i.producto_id===prodId);
   if(exist){ if(exist.cantidad>=p.stock){ toastT('No hay más stock','warn'); return; } exist.cantidad=Math.min(p.stock, exist.cantidad+add); }
-  else carrito.push({empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:add,imagen:p.imagen,stock:p.stock});
+  else carrito.push({empresa_id:eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:add,imagen:p.imagen,stock:p.stock});
   guardarCarritoTienda();
   updateBadge(); refrescarVista();
   toastT(add>1?`${add} × ${p.nombre} agregados al carrito`:`${p.nombre} agregado al carrito`);
@@ -929,12 +938,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   }
   cargarCarritoTienda();
   /* Reconciliar el carrito con el catálogo actual: corrige precio, portada y
-     stock, y elimina productos que ya no existen en esta tienda. */
-  carrito=carrito.map(it=>{
-    const p=prodPor(it.producto_id); if(!p||p.estado!=='activo'||p.stock<=0) return null;
-    return {...it,empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||it.empresa_nombre,nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||it.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(it.cantidad)||1),Number(p.stock)||1)};
-  }).filter(Boolean);
-  guardarCarritoTienda();
+     stock, y elimina productos que ya no existen en esta tienda.
+     BLINDAJE: solo reconciliamos si el catálogo cargó bien (hay productos) y si
+     conocemos el id de la tienda. Sin esas dos cosas, un fallo transitorio de
+     carga borraría un carrito válido; mejor dejarlo intacto para el próximo load. */
+  const _eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
+  if(_eid && Array.isArray(DB.productos) && DB.productos.length){
+    carrito=carrito.map(it=>{
+      const p=prodPor(it.producto_id); if(!p||p.estado!=='activo'||p.stock<=0) return null;
+      return {...it,empresa_id:_eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||it.empresa_nombre,nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||it.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(it.cantidad)||1),Number(p.stock)||1)};
+    }).filter(Boolean);
+    guardarCarritoTienda();
+  }
   /* Configurar marca */
   const nombre=DB.config.nombre||'Siwepe';
   const contexto=document.getElementById('sw-tienda-contexto');
