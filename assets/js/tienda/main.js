@@ -736,29 +736,20 @@ function guardarCarritoTienda(){
   const todos=siwepeCart.get().filter(x=>!esMio(x));
   siwepeCart.set([...todos,...carrito]);
 }
-<<<<<<< HEAD
-function agregarT(prodId, qty){
-  const p=prodPor(prodId); if(!p||p.stock<=0) return;
-  // Blindaje: si por alguna razón no tenemos el id de la tienda, NO guardamos un
-  // item roto (empresa_id=0 se filtraría y el carrito quedaría vacío). Avisamos.
-  const eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
-  if(!eid){ toastT('No se pudo identificar la tienda. Recargá la página e intentá de nuevo.','warn'); return; }
-  const add=Math.max(1,Math.min(Number(qty)||1,p.stock));
-  const exist=carrito.find(i=>i.producto_id===prodId);
-  if(exist){ if(exist.cantidad>=p.stock){ toastT('No hay más stock','warn'); return; } exist.cantidad=Math.min(p.stock, exist.cantidad+add); }
-  else carrito.push({empresa_id:eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,nombre:p.nombre,precio:p.precio_venta,cantidad:add,imagen:p.imagen,stock:p.stock});
-=======
 function agregarT(prodId, qty, varianteId=''){
   const p=prodPor(prodId); if(!p) return;
   const variantes=(p.variantes||[]).filter(v=>v.activo!==false),v=variantes.find(x=>String(x.id)===String(varianteId));
   if(variantes.length&&!v){abrirDetalle(prodId);toastT('Elige una talla, color o presentación','warn');return;}
   const stock=v?Number(v.stock||0):Number(p.stock||0),precio=v?Number(v.precioVenta||0):Number(p.precio_venta||0),varianteNombre=v?Object.values(v.atributos||{}).filter(Boolean).join(' · '):'';
   if(stock<=0)return toastT('Esta opción está agotada','warn');
+  // Blindaje: sin id de tienda válido no guardamos un item roto (empresa_id=0 se
+  // filtra en siwepeCart y el carrito saldría vacío). Mejor avisar y no romper.
+  const eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
+  if(!eid){ toastT('No se pudo identificar la tienda. Recargá la página e intentá de nuevo.','warn'); return; }
   const add=Math.max(1,Math.min(Number(qty)||1,stock));
   const exist=carrito.find(i=>i.producto_id===prodId&&String(i.variante_id||'')===String(varianteId||''));
   if(exist){ if(exist.cantidad>=stock){ toastT('No hay más stock','warn'); return; } exist.cantidad=Math.min(stock, exist.cantidad+add); }
-  else carrito.push({empresa_id:Number(DB.empresa_id),empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,variante_id:String(varianteId||''),variante_nombre:varianteNombre,nombre:p.nombre,precio,cantidad:add,imagen:p.imagen,stock});
->>>>>>> d154857a2dd2b9ab0792d61c7add36c3bf44a83b
+  else carrito.push({empresa_id:eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||'Tienda SIWEPE',producto_id:prodId,variante_id:String(varianteId||''),variante_nombre:varianteNombre,nombre:p.nombre,precio,cantidad:add,imagen:p.imagen,stock});
   guardarCarritoTienda();
   updateBadge(); refrescarVista();
   toastT(add>1?`${add} × ${p.nombre} agregados al carrito`:`${p.nombre} agregado al carrito`);
@@ -993,8 +984,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const _eid=Number(DB.empresa_id)||Number(DB.empresa&&DB.empresa.id)||0;
   if(_eid && Array.isArray(DB.productos) && DB.productos.length){
     carrito=carrito.map(it=>{
-      const p=prodPor(it.producto_id); if(!p||p.estado!=='activo'||p.stock<=0) return null;
-      return {...it,empresa_id:_eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||it.empresa_nombre,nombre:p.nombre,precio:Number(p.precio_venta)||0,imagen:p.imagen||it.imagen||'',stock:Number(p.stock)||0,cantidad:Math.min(Math.max(1,Number(it.cantidad)||1),Number(p.stock)||1)};
+      const p=prodPor(it.producto_id); if(!p||p.estado!=='activo') return null;
+      const vs=(p.variantes||[]).filter(v=>v.activo!==false),v=vs.find(x=>String(x.id)===String(it.variante_id||''));
+      if(vs.length&&!v) return null;                       // la variante ya no existe
+      const stock=Number(v?v.stock:p.stock)||0; if(stock<=0) return null;
+      return {...it,empresa_id:_eid,empresa_slug:String(DB.empresa?.slug||bsEmpresa()||''),empresa_nombre:DB.config.nombre||DB.empresa?.nombre||it.empresa_nombre,nombre:p.nombre,variante_id:v?String(v.id):'',variante_nombre:v?Object.values(v.atributos||{}).filter(Boolean).join(' · '):'',precio:Number(v?v.precioVenta:p.precio_venta)||0,imagen:p.imagen||it.imagen||'',stock,cantidad:Math.min(Math.max(1,Number(it.cantidad)||1),stock)};
     }).filter(Boolean);
     guardarCarritoTienda();
   }
