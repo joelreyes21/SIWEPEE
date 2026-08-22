@@ -236,25 +236,33 @@ window.toggleInlineCategory=toggleInlineCategory; window.saveInlineCategory=save
 /* ── NAVEGACIÓN ── */
 const PAGE_TITLES = {
   dashboard:'Panel principal', productos:'Productos', categorias:'Categorías', galeria:'Galería',
-  proveedores:'Proveedores', clientes:'Clientes', fiado:'Fiado', administradores:'Administradores', inventario:'Inventario', compras:'Compras',
+  proveedores:'Proveedores', clientes:'Clientes', fiado:'Cuentas por cobrar', 'cuentas-cobrar':'Cuentas por cobrar', 'cuentas-pagar':'Cuentas por pagar', administradores:'Administradores', inventario:'Inventario', compras:'Compras',
   ventas:'Ventas', movimientos:'Movimientos', pedidos:'Pedidos',
-  reportes:'Reportes', configuracion:'Configuración'
+  contabilidad:'Resumen contable', reportes:'Reportes', configuracion:'Configuración',
+  caja:'Caja y turnos',pos:'Punto de venta',promociones:'Promociones',importacion:'Importar productos',gastronomia:'Mesas y comandas'
 };
 
 function goTo(page){
+  const route=page==='cuentas-cobrar'?{page:'fiado'}:page==='cuentas-pagar'?{page:'contabilidad',accountingView:'pagar'}:{page};
+  const targetPage=route.page;
   $$('.page').forEach(p=>p.classList.remove('active'));
   $$('.sb-item').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
-  const el = document.getElementById('page-'+page);
+  const el = document.getElementById('page-'+targetPage);
   if(el) el.classList.add('active');
   $('#topbar-title').textContent = PAGE_TITLES[page]||page;
   closeSidebar();
-  if(page==='dashboard')   renderDashboard();
-  if(page==='movimientos') renderMovimientos();
-  if(page==='pedidos')     renderPedidos();
-  if(page==='galeria')     renderGaleriaAdmin();
-  if(page==='inventario')  renderInventario();
-  if(page==='reportes')    renderReporte();
-  if(page==='fiado')       renderFiado();
+  if(targetPage==='dashboard')   renderDashboard();
+  if(targetPage==='movimientos') renderMovimientos();
+  if(targetPage==='pedidos')     renderPedidos();
+  if(targetPage==='galeria')     renderGaleriaAdmin();
+  if(targetPage==='inventario')  renderInventario();
+  if(targetPage==='reportes')    renderReporte();
+  if(targetPage==='fiado')       renderFiado();
+  if(targetPage==='contabilidad'){
+    setAccountingView(route.accountingView||'resumen');
+    renderContabilidad();
+  }
+  if(typeof renderModuloOperativo==='function') renderModuloOperativo(targetPage);
   window.scrollTo({top:0});
 }
 
@@ -749,6 +757,7 @@ function openFormProducto(id=null){
     <div class="form-grid">
       <div class="field"><label>Código <span style="font-weight:400;color:var(--text-muted)">(automático)</span></label><input id="fp-codigo" value="${esc(codigoVal)}" readonly style="background:var(--surface-2);color:var(--text-secondary);cursor:not-allowed"></div>
       <div class="field"><label>Nombre <span class="req">*</span></label><input id="fp-nombre" value="${p?esc(p.nombre):''}" placeholder="Ej: nombre del producto" maxlength="120"><span class="ferr"></span></div>
+      <div class="field span2 ops-barcode-field"><label>Código de barras interno <span style="font-weight:400;color:var(--text-muted)">(opcional)</span></label><div class="ops-barcode-input"><input id="fp-barcode" value="${p?esc(p.codigoBarras||''):''}" maxlength="96" placeholder="Genera uno desde el ID o escribe un código existente"><button type="button" class="btn btn-outline" onclick="generarCodigoInternoProducto(${id||'null'})">Generar</button></div><div id="fp-barcode-preview" class="ops-barcode-preview"></div><small>Es un identificador operativo dentro de SIWEPE; no sustituye un GTIN/UPC/EAN registrado externamente.</small></div>
       <div class="field"><label class="field-label-action"><span>Categoría <span class="req">*</span></span><button type="button" onclick="toggleQuickCategory()">+ Crear aquí</button></label><select id="fp-cat"><option value="">Selecciona…</option>${cats}</select><span class="ferr"></span></div>
       <div class="field span2 quick-category" id="fp-quick-cat" hidden><div><strong>Nueva categoría sin salir del producto</strong><span>Lo que ya escribiste se conserva.</span></div><div class="quick-category-row"><input id="fp-quick-cat-name" maxlength="80" placeholder="Ej: Camisas"><input id="fp-quick-cat-desc" maxlength="160" placeholder="Descripción breve"><button type="button" class="btn btn-outline" onclick="saveQuickCategory()">Crear categoría</button></div></div>
       <div class="field"><label>Estado</label><select id="fp-estado"><option value="activo" ${p&&p.estado==='activo'?'selected':''}>Activo</option><option value="inactivo" ${!p||p.estado==='inactivo'?'selected':''}>Inactivo</option></select></div>
@@ -758,6 +767,7 @@ function openFormProducto(id=null){
       <div class="field"><label>Publicado en tienda</label><input id="fp-stock" type="number" min="0" max="${totalExistencias}" step="1" value="${p?p.stock:'0'}" ${p?'':'readonly'}><small>${p?`Puedes publicar hasta ${totalExistencias} unidades; se descuentan del inventario.`:'Primero registra una entrada en Inventario.'}</small><span class="ferr"></span></div>
       <div class="field"><label>Disponible en inventario</label><input id="fp-stock-inv" type="number" min="0" step="1" value="${p?p.stock_inventario||0:'0'}" readonly><small>Se actualiza automáticamente sin alterar el total.</small></div>
       <div class="field"><label>Stock mínimo <span class="req">*</span></label><input id="fp-stockmin" type="number" min="0" step="1" value="${p?p.stock_min:'5'}"><span class="ferr"></span></div>
+      <div class="field span2 ops-variants-field"><div class="ops-variants-head"><div><label>Variantes del producto</label><small>Talla, color o presentación con precio y existencias independientes.</small></div><button type="button" class="btn btn-outline btn-sm" onclick="agregarVarianteProducto()">+ Agregar variante</button></div><div id="fp-variants"></div></div>
       <div class="field span2"><label>Galería del producto <span style="font-weight:400;color:var(--text-muted)">(hasta 6 fotos · 6 MB cada una; la primera será portada)</span></label>
         <div class="fp-images-grid" id="fp-images-grid"></div>
         <label class="fp-image-upload">${svgIcon('mas',16)} Agregar fotografías<input type="file" id="fp-img" accept="image/*,.heic,.heif" multiple hidden></label>
@@ -783,6 +793,8 @@ function openFormProducto(id=null){
     }).catch(err=>toast(errImagen(err),'error'));
   });
   window.__fpImgs=()=>imgsActuales;
+  if(typeof inicializarEditorVariantes==='function') inicializarEditorVariantes(p);
+  if(typeof actualizarPreviewBarcode==='function') actualizarPreviewBarcode();
   precioVacioEnCero('fp-pcompra'); precioVacioEnCero('fp-pventa');
   if(p){
     const sincronizarStock=()=>{
@@ -823,7 +835,12 @@ function saveProducto(id){
   if(!ok) return;
   const cod=($('#fp-codigo').value||'').trim().toUpperCase();  // generado automáticamente
   const imagenes=window.__fpImgs?window.__fpImgs().filter(Boolean).slice(0,6):[];
-  const datos={codigo:cod,nombre:$('#fp-nombre').value.trim(),categoria_id:+$('#fp-cat').value,descripcion:$('#fp-desc').value.trim(),precio_compra:+($('#fp-pcompra').value||0),precio_venta:+($('#fp-pventa').value||0),stock:stockVal,stock_inventario:+($('#fp-stock-inv')?.value||0),stock_min:+$('#fp-stockmin').value,imagen:imagenes[0]||'',imagenes,estado:$('#fp-estado').value,destacado:$('#fp-destacado').value==='1',publicado_alguna_vez:p?(!!p.publicado_alguna_vez||stockVal>0):false,marca:$('#fp-marca').value.trim(),tipoPiel:[]};
+  let variantes=[];
+  try{ variantes=typeof leerVariantesProducto==='function'?leerVariantesProducto():[]; }
+  catch(e){ toast(e.message||'Revisa las variantes','error'); return; }
+  const stockFinal=variantes.length?variantes.reduce((s,v)=>s+(+v.stock||0),0):stockVal;
+  const inventarioFinal=variantes.length?variantes.reduce((s,v)=>s+(+v.stockInventario||0),0):+($('#fp-stock-inv')?.value||0);
+  const datos={codigo:cod,nombre:$('#fp-nombre').value.trim(),categoria_id:+$('#fp-cat').value,descripcion:$('#fp-desc').value.trim(),precio_compra:+($('#fp-pcompra').value||0),precio_venta:+($('#fp-pventa').value||0),stock:stockFinal,stock_inventario:inventarioFinal,stock_min:+$('#fp-stockmin').value,imagen:imagenes[0]||'',imagenes,estado:$('#fp-estado').value,destacado:$('#fp-destacado').value==='1',publicado_alguna_vez:p?(!!p.publicado_alguna_vez||stockFinal>0):false,marca:$('#fp-marca').value.trim(),tipoPiel:[],codigoBarras:($('#fp-barcode')?.value||'').trim(),variantes};
   if(id){
     const anteriorPublicado=+p.stock||0, diferencia=stockVal-anteriorPublicado;
     Object.assign(prodPor(id),datos);
@@ -1092,7 +1109,7 @@ async function renderFiado(){
     const pend=_fiadoCache.filter(c=>c.estado!=='pagado');
     if(kpis) kpis.innerHTML=`
       <div class="fiado-kpi big"><span>Total por cobrar</span><strong>${dinero(r.totalPorCobrar||0)}</strong></div>
-      <div class="fiado-kpi"><span>Fiados pendientes</span><strong>${pend.length}</strong></div>
+      <div class="fiado-kpi"><span>Cuentas pendientes</span><strong>${pend.length}</strong></div>
       <div class="fiado-kpi"><span>Clientes con deuda</span><strong>${new Set(pend.map(c=>c.clienteNombre.toLowerCase())).size}</strong></div>`;
     tbody.innerHTML=_fiadoCache.map(c=>{
       const pagado=c.estado==='pagado';
@@ -1112,25 +1129,75 @@ async function renderFiado(){
           <button class="btn-icon danger" title="Eliminar" onclick="borrarFiado(${c.id})">${svgIcon('basura')}</button>
         </div></td>
       </tr>`;
-    }).join('')||`<tr class="empty-row"><td colspan="9"><em>Aún no hay fiados. Registrá lo que te deben con "Registrar fiado".</em></td></tr>`;
+    }).join('')||`<tr class="empty-row"><td colspan="9"><em>Aún no hay cuentas por cobrar. Registrá aquí los saldos pendientes de tus clientes.</em></td></tr>`;
   }catch(e){ tbody.innerHTML=`<tr class="empty-row"><td colspan="9"><em>${esc(e.message||'No se pudo cargar')}</em></td></tr>`; }
 }
 function openFormFiado(){
-  openModal('Registrar fiado','Anotá lo que un cliente te queda debiendo.',`
+  const categorias=DB.categorias.filter(c=>c.estado==='activo').map(c=>({value:c.id,label:c.nombre}));
+  openModal('Nueva cuenta por cobrar','Selecciona el producto para tomar su precio o edita el monto antes de guardar.',`
     <div class="form-grid">
       <div class="field span2"><label>Cliente <span class="req">*</span></label><input id="ff-cliente" maxlength="120" placeholder="Nombre del cliente"><span class="ferr"></span></div>
-      <div class="field span2"><label>Concepto</label><input id="ff-concepto" maxlength="160" placeholder="Ej: 2 camisas, mercadería…"></div>
-      <div class="field"><label>Monto (L) <span class="req">*</span></label><input id="ff-monto" type="number" min="0" step="0.01" placeholder="0.00"><span class="ferr"></span></div>
+      ${comboField('ff-cat','Categoría','Escribe o selecciona una categoría…',{actionLabel:'+ Crear aquí',actionHandler:"toggleInlineCategory('ff')"})}
+      ${quickCategoryPanel('ff')}
+      ${comboField('ff-prod','Producto','Elige una categoría primero…',{disabled:true})}
+      <div class="field span2 purchase-new-product" id="ff-nuevo-wrap" hidden>
+        <div class="purchase-new-head"><span>${svgIcon('caja',17)}</span><div><strong>Crear producto nuevo</strong><small>Se guardará inactivo y sin existencias para que lo completes después.</small></div></div>
+        <div class="form-grid">
+          <div class="field"><label>Nombre <span class="req">*</span></label><input id="ff-nuevo-nombre" maxlength="120" placeholder="Ej: Camisa personalizada"><span class="ferr"></span></div>
+          <div class="field"><label>Marca</label><input id="ff-nuevo-marca" maxlength="80" placeholder="Opcional"></div>
+          <div class="field span2"><label>Descripción</label><textarea id="ff-nuevo-desc" maxlength="1000" rows="2" placeholder="Detalles del producto"></textarea></div>
+        </div>
+      </div>
+      <div class="field span2"><label>Concepto</label><input id="ff-concepto" maxlength="160" placeholder="Se completa con el producto y puedes editarlo"></div>
+      <div class="field"><label>Monto (L) <span class="req">*</span></label><input id="ff-monto" type="number" min="0" step="0.01" placeholder="0.00"><small>Se carga desde el precio de venta, pero puedes cambiarlo.</small><span class="ferr"></span></div>
       <div class="field"><label>Fecha</label><input id="ff-fecha" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
       <div class="field span2"><label>Fecha de vencimiento (opcional)</label><input id="ff-vence" type="date"></div>
     </div>
-    <div class="modal-footer"><button class="btn btn-primary" onclick="guardarFiado()">${svgIcon('check',14)} Registrar fiado</button></div>`);
+    <div class="modal-footer"><button class="btn btn-primary" onclick="guardarFiado()">${svgIcon('check',14)} Guardar cuenta</button></div>`);
+  comboInit('ff-cat',categorias);
+  comboInit('ff-prod',[]);
+  $('#ff-cat').addEventListener('input',()=>{
+    const catId=$('#ff-cat').value,producto=$('#ff-prod');
+    $('#ff-nuevo-wrap').hidden=true;
+    if(!catId){producto._combo.setOpciones([],'Elige una categoría primero…');return;}
+    const opciones=DB.productos.filter(p=>String(p.categoria_id)===String(catId))
+      .map(p=>({value:p.id,label:p.nombre,sub:`Precio de venta ${dinero(p.precio_venta)}`,data:{precio:p.precio_venta,nombre:p.nombre}}));
+    opciones.unshift({value:'nuevo',label:'Crear un producto nuevo',sub:'Se conservará para completarlo después'});
+    producto._combo.setOpciones(opciones,'Escribe, selecciona o crea un producto…');
+  });
+  $('#ff-prod').addEventListener('input',()=>{
+    const producto=$('#ff-prod'),esNuevo=producto.value==='nuevo';
+    $('#ff-nuevo-wrap').hidden=!esNuevo;
+    if(esNuevo){
+      $('#ff-concepto').value='';
+      $('#ff-monto').value='';
+      setTimeout(()=>$('#ff-nuevo-nombre')?.focus(),40);
+      return;
+    }
+    if(producto.value){
+      $('#ff-concepto').value=producto.dataset.nombre||$('#ff-prod-q').value;
+      $('#ff-monto').value=Number(producto.dataset.precio||0).toFixed(2);
+    }
+  });
+  precioVacioEnCero('ff-monto');
 }
 async function guardarFiado(){
-  if(!validar([['ff-cliente',noVacio,'Escribe el nombre'],['ff-cliente',soloLetras,'El nombre solo puede tener letras'],['ff-monto',v=>Number(v)>0,'Ingresa un monto mayor que 0']])) return;
-  const datos={ clienteNombre:$('#ff-cliente').value.trim(), concepto:$('#ff-concepto').value.trim(), monto:Number($('#ff-monto').value), fecha:$('#ff-fecha').value, vence:$('#ff-vence').value||null };
-  try{ await apiPostAuth('/api/creditos',datos); closeModal(); renderFiado(); toast('Fiado registrado'); }
-  catch(e){ toast(e.message||'No se pudo registrar','error'); }
+  if(!validar([['ff-cliente',noVacio,'Escribe el nombre'],['ff-cliente',soloLetras,'El nombre solo puede tener letras'],['ff-cat',noVacio,'Elige una categoría'],['ff-prod',noVacio,'Elige o crea un producto'],['ff-monto',v=>Number(v)>0,'Ingresa un monto mayor que 0']])) return;
+  const esNuevo=$('#ff-prod').value==='nuevo';
+  if(esNuevo&&!validar([['ff-nuevo-nombre',noVacio,'Escribe el nombre del producto']])) return;
+  const producto=esNuevo?null:prodPor(+$('#ff-prod').value);
+  const nombreProducto=esNuevo?$('#ff-nuevo-nombre').value.trim():(producto?.nombre||$('#ff-prod-q').value.trim());
+  const concepto=$('#ff-concepto').value.trim()||nombreProducto;
+  const datos={clienteNombre:$('#ff-cliente').value.trim(),concepto,monto:Number($('#ff-monto').value),fecha:$('#ff-fecha').value,vence:$('#ff-vence').value||null};
+  try{
+    await apiPostAuth('/api/creditos',datos);
+    if(esNuevo){
+      const monto=Number($('#ff-monto').value)||0;
+      DB.productos.push({id:nuevoId('producto'),codigo:siguienteCodigoProducto(),nombre:nombreProducto,categoria_id:+$('#ff-cat').value,descripcion:$('#ff-nuevo-desc').value.trim(),precio_compra:0,precio_venta:monto,stock:0,stock_inventario:0,stock_min:0,imagen:'',imagenes:[],estado:'inactivo',destacado:false,publicado_alguna_vez:false,marca:$('#ff-nuevo-marca').value.trim(),tipoPiel:[]});
+      dbGuardar();renderProductos();renderDashboard();
+    }
+    closeModal();renderFiado();toast(esNuevo?'Cuenta registrada y producto creado':'Cuenta por cobrar registrada');
+  }catch(e){toast(e.message||'No se pudo registrar','error');}
 }
 function openAbonar(id){
   const c=_fiadoCache.find(x=>x.id===id); if(!c) return;
@@ -1149,17 +1216,96 @@ async function guardarAbono(id){
   if(!(monto>0)){ toast('Ingresa un monto mayor que 0','error'); return; }
   if(c && monto>c.saldo+0.001){ toast(`El abono no puede pasar del saldo (${dinero(c.saldo)})`,'error'); return; }
   const datos={ monto, metodo:$('#fa-metodo').value, fecha:$('#fa-fecha').value, nota:$('#fa-nota').value.trim() };
-  try{ const r=await apiPostAuth(`/api/creditos/${id}/abonos`,datos); closeModal(); renderFiado(); toast(r.estado==='pagado'?'¡Fiado saldado por completo!':'Abono registrado'); }
+  try{ const r=await apiPostAuth(`/api/creditos/${id}/abonos`,datos); closeModal(); renderFiado(); toast(r.estado==='pagado'?'¡Cuenta saldada por completo!':'Abono registrado'); }
   catch(e){ toast(e.message||'No se pudo registrar el abono','error'); }
 }
 function borrarFiado(id){
   const c=_fiadoCache.find(x=>x.id===id);
-  openConfirm(`Se eliminará este fiado${c?` de "${esc(c.clienteNombre)}"`:''} y sus abonos. No se puede deshacer.`,async()=>{
-    try{ await apiDelete(`/api/creditos/${id}`); renderFiado(); toast('Fiado eliminado'); }
+  openConfirm(`Se eliminará esta cuenta por cobrar${c?` de "${esc(c.clienteNombre)}"`:''} y sus abonos. No se puede deshacer.`,async()=>{
+    try{ await apiDelete(`/api/creditos/${id}`); renderFiado(); toast('Cuenta por cobrar eliminada'); }
     catch(e){ toast(e.message||'No se pudo eliminar','error'); }
   });
 }
 window.renderFiado=renderFiado; window.openFormFiado=openFormFiado; window.guardarFiado=guardarFiado; window.openAbonar=openAbonar; window.guardarAbono=guardarAbono; window.borrarFiado=borrarFiado;
+
+/* ── CENTRO CONTABLE ──
+   Los ingresos vienen de ventas activas y las cuentas por cobrar registradas.
+   Gastos, cuentas por pagar y facturas usan endpoints dedicados para
+   conservar trazabilidad sin depender del guardado masivo del panel. */
+let _accountingCache=null,_accountingView='resumen';
+const ACC_ESTADO={borrador:'Borrador',emitida:'Emitida',pagada:'Pagada',anulada:'Anulada',pendiente:'Pendiente'};
+function accBadge(estado){const cls=estado==='pagada'?'b-ok':estado==='anulada'?'b-muted':estado==='emitida'?'b-blue':estado==='pendiente'?'b-warn':'b-muted';return `<span class="badge ${cls}">${ACC_ESTADO[estado]||esc(estado)}</span>`;}
+function setAccountingView(view){
+  _accountingView=view;
+  $$('[data-accounting-view]').forEach(b=>b.classList.toggle('active',b.dataset.accountingView===view));
+  $$('[data-accounting-panel]').forEach(p=>p.classList.toggle('active',p.dataset.accountingPanel===view));
+  const root=$('#page-contabilidad');
+  if(root) root.dataset.accountingSection=view;
+  const meta={
+    resumen:['Control financiero','Resumen contable','Una vista general de ingresos, gastos, cuentas y comprobantes del negocio.'],
+    ingresos:['Entradas de dinero','Ingresos','Ventas directas y pedidos aprobados registrados por el negocio.'],
+    gastos:['Egresos operativos','Gastos','Servicios, transporte, salarios y otros egresos bajo control.'],
+    cobrar:['Clientes y cobros','Cuentas por cobrar','Saldos pendientes de clientes y seguimiento de abonos.'],
+    pagar:['Proveedores y obligaciones','Cuentas por pagar','Vencimientos, saldos y pagos realizados a proveedores.'],
+    facturas:['Comprobantes internos','Facturación interna','Documentos comerciales para el control operativo del negocio.']
+  }[view]||[];
+  if($('#acc-hero-kicker'))$('#acc-hero-kicker').textContent=meta[0]||'Control financiero';
+  if($('#acc-hero-title'))$('#acc-hero-title').textContent=meta[1]||'Resumen contable';
+  if($('#acc-hero-subtitle'))$('#acc-hero-subtitle').textContent=meta[2]||'';
+}
+async function renderContabilidad(){
+  const root=$('#page-contabilidad');if(!root)return;
+  root.classList.add('accounting-loading');
+  try{_accountingCache=await apiGet('/api/contabilidad');renderContabilidadDatos();}
+  catch(e){toast(e.message||'No se pudo cargar contabilidad','error');}
+  finally{root.classList.remove('accounting-loading');}
+}
+function renderContabilidadDatos(){
+  const d=_accountingCache;if(!d)return;const r=d.resumen||{};
+  const ids={ingresos:r.ingresos,gastos:r.gastos,flujo:r.flujoOperativo,cobrar:r.porCobrar,pagar:r.porPagar,facturado:r.facturado};
+  Object.entries(ids).forEach(([k,v])=>{const el=$(`#acc-kpi-${k}`);if(el){el.textContent=dinero(v||0);if(k==='flujo')el.classList.toggle('negative',Number(v)<0);}});
+  renderAccountingSummary(d);renderAccountingTables(d);setAccountingView(_accountingView);
+  aplicarPermisosRol();
+}
+function renderAccountingSummary(d){
+  const meses={};
+  const add=(fecha,key,monto)=>{const mes=String(fecha||'').slice(0,7);if(!mes)return;if(!meses[mes])meses[mes]={ingresos:0,gastos:0,compras:0};meses[mes][key]+=Number(monto)||0;};
+  (d.ventas||[]).forEach(x=>add(x.fecha,'ingresos',x.total));
+  (d.gastos||[]).filter(x=>x.estado==='activo').forEach(x=>add(x.fecha,'gastos',x.monto));
+  (d.compras||[]).forEach(x=>add(x.fecha,'compras',x.total));
+  const lista=Object.entries(meses).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6),max=Math.max(1,...lista.flatMap(([,x])=>[x.ingresos,x.gastos,x.compras]));
+  const months=$('#accounting-months');if(months)months.innerHTML=lista.length?`<div class="accounting-legend"><span><i class="income"></i>Ingresos</span><span><i class="expense"></i>Gastos</span><span><i class="purchase"></i>Compras</span></div><div class="accounting-bars">${lista.map(([m,x])=>`<div class="accounting-month"><div class="accounting-bar-set"><i class="income" style="height:${Math.max(3,x.ingresos/max*100)}%" title="Ingresos ${dinero(x.ingresos)}"></i><i class="expense" style="height:${Math.max(3,x.gastos/max*100)}%" title="Gastos ${dinero(x.gastos)}"></i><i class="purchase" style="height:${Math.max(3,x.compras/max*100)}%" title="Compras ${dinero(x.compras)}"></i></div><span>${m}</span></div>`).join('')}</div>`:`<div class="accounting-empty">Todavía no hay movimientos suficientes para comparar meses.</div>`;
+  const vencidasCobrar=(d.cuentasCobrar||[]).filter(x=>x.estado!=='pagado'&&x.vence&&x.vence<hoy()).length;
+  const vencidasPagar=(d.cuentasPagar||[]).filter(x=>x.estado==='pendiente'&&x.vence&&x.vence<hoy()).length;
+  const health=$('#accounting-health');if(health)health.innerHTML=`<div class="accounting-health-row"><span>Cuentas por cobrar abiertas</span><strong>${(d.cuentasCobrar||[]).filter(x=>x.estado!=='pagado').length}</strong></div><div class="accounting-health-row warning"><span>Cobros vencidos</span><strong>${vencidasCobrar}</strong></div><div class="accounting-health-row"><span>Cuentas por pagar abiertas</span><strong>${(d.cuentasPagar||[]).filter(x=>x.estado==='pendiente').length}</strong></div><div class="accounting-health-row warning"><span>Pagos vencidos</span><strong>${vencidasPagar}</strong></div><button class="btn btn-outline btn-sm" onclick="setAccountingView('pagar')">Revisar obligaciones</button>`;
+}
+function renderAccountingTables(d){
+  const vacio=(cols,msg)=>`<tr class="empty-row"><td colspan="${cols}"><em>${msg}</em></td></tr>`;
+  const ingresos=$('#tabla-acc-ingresos');if(ingresos)ingresos.innerHTML=(d.ventas||[]).map(v=>`<tr><td>${fechaCorta(v.fecha)}</td><td>${esc(v.cliente_nombre)||'Mostrador'}</td><td>${v.pedido_id?`Pedido #${v.pedido_id}`:'Venta directa'}</td><td>${v.cantidad}</td><td><strong>${dinero(v.total)}</strong></td></tr>`).join('')||vacio(5,'No hay ingresos registrados.');
+  const gastos=$('#tabla-acc-gastos');if(gastos)gastos.innerHTML=(d.gastos||[]).map(g=>`<tr><td>${fechaCorta(g.fecha)}</td><td>${esc(g.categoria)}</td><td><strong>${esc(g.descripcion)}</strong></td><td>${esc(g.metodo)}</td><td>${dinero(g.monto)}</td><td>${g.estado==='activo'?'<span class="badge b-ok">Activo</span>':'<span class="badge b-muted">Anulado</span>'}</td><td class="td-actions"><div class="td-actions-wrap">${g.estado==='activo'?`<button class="btn-icon danger js-mutate" title="Anular gasto" onclick="anularGasto(${g.id})">${svgIcon('basura')}</button>`:''}</div></td></tr>`).join('')||vacio(7,'No hay gastos registrados.');
+  const cobrar=$('#tabla-acc-cobrar');if(cobrar)cobrar.innerHTML=(d.cuentasCobrar||[]).map(c=>`<tr><td><strong>${esc(c.cliente_nombre)}</strong></td><td>${esc(c.concepto)||'—'}</td><td>${c.vence?fechaCorta(c.vence):'—'}</td><td>${dinero(c.monto)}</td><td>${dinero(c.abonado)}</td><td><strong>${dinero(c.saldo)}</strong></td><td>${c.estado==='pagado'?'<span class="badge b-ok">Pagado</span>':'<span class="badge b-warn">Pendiente</span>'}</td></tr>`).join('')||vacio(7,'No hay cuentas por cobrar.');
+  const pagar=$('#tabla-acc-pagar');if(pagar)pagar.innerHTML=(d.cuentasPagar||[]).map(c=>`<tr><td><strong>${esc(c.proveedor_nombre)}</strong></td><td>${esc(c.concepto)}</td><td>${c.vence?fechaCorta(c.vence):'—'}</td><td>${dinero(c.monto)}</td><td>${dinero(c.pagado)}</td><td><strong>${dinero(c.saldo)}</strong></td><td>${c.estado==='pagada'?'<span class="badge b-ok">Pagada</span>':c.estado==='anulada'?'<span class="badge b-muted">Anulada</span>':'<span class="badge b-warn">Pendiente</span>'}</td><td class="td-actions"><div class="td-actions-wrap">${c.estado==='pendiente'?`<button class="btn-icon js-mutate" title="Registrar pago" onclick="openPagoCuentaPagar(${c.id})">${svgIcon('billete')}</button><button class="btn-icon danger js-mutate" title="Anular" onclick="anularCuentaPagar(${c.id})">${svgIcon('basura')}</button>`:''}</div></td></tr>`).join('')||vacio(8,'No hay cuentas por pagar.');
+  const facturas=$('#tabla-acc-facturas');if(facturas)facturas.innerHTML=(d.facturas||[]).map(f=>`<tr><td><strong>${esc(f.numero)}</strong></td><td>${fechaCorta(f.fecha)}</td><td>${esc(f.clienteNombre)}</td><td><strong>${dinero(f.total)}</strong></td><td>${accBadge(f.estado)}</td><td class="td-actions"><div class="td-actions-wrap"><button class="btn-icon" title="Ver e imprimir" onclick="imprimirFacturaInterna(${f.id})">${svgIcon('ojo')}</button>${f.estado==='borrador'?`<button class="btn-icon js-mutate" title="Emitir" onclick="cambiarEstadoFactura(${f.id},'emitida')">${svgIcon('check')}</button>`:''}${f.estado==='emitida'?`<button class="btn-icon js-mutate" title="Marcar pagada" onclick="cambiarEstadoFactura(${f.id},'pagada')">${svgIcon('billete')}</button>`:''}${f.estado!=='anulada'&&f.estado!=='pagada'?`<button class="btn-icon danger js-mutate" title="Anular" onclick="cambiarEstadoFactura(${f.id},'anulada')">${svgIcon('basura')}</button>`:''}</div></td></tr>`).join('')||vacio(6,'No hay facturas internas.');
+}
+function openFormGasto(){
+  openModal('Registrar gasto','Guarda un egreso operativo con su método y referencia.',`<div class="form-grid"><div class="field"><label>Categoría <span class="req">*</span></label><select id="cg-categoria"><option>Servicios</option><option>Transporte</option><option>Salarios</option><option>Alquiler</option><option>Publicidad</option><option>Mantenimiento</option><option>Impuestos</option><option>Otros</option></select></div><div class="field"><label>Monto <span class="req">*</span></label><input id="cg-monto" type="number" min="0" step="0.01" placeholder="0.00"><span class="ferr"></span></div><div class="field span2"><label>Descripción <span class="req">*</span></label><input id="cg-descripcion" maxlength="180" placeholder="Ej. recibo de energía de agosto"><span class="ferr"></span></div><div class="field"><label>Fecha</label><input id="cg-fecha" type="date" value="${hoy()}"></div><div class="field"><label>Método</label><select id="cg-metodo"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="cheque">Cheque</option><option value="otro">Otro</option></select></div><div class="field span2"><label>Referencia</label><input id="cg-referencia" maxlength="80" placeholder="Número de recibo o transferencia (opcional)"></div></div><div class="modal-footer"><button class="btn btn-primary" onclick="guardarGasto()">${svgIcon('check',14)} Guardar gasto</button></div>`);
+}
+async function guardarGasto(){if(!validar([['cg-descripcion',noVacio,'Describe el gasto'],['cg-monto',v=>Number(v)>0,'Ingresa un monto mayor que cero']]))return;try{await apiPostAuth('/api/contabilidad/gastos',{categoria:$('#cg-categoria').value,descripcion:$('#cg-descripcion').value.trim(),monto:Number($('#cg-monto').value),fecha:$('#cg-fecha').value,metodo:$('#cg-metodo').value,referencia:$('#cg-referencia').value.trim()});closeModal();await renderContabilidad();setAccountingView('gastos');toast('Gasto registrado');}catch(e){toast(e.message||'No se pudo registrar el gasto','error');}}
+function anularGasto(id){openConfirm('El gasto quedará anulado y seguirá visible para conservar la trazabilidad.',async()=>{try{await apiPatch(`/api/contabilidad/gastos/${id}/anular`,{});await renderContabilidad();toast('Gasto anulado');}catch(e){toast(e.message||'No se pudo anular','error');}});}
+function openFormCuentaPagar(){const proveedores=(DB.proveedores||[]).filter(p=>p.estado==='activo');openModal('Nueva cuenta por pagar','Registra una obligación con un proveedor y controla sus abonos.',`<div class="form-grid"><div class="field span2"><label>Proveedor <span class="req">*</span></label><input id="ccp-proveedor" list="ccp-proveedores" maxlength="120" placeholder="Escribe o selecciona un proveedor"><datalist id="ccp-proveedores">${proveedores.map(p=>`<option value="${esc(p.nombre)}" data-id="${p.id}"></option>`).join('')}</datalist><span class="ferr"></span></div><div class="field span2"><label>Concepto <span class="req">*</span></label><input id="ccp-concepto" maxlength="180" placeholder="Ej. compra de mercadería a crédito"><span class="ferr"></span></div><div class="field"><label>Monto <span class="req">*</span></label><input id="ccp-monto" type="number" min="0" step="0.01" placeholder="0.00"><span class="ferr"></span></div><div class="field"><label>Fecha</label><input id="ccp-fecha" type="date" value="${hoy()}"></div><div class="field span2"><label>Vencimiento</label><input id="ccp-vence" type="date"></div></div><div class="modal-footer"><button class="btn btn-primary" onclick="guardarCuentaPagar()">${svgIcon('check',14)} Guardar cuenta</button></div>`);}
+async function guardarCuentaPagar(){if(!validar([['ccp-proveedor',noVacio,'Escribe el proveedor'],['ccp-concepto',noVacio,'Escribe el concepto'],['ccp-monto',v=>Number(v)>0,'Ingresa un monto mayor que cero']]))return;const nombre=$('#ccp-proveedor').value.trim(),p=(DB.proveedores||[]).find(x=>x.nombre.toLowerCase()===nombre.toLowerCase());try{await apiPostAuth('/api/contabilidad/cuentas-pagar',{proveedorId:p&&p.id,proveedorNombre:nombre,concepto:$('#ccp-concepto').value.trim(),monto:Number($('#ccp-monto').value),fecha:$('#ccp-fecha').value,vence:$('#ccp-vence').value||null});closeModal();await renderContabilidad();setAccountingView('pagar');toast('Cuenta por pagar registrada');}catch(e){toast(e.message||'No se pudo registrar','error');}}
+function openPagoCuentaPagar(id){const c=_accountingCache?.cuentasPagar?.find(x=>x.id===id);if(!c)return;openModal('Registrar pago',`${esc(c.proveedor_nombre)} · saldo ${dinero(c.saldo)}`,`<div class="form-grid"><div class="field"><label>Monto <span class="req">*</span></label><input id="cp-monto" type="number" min="0" max="${c.saldo}" step="0.01"><span class="ferr"></span></div><div class="field"><label>Método</label><select id="cp-metodo"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="tarjeta">Tarjeta</option><option value="cheque">Cheque</option><option value="otro">Otro</option></select></div><div class="field"><label>Fecha</label><input id="cp-fecha" type="date" value="${hoy()}"></div><div class="field"><label>Referencia</label><input id="cp-referencia" maxlength="80"></div><div class="field span2"><label>Nota</label><input id="cp-nota" maxlength="180"></div></div><div class="modal-footer"><button class="btn btn-primary" onclick="guardarPagoCuentaPagar(${id})">${svgIcon('check',14)} Registrar pago</button></div>`);}
+async function guardarPagoCuentaPagar(id){const monto=Number($('#cp-monto').value);if(!(monto>0)){toast('Ingresa un monto mayor que cero','error');return;}try{await apiPostAuth(`/api/contabilidad/cuentas-pagar/${id}/pagos`,{monto,metodo:$('#cp-metodo').value,fecha:$('#cp-fecha').value,referencia:$('#cp-referencia').value.trim(),nota:$('#cp-nota').value.trim()});closeModal();await renderContabilidad();setAccountingView('pagar');toast('Pago registrado');}catch(e){toast(e.message||'No se pudo registrar el pago','error');}}
+function anularCuentaPagar(id){openConfirm('La cuenta quedará anulada y se conservará en el historial.',async()=>{try{await apiPatch(`/api/contabilidad/cuentas-pagar/${id}/anular`,{});await renderContabilidad();toast('Cuenta anulada');}catch(e){toast(e.message||'No se pudo anular','error');}});}
+function facturaItemHtml(){return `<div class="invoice-line"><input class="cfi-desc" maxlength="160" placeholder="Descripción"><input class="cfi-cant" type="number" min="0.01" step="0.01" value="1" aria-label="Cantidad"><input class="cfi-precio" type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio"><button type="button" class="btn-icon danger" title="Quitar" onclick="this.closest('.invoice-line').remove();actualizarTotalFactura()">${svgIcon('basura')}</button></div>`;}
+function openFormFactura(){openModal('Crear factura interna','Comprobante comercial para control del negocio; no es una factura fiscal autorizada.',`<div class="accounting-modal-note"><strong>Documento interno</strong><span>La serie sugerida inicia con INT para evitar confundirlo con numeración fiscal.</span></div><div class="form-grid"><div class="field"><label>Cliente <span class="req">*</span></label><input id="cf-cliente" maxlength="120"><span class="ferr"></span></div><div class="field"><label>Identidad / RTN</label><input id="cf-identidad" maxlength="40"></div><div class="field"><label>Fecha</label><input id="cf-fecha" type="date" value="${hoy()}"></div><div class="field"><label>Vence</label><input id="cf-vence" type="date"></div></div><div class="invoice-lines-head"><strong>Conceptos</strong><span>Descripción · cantidad · precio</span></div><div id="cf-items">${facturaItemHtml()}</div><button type="button" class="btn btn-outline btn-sm" onclick="agregarItemFactura()">+ Agregar concepto</button><div class="form-grid invoice-totals"><div class="field"><label>Impuesto informado</label><input id="cf-impuesto" type="number" min="0" step="0.01" value="0"></div><div class="invoice-total-box"><span>Total</span><strong id="cf-total">${dinero(0)}</strong></div><div class="field span2"><label>Notas</label><textarea id="cf-notas" maxlength="255"></textarea></div><label class="invoice-emit"><input id="cf-emitir" type="checkbox" checked> Crear directamente como emitida</label></div><div class="modal-footer"><button class="btn btn-primary" onclick="guardarFacturaInterna()">${svgIcon('check',14)} Crear factura</button></div>`);$('#cf-items').addEventListener('input',actualizarTotalFactura);$('#cf-impuesto').addEventListener('input',actualizarTotalFactura);}
+function agregarItemFactura(){const box=$('#cf-items');if(box&&box.children.length<100){box.insertAdjacentHTML('beforeend',facturaItemHtml());}}
+function leerItemsFactura(){return $$('#cf-items .invoice-line').map(r=>({descripcion:r.querySelector('.cfi-desc').value.trim(),cantidad:Number(r.querySelector('.cfi-cant').value),precio:Number(r.querySelector('.cfi-precio').value||0)})).filter(x=>x.descripcion);}
+function actualizarTotalFactura(){const subtotal=leerItemsFactura().reduce((s,x)=>s+x.cantidad*x.precio,0),impuesto=Number($('#cf-impuesto')?.value||0);if($('#cf-total'))$('#cf-total').textContent=dinero(subtotal+impuesto);}
+async function guardarFacturaInterna(){const items=leerItemsFactura();if(!$('#cf-cliente').value.trim()){toast('Escribe el nombre del cliente','error');return;}if(!items.length||items.some(x=>!(x.cantidad>0)||x.precio<0)){toast('Agrega al menos un concepto válido','error');return;}try{const r=await apiPostAuth('/api/contabilidad/facturas',{clienteNombre:$('#cf-cliente').value.trim(),clienteIdentidad:$('#cf-identidad').value.trim(),fecha:$('#cf-fecha').value,vence:$('#cf-vence').value||null,items,impuesto:Number($('#cf-impuesto').value||0),notas:$('#cf-notas').value.trim(),emitir:$('#cf-emitir').checked});closeModal();await renderContabilidad();setAccountingView('facturas');toast(`Factura ${r.numero} creada`);}catch(e){toast(e.message||'No se pudo crear la factura','error');}}
+async function cambiarEstadoFactura(id,estado){try{await apiPatch(`/api/contabilidad/facturas/${id}/estado`,{estado});await renderContabilidad();setAccountingView('facturas');toast(`Factura ${ACC_ESTADO[estado].toLowerCase()}`);}catch(e){toast(e.message||'No se pudo actualizar','error');}}
+function imprimirFacturaInterna(id){const f=_accountingCache?.facturas?.find(x=>x.id===id);if(!f)return;const nombre=DB.config.nombre||'SIWEPE',moneda=DB.config.moneda||'L',w=window.open('','_blank','width=900,height=760');if(!w){toast('Permite ventanas emergentes para imprimir','error');return;}w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(f.numero)}</title><style>body{font-family:Arial,sans-serif;color:#17243b;margin:38px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #168bd2;padding-bottom:22px}.badge{padding:7px 12px;border-radius:99px;background:#eaf4fb;color:#086cae;font-weight:700}table{width:100%;border-collapse:collapse;margin-top:28px}th,td{text-align:left;padding:12px;border-bottom:1px solid #dfe7ef}th{font-size:12px;text-transform:uppercase;color:#66758a}.totals{margin:24px 0 0 auto;width:320px}.totals div{display:flex;justify-content:space-between;padding:8px}.total{font-size:22px;font-weight:800;border-top:2px solid #17243b}.notice{margin-top:36px;padding:14px;background:#fff6db;border:1px solid #f0d272;border-radius:10px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="head"><div><h1>${esc(nombre)}</h1><p>Factura interna ${esc(f.numero)}</p></div><span class="badge">${esc(ACC_ESTADO[f.estado]||f.estado)}</span></div><h2>${esc(f.clienteNombre)}</h2><p>${esc(f.clienteIdentidad||'')} · ${fechaCorta(f.fecha)}</p><table><thead><tr><th>Concepto</th><th>Cantidad</th><th>Precio</th><th>Total</th></tr></thead><tbody>${f.items.map(x=>`<tr><td>${esc(x.descripcion)}</td><td>${x.cantidad}</td><td>${moneda} ${Number(x.precio).toFixed(2)}</td><td>${moneda} ${Number(x.total).toFixed(2)}</td></tr>`).join('')}</tbody></table><div class="totals"><div><span>Subtotal</span><strong>${moneda} ${f.subtotal.toFixed(2)}</strong></div><div><span>Impuesto informado</span><strong>${moneda} ${f.impuesto.toFixed(2)}</strong></div><div class="total"><span>Total</span><strong>${moneda} ${f.total.toFixed(2)}</strong></div></div>${f.notas?`<p>${esc(f.notas)}</p>`:''}<div class="notice"><strong>Documento de control interno.</strong> No sustituye una factura fiscal autorizada.</div><button onclick="print()">Imprimir / Guardar como PDF</button></body></html>`);w.document.close();}
+Object.assign(window,{renderContabilidad,setAccountingView,openFormGasto,guardarGasto,anularGasto,openFormCuentaPagar,guardarCuentaPagar,openPagoCuentaPagar,guardarPagoCuentaPagar,anularCuentaPagar,openFormFactura,agregarItemFactura,actualizarTotalFactura,guardarFacturaInterna,cambiarEstadoFactura,imprimirFacturaInterna});
 
 /* ── INVENTARIO CONECTADO ──
    `stock_inventario` representa las unidades físicas todavía guardadas y

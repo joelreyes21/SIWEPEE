@@ -66,6 +66,7 @@ body[data-role="proveedor"] [aria-disabled="true"]{opacity:.42;cursor:not-allowe
   .brand-name{font-size:18px!important}
   .nav-links{gap:3px!important;min-width:0;margin-left:auto!important}
   .nav-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 9px!important;font-size:11.5px!important;line-height:1.15;white-space:nowrap}
+  .nav-btn.ghost{display:none!important}
   .nav-btn.subtle{display:none!important}
   #role-readonly-note{left:12px;right:12px;text-align:center;border-radius:14px}
   .powered-by-siwepe{padding-bottom:86px}
@@ -80,7 +81,6 @@ body[data-role="proveedor"] [aria-disabled="true"]{opacity:.42;cursor:not-allowe
 }
 
 @media (max-width:420px){
-  .nav-btn.ghost{display:inline-flex!important}
   .platform-values{padding:0 16px;margin-top:24px}
   .platform-value{padding:20px}
 }

@@ -11,8 +11,9 @@
 <link rel="icon" type="image/png" href="../assets/img/siwepe-mark.png">
 <meta name="theme-color" content="#4B5563">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/admin.css?v=20260820.7">
-<link rel="stylesheet" href="../assets/css/platform.css?v=20260813.5">
+<link rel="stylesheet" href="../assets/css/admin.css?v=20260822.1">
+<link rel="stylesheet" href="../assets/css/operations.css?v=20260822.2">
+<link rel="stylesheet" href="../assets/css/platform.css?v=20260821.1">
 <style>/* Tipografía global: TODO en Manrope Light */
 *,*::before,*::after{font-family:'Manrope',sans-serif;}</style>
 <script>
@@ -125,7 +126,7 @@
           <button class="btn btn-primary admin-login-submit" id="btn-reset">Guardar contraseña</button>
         </div>
 
-        <div class="admin-login-legal"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-3Z"/></svg><span>Sesión segura · <a href="terminos.html" target="_blank" rel="noopener">Privacidad y términos</a></span></div>
+        <div class="admin-login-legal"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.4 8 10 4.6-1.6 8-5 8-10V6l-8-3Z"/></svg><span>Sesión segura · <a href="terminos.html" target="_blank" rel="noopener">Centro legal</a> · <a href="terminos.html#comercios" target="_blank" rel="noopener">Comercios</a></span></div>
       </div>
       <p class="admin-login-form-foot">© 2026 SIWEPE · Herramientas para negocios que avanzan.</p>
     </section>
@@ -147,16 +148,24 @@
       <button class="sb-item" data-page="productos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></span><span class="sb-label">Productos</span></button>
       <button class="sb-item" data-page="categorias"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-etiqueta"/></svg></span><span class="sb-label">Categorías</span></button>
       <button class="sb-item" data-page="galeria"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg></span><span class="sb-label">Galería</span></button>
+      <button class="sb-item" data-page="promociones"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h7l9 9-7 7-9-9V4Z"/><circle cx="8" cy="8" r="1.3"/></svg></span><span class="sb-label">Promociones</span></button>
       <span class="sb-section">Operaciones</span>
+      <button class="sb-item" data-page="caja"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h4"/></svg></span><span class="sb-label">Caja y turnos</span><span class="sb-badge" id="caja-badge"></span></button>
+      <button class="sb-item" data-page="pos"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h14v18H5zM8 7h8M8 11h2m2 0h4M8 15h8"/></svg></span><span class="sb-label">Punto de venta</span></button>
       <button class="sb-item" data-page="inventario"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-caja"/></svg></span><span class="sb-label">Inventario</span></button>
       <button class="sb-item" data-page="compras"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-entrada"/></svg></span><span class="sb-label">Compras</span></button>
       <button class="sb-item" data-page="ventas"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-salida"/></svg></span><span class="sb-label">Ventas</span></button>
       <button class="sb-item" data-page="movimientos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-historial"/></svg></span><span class="sb-label">Movimientos</span></button>
       <button class="sb-item" data-page="pedidos"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-bolsa"/></svg></span><span class="sb-label">Pedidos</span><span class="sb-badge" id="pedidos-badge"></span></button>
+      <span class="sb-section">Gastronomía</span>
+      <button class="sb-item" data-page="gastronomia"><span class="sb-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3v18M17 3c3 2 4 6 0 9"/></svg></span><span class="sb-label">Mesas y comandas</span></button>
       <span class="sb-section">Personas</span>
       <button class="sb-item" data-page="proveedores"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-camion"/></svg></span><span class="sb-label">Proveedores</span></button>
       <button class="sb-item" data-page="clientes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-corazon"/></svg></span><span class="sb-label">Clientes</span></button>
-      <button class="sb-item" data-page="fiado"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-billete"/></svg></span><span class="sb-label">Fiado</span></button>
+      <span class="sb-section">Contabilidad</span>
+      <button class="sb-item" data-page="contabilidad"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16v18H4z"/><path d="M8 7h8M8 11h2m3 0h3M8 15h2m3 0h3"/></svg></span><span class="sb-label">Resumen contable</span></button>
+      <button class="sb-item" data-page="cuentas-cobrar"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-billete"/></svg></span><span class="sb-label">Cuentas por cobrar</span></button>
+      <button class="sb-item" data-page="cuentas-pagar"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-entrada"/></svg></span><span class="sb-label">Cuentas por pagar</span></button>
       <span class="sb-section">Sistema</span>
       <button class="sb-item" data-page="reportes"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-reporte"/></svg></span><span class="sb-label">Reportes</span></button>
       <button class="sb-item" data-page="configuracion"><span class="sb-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-ajustes"/></svg></span><span class="sb-label">Configuración</span></button>
@@ -169,7 +178,7 @@
       <button class="sb-logout-btn" onclick="cerrarSesionAdmin()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Cerrar sesión
       </button>
-      <a href="terminos.html" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:11px;color:var(--text-muted);margin-top:10px;text-decoration:underline">Términos y privacidad</a>
+      <a href="terminos.html" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:11px;color:var(--text-muted);margin-top:10px;text-decoration:underline">Centro legal y políticas</a>
     </div>
   </aside>
 
@@ -184,6 +193,7 @@
         <div class="topbar-search-results" id="topbar-search-res"></div>
       </div>
       <div class="topbar-right">
+        <button class="ops-notify-btn" id="ops-notify-btn" type="button" onclick="toggleNotificaciones()" aria-label="Recordatorios de cobro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span id="ops-notify-count"></span></button>
         <div class="topbar-avatar">A</div>
       </div>
     </header>
@@ -290,7 +300,7 @@
 
       <!-- PRODUCTOS -->
       <div class="page" id="page-productos">
-        <div class="page-header"><div><h2 class="page-title">Productos</h2><p class="page-subtitle">Gestiona el catálogo de la tienda</p></div><button class="btn btn-primary" onclick="openFormProducto()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nuevo producto</button></div>
+        <div class="page-header"><div><h2 class="page-title">Productos</h2><p class="page-subtitle">Gestiona el catálogo, variantes y códigos internos</p></div><div class="page-actions"><button class="btn btn-outline" onclick="goTo('importacion')">Importar Excel</button><button class="btn btn-primary" onclick="openFormProducto()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nuevo producto</button></div></div>
         <div class="filters-bar">
           <div class="filter-field"><svg><use href="#icon-buscar"/></svg><input type="search" id="filtro-prod-q" placeholder="Buscar por nombre o código…" maxlength="100"></div>
           <select class="filter-select cat-filter-sel" id="filtro-prod-cat"><option value="">Todas las categorías</option></select>
@@ -303,6 +313,22 @@
       <div class="page" id="page-categorias">
         <div class="page-header"><div><h2 class="page-title">Categorías</h2><p class="page-subtitle">Organiza los productos por colección</p></div><button class="btn btn-primary" onclick="openFormCat()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nueva categoría</button></div>
         <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Descripción</th><th>Productos</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-categorias"></tbody></table></div></div>
+      </div>
+
+      <!-- IMPORTACIÓN MASIVA -->
+      <div class="page" id="page-importacion">
+        <div class="ops-hero"><div><span class="ops-kicker">Carga segura</span><h2 class="page-title">Importar productos</h2><p class="page-subtitle">Revisa una vista previa antes de aplicar hasta 1,000 filas desde Excel o CSV.</p></div><button class="btn btn-outline" onclick="descargarPlantillaImportacion()">Descargar plantilla CSV</button></div>
+        <div class="ops-import-grid">
+          <section class="card ops-upload-card"><div class="card-body"><label class="ops-dropzone" for="import-file"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 15v5h16v-5"/></svg><strong>Selecciona tu archivo</strong><span>.xlsx o .csv · máximo 8 MB</span><input id="import-file" type="file" accept=".xlsx,.csv" hidden></label><div class="ops-help"><strong>Columnas reconocidas</strong><p>Nombre, categoría, descripción, costo, precio, stock tienda, stock inventario, stock mínimo, marca y generar código.</p></div></div></section>
+          <section class="card"><div class="card-header"><div><h3>Resultado de validación</h3><p id="import-status">Aún no seleccionas un archivo.</p></div><button class="btn btn-primary" id="import-apply" onclick="aplicarImportacion()" disabled>Importar productos</button></div><div class="table-wrap ops-import-table"><table><thead><tr><th>Fila</th><th>Producto</th><th>Categoría</th><th>Costo</th><th>Precio</th><th>Existencias</th><th>Estado</th></tr></thead><tbody id="import-preview"></tbody></table></div></section>
+        </div>
+      </div>
+
+      <!-- PROMOCIONES -->
+      <div class="page" id="page-promociones">
+        <div class="ops-hero ops-promo-hero"><div><span class="ops-kicker">Reglas comerciales</span><h2 class="page-title">Descuentos y promociones</h2><p class="page-subtitle">Define condiciones, productos y fechas; el servidor calcula siempre el precio final.</p></div><button class="btn btn-primary" onclick="openFormPromocion()">Nueva promoción</button></div>
+        <div class="ops-summary-grid" id="promo-kpis"></div>
+        <div class="ops-card-grid" id="promo-grid"></div>
       </div>
 
       <!-- GALERÍA PÚBLICA -->
@@ -345,6 +371,19 @@
         <div class="card"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Teléfono</th><th>Correo</th><th>WhatsApp</th><th>Pedidos</th><th>Total comprado</th><th>Dirección</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-clientes"></tbody></table></div></div>
       </div>
 
+
+      <!-- CAJA -->
+      <div class="page" id="page-caja">
+        <div class="ops-hero"><div><span class="ops-kicker">Control de efectivo</span><h2 class="page-title">Caja, turnos y arqueo</h2><p class="page-subtitle">Cada movimiento queda ligado al turno activo y al usuario que lo registró.</p></div><div class="page-actions" id="caja-actions"></div></div>
+        <div class="ops-summary-grid" id="caja-kpis"></div>
+        <div class="ops-two-cols"><section class="card"><div class="card-header"><div><h3>Movimientos del turno</h3><p>Ventas, entradas, salidas y retiros</p></div></div><div class="table-wrap"><table><thead><tr><th>Hora</th><th>Tipo</th><th>Descripción</th><th>Método</th><th>Monto</th></tr></thead><tbody id="caja-movimientos"></tbody></table></div></section><section class="card"><div class="card-header"><div><h3>Turnos cerrados</h3><p>Últimos 30 arqueos</p></div></div><div id="caja-historial" class="ops-history"></div></section></div>
+      </div>
+
+      <!-- POS -->
+      <div class="page" id="page-pos">
+        <div class="ops-hero"><div><span class="ops-kicker">Venta de mostrador</span><h2 class="page-title">Punto de venta</h2><p class="page-subtitle">Carrito multiproducto, promociones automáticas y descuento transaccional de inventario.</p></div><span class="ops-status-pill" id="pos-caja-status">Verificando caja…</span></div>
+        <div class="pos-layout"><section class="pos-catalog"><div class="filters-bar"><div class="filter-field"><svg><use href="#icon-buscar"/></svg><input id="pos-search" type="search" placeholder="Buscar por nombre, SKU o código…" oninput="renderPosProductos()"></div><select class="filter-select" id="pos-category" onchange="renderPosProductos()"><option value="">Todas las categorías</option></select></div><div class="pos-products" id="pos-products"></div></section><aside class="pos-ticket card"><div class="card-header"><div><h3>Venta actual</h3><p id="pos-lines-count">0 productos</p></div><button class="btn btn-ghost btn-sm" onclick="vaciarPos()">Vaciar</button></div><div class="pos-lines" id="pos-lines"></div><div class="pos-customer"><input id="pos-client" maxlength="120" placeholder="Cliente de mostrador (opcional)"></div><div class="pos-total"><span>Total</span><strong id="pos-total">L 0.00</strong><small id="pos-savings"></small></div><div class="pos-payment"><label>Método de pago</label><div class="ops-segmented" id="pos-methods"><button class="active" data-value="efectivo">Efectivo</button><button data-value="transferencia">Transferencia</button><button data-value="otro">Otro</button></div><div class="field" id="pos-received-wrap"><label>Efectivo recibido</label><input id="pos-received" type="number" min="0" step="0.01" placeholder="0.00"></div><button class="btn btn-primary pos-pay" id="pos-pay" onclick="cobrarPos()">Cobrar venta</button></div></aside></div>
+      </div>
 
       <!-- INVENTARIO FÍSICO Y PUBLICADO -->
       <div class="page" id="page-inventario">
@@ -418,11 +457,56 @@
         <div id="ped-contenedor"></div>
       </div>
 
-      <!-- FIADO / CUENTAS POR COBRAR -->
+      <!-- GASTRONOMÍA -->
+      <div class="page" id="page-gastronomia">
+        <div class="ops-hero ops-food-hero"><div><span class="ops-kicker">Módulo gastronómico</span><h2 class="page-title">Mesas, comandas y cocina</h2><p class="page-subtitle">Toma pedidos, envíalos a preparación y cobra usando la misma caja e inventario.</p></div><div class="page-actions"><button class="btn btn-outline" onclick="openFormMesa()">Nueva mesa</button><button class="btn btn-primary" onclick="openFormComanda()">Nueva comanda</button></div></div>
+        <div class="ops-segmented gastro-tabs"><button class="active" data-gastro-view="mesas" onclick="setGastroView('mesas')">Salón</button><button data-gastro-view="comandas" onclick="setGastroView('comandas')">Comandas</button><button data-gastro-view="cocina" onclick="setGastroView('cocina')">Cocina</button></div>
+        <section class="gastro-view active" data-gastro-panel="mesas"><div class="mesa-grid" id="mesa-grid"></div></section>
+        <section class="gastro-view" data-gastro-panel="comandas"><div class="ops-card-grid" id="comanda-grid"></div></section>
+        <section class="gastro-view" data-gastro-panel="cocina"><div class="kitchen-board" id="kitchen-board"></div></section>
+      </div>
+
+      <!-- CUENTAS POR COBRAR -->
       <div class="page" id="page-fiado">
-        <div class="page-header"><div><h2 class="page-title">Fiado · Cuentas por cobrar</h2><p class="page-subtitle">Llevá el control de lo que te deben tus clientes y registrá sus abonos</p></div><button class="btn btn-primary" onclick="openFormFiado()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Registrar fiado</button></div>
+        <div class="page-header"><div><h2 class="page-title">Cuentas por cobrar</h2><p class="page-subtitle">Llevá el control de los saldos pendientes de tus clientes y registrá sus abonos</p></div><button class="btn btn-primary" onclick="openFormFiado()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-mas"/></svg> Nueva cuenta por cobrar</button></div>
         <div class="fiado-kpis" id="fiado-kpis"></div>
         <div class="card"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Concepto</th><th>Fecha</th><th>Vence</th><th>Monto</th><th>Abonado</th><th>Saldo</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-fiado"></tbody></table></div></div>
+      </div>
+
+      <!-- CONTABILIDAD OPERATIVA -->
+      <div class="page" id="page-contabilidad">
+        <div class="accounting-hero">
+          <div><span class="accounting-kicker" id="acc-hero-kicker">Control financiero</span><h2 class="page-title" id="acc-hero-title">Resumen contable</h2><p class="page-subtitle" id="acc-hero-subtitle">Una vista general de ingresos, gastos, cuentas y comprobantes del negocio.</p></div>
+          <div class="accounting-actions js-mutate"><button class="btn btn-outline" data-accounting-action="pagar" onclick="openFormCuentaPagar()">Nueva cuenta por pagar</button><button class="btn btn-outline" data-accounting-action="gastos" onclick="openFormGasto()">Registrar gasto</button><button class="btn btn-primary" data-accounting-action="facturas" onclick="openFormFactura()">Crear factura interna</button></div>
+        </div>
+        <div class="accounting-warning"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-info"/></svg><span><strong>Control operativo, no declaración fiscal.</strong> Los comprobantes internos organizan el negocio, pero no sustituyen una factura autorizada por la autoridad tributaria.</span></div>
+        <div class="accounting-kpis">
+          <article><span>Ingresos por ventas</span><strong id="acc-kpi-ingresos">L 0.00</strong><small>ventas directas y pedidos aprobados</small></article>
+          <article><span>Gastos operativos</span><strong id="acc-kpi-gastos">L 0.00</strong><small>gastos activos registrados</small></article>
+          <article><span>Flujo operativo</span><strong id="acc-kpi-flujo">L 0.00</strong><small>ingresos menos gastos</small></article>
+          <article><span>Por cobrar</span><strong id="acc-kpi-cobrar">L 0.00</strong><small>saldos pendientes de clientes</small></article>
+          <article><span>Por pagar</span><strong id="acc-kpi-pagar">L 0.00</strong><small>obligaciones con proveedores</small></article>
+          <article><span>Facturado</span><strong id="acc-kpi-facturado">L 0.00</strong><small>comprobantes emitidos o pagados</small></article>
+        </div>
+        <div class="accounting-tabs" role="tablist" aria-label="Secciones contables">
+          <button class="active" data-accounting-view="resumen" onclick="setAccountingView('resumen')">Resumen</button>
+          <button data-accounting-view="ingresos" onclick="setAccountingView('ingresos')">Ingresos</button>
+          <button data-accounting-view="gastos" onclick="setAccountingView('gastos')">Gastos</button>
+          <button data-accounting-view="cobrar" onclick="setAccountingView('cobrar')">Cuentas por cobrar</button>
+          <button data-accounting-view="pagar" onclick="setAccountingView('pagar')">Cuentas por pagar</button>
+          <button data-accounting-view="facturas" onclick="setAccountingView('facturas')">Facturas</button>
+        </div>
+        <section class="accounting-view active" data-accounting-panel="resumen">
+          <div class="accounting-summary-grid">
+            <div class="card"><div class="card-header"><div><h3>Actividad de los últimos meses</h3><p>Ingresos, gastos y compras registrados</p></div></div><div class="card-body" id="accounting-months"></div></div>
+            <div class="card"><div class="card-header"><div><h3>Salud de las cuentas</h3><p>Saldos pendientes que requieren atención</p></div></div><div class="card-body" id="accounting-health"></div></div>
+          </div>
+        </section>
+        <section class="accounting-view" data-accounting-panel="ingresos"><div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Origen</th><th>Cantidad</th><th>Total</th></tr></thead><tbody id="tabla-acc-ingresos"></tbody></table></div></div></section>
+        <section class="accounting-view" data-accounting-panel="gastos"><div class="page-header compact"><div><h3>Gastos operativos</h3><p>Registra servicios, transporte, salarios y otros egresos</p></div><button class="btn btn-primary js-mutate" onclick="openFormGasto()">Registrar gasto</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Método</th><th>Monto</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-acc-gastos"></tbody></table></div></div></section>
+        <section class="accounting-view" data-accounting-panel="cobrar"><div class="page-header compact"><div><h3>Cuentas por cobrar</h3><p>Saldos pendientes de clientes y seguimiento de sus abonos</p></div><button class="btn btn-primary js-mutate" onclick="goTo('cuentas-cobrar')">Administrar cuentas</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Abonado</th><th>Saldo</th><th>Estado</th></tr></thead><tbody id="tabla-acc-cobrar"></tbody></table></div></div></section>
+        <section class="accounting-view" data-accounting-panel="pagar"><div class="page-header compact"><div><h3>Obligaciones registradas</h3><p>Control de saldos y pagos realizados a proveedores</p></div><button class="btn btn-primary js-mutate" onclick="openFormCuentaPagar()">Nueva cuenta por pagar</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Proveedor</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Pagado</th><th>Saldo</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-acc-pagar"></tbody></table></div></div></section>
+        <section class="accounting-view" data-accounting-panel="facturas"><div class="page-header compact"><div><h3>Facturación interna</h3><p>Cotiza, emite y conserva comprobantes comerciales</p></div><button class="btn btn-primary js-mutate" onclick="openFormFactura()">Nueva factura</button></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th class="center">Acciones</th></tr></thead><tbody id="tabla-acc-facturas"></tbody></table></div></div></section>
       </div>
 
       <!-- REPORTES -->
@@ -529,6 +613,11 @@
   </div>
 </div><!-- fin admin-app -->
 
+<aside class="ops-notify-panel" id="ops-notify-panel" aria-hidden="true">
+  <div class="ops-notify-head"><div><strong>Recordatorios de cobro</strong><span>Alertas internas de cuentas próximas o vencidas</span></div><button onclick="toggleNotificaciones(false)" aria-label="Cerrar">×</button></div>
+  <div id="ops-notify-list" class="ops-notify-list"></div>
+</aside>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal">
@@ -557,8 +646,10 @@
 
 <!-- Conversión automática de fotos HEIC (iPhone) a JPG -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="../assets/js/shared/data.js?v=20260820.1"></script>
-<script src="../assets/js/admin/main.js?v=20260820.7"></script>
+<script src="../assets/js/shared/noinspect.js?v=20260821.1"></script>
+<script src="../assets/js/shared/data.js?v=20260822.2"></script>
+<script src="../assets/js/admin/main.js?v=20260822.1"></script>
+<script src="../assets/js/admin/operations.js?v=20260822.2"></script>
 <script>
   /* Inicializar dashboard fecha y saludo */
   document.addEventListener('DOMContentLoaded',()=>{

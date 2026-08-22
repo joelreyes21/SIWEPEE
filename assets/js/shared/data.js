@@ -207,6 +207,8 @@ const siwepeCart={
         empresa_slug:String(x.empresa_slug||''),
         empresa_nombre:String(x.empresa_nombre||''),
         producto_id:Number(x.producto_id)||0,
+        variante_id:String(x.variante_id||x.varianteId||''),
+        variante_nombre:String(x.variante_nombre||x.varianteNombre||''),
         nombre:String(x.nombre||'Producto'),
         precio:Math.max(0,Number(x.precio)||0),
         cantidad:Math.max(1,Math.trunc(Number(x.cantidad)||1)),
@@ -229,18 +231,19 @@ const siwepeCart={
     const next=this.get();
     const empresaId=Number(item&&item.empresa_id), productoId=Number(item&&item.producto_id);
     if(!empresaId||!productoId) throw new Error('No se pudo identificar la tienda o el producto.');
-    const idx=next.findIndex(x=>x.empresa_id===empresaId&&x.producto_id===productoId);
+    const varianteId=String(item&&item.variante_id||item&&item.varianteId||'');
+    const idx=next.findIndex(x=>x.empresa_id===empresaId&&x.producto_id===productoId&&String(x.variante_id||'')===varianteId);
     const limite=Math.max(0,Math.trunc(Number(item.stock)||0));
     if(idx>=0){
       const cantidad=Math.max(1,Math.trunc(Number(next[idx].cantidad)||1))+Math.max(1,Math.trunc(Number(item.cantidad)||1));
-      next[idx]={...next[idx],...item,empresa_id:empresaId,producto_id:productoId,cantidad:limite?Math.min(cantidad,limite):cantidad,stock:limite};
+      next[idx]={...next[idx],...item,empresa_id:empresaId,producto_id:productoId,variante_id:varianteId,cantidad:limite?Math.min(cantidad,limite):cantidad,stock:limite};
     }else{
-      next.push({...item,empresa_id:empresaId,producto_id:productoId,cantidad:Math.max(1,Math.trunc(Number(item.cantidad)||1)),stock:limite});
+      next.push({...item,empresa_id:empresaId,producto_id:productoId,variante_id:varianteId,cantidad:Math.max(1,Math.trunc(Number(item.cantidad)||1)),stock:limite});
     }
     return this.set(next);
   },
-  update(empresaId,productoId,cantidad){
-    const next=this.get(), idx=next.findIndex(x=>x.empresa_id===Number(empresaId)&&x.producto_id===Number(productoId));
+  update(empresaId,productoId,cantidad,varianteId=''){
+    const next=this.get(), idx=next.findIndex(x=>x.empresa_id===Number(empresaId)&&x.producto_id===Number(productoId)&&String(x.variante_id||'')===String(varianteId||''));
     if(idx<0) return next;
     const n=Math.trunc(Number(cantidad)||0);
     if(n<=0) next.splice(idx,1);
@@ -410,6 +413,8 @@ function _migrar(){
     if(!p.imagen&&p.imagenes.length) p.imagen=p.imagenes[0];
     if(p.stock_inventario===undefined) p.stock_inventario=0;
     if(p.publicado_alguna_vez===undefined) p.publicado_alguna_vez=!!(p.stock>0||p.estado==='activo');
+    if(p.codigoBarras===undefined) p.codigoBarras='';
+    if(!Array.isArray(p.variantes)) p.variantes=[];
   });
   DB.ventas.forEach(v=>{
     if(v.origen_stock===undefined) v.origen_stock='tienda';
